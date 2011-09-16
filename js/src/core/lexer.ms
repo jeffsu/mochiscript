@@ -1,8 +1,17 @@
 (function ($m) {
   var TOKENS = [
-    [ 'COMMENT', '\/\/|/\\*' ],
-    [ 'SPACE',   '\\s+' ]
+    [ "KEYWORD",  "class|module" ], 
+    [ "OPERATOR", "\\+|\\-|\\++" ],
+    [ "IDENT",    "\\d+|[\\$\\w]+" ],
   ];
 
   var IDS = {};
+  var TOKEN_REGEX = TOKENS.collect { 
+
+  class Tokenizer {
+    static tokenize(str) {
+      var m = str.match(TOKEN_REGEX);
+    }
+  }
+
 })($m);
