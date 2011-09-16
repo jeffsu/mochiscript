@@ -1,0 +1,70 @@
+class Config {
+  var CLI_REGEX = /^-(r|i|f|n|v|m)(=(\w+))?$/;
+  var optsLookup = { 
+    'n': 'non-recursive',
+    'i': 'interval',
+    'f': 'format',
+    'v': 'verbose',
+    'm': 'use_mtime'
+  };
+
+  function initialize(fs, argv) {
+    this.format    = 'browser';
+    this.recursive = true;
+    this.interval  = 2;
+    this.sourceDir = './app/js2';
+    this.targetDir = './public/javascripts';
+    this.args      = [];
+
+    this.fs = fs;
+
+    if (! this.loadConfigFile('./config/js2.json')) {
+      this.loadConfigFile('./js2.json');
+    }
+
+    if (argv) {
+      while (argv.length) {
+        var opt = argv.shift(); 
+        var m = opt.match(this.CLI_REGEX);
+        if (m) {
+          this[this.optsLookup[m[1]]] = m[3] || true; 
+        } else if (! this.command) {
+          this.command = opt;
+        } else {
+          this.args.push(opt);
+        }
+      }
+    }
+
+    this.recursive = !this['non-recursive'];
+    this.interval = parseInt(this.interval);
+  }
+
+  function loadConfigFile(file) {
+    if (this.fs.isFile(file)) {
+      try {
+        var config = JSON.parse(this.fs.read(file).replace(/\n\r?/g, ''));
+
+        if (config['out-dir']) {
+          config['target-dir'] = config['target-dir'] || config['out-dir'];
+          console.log("Please use target-dir instead of out-dir");
+        }
+
+        this.format    = config.format || this.format;
+        this.interval  = config['interval'] ? config['interval'] : this.interval;
+        this.sourceDir = config['source-dir'] || this.sourceDir;
+        this.targetDir = config['target-dir'] || this.targetDir;
+        this.verbose   = ('verbose' in config) ? config['verbose'] : false;
+
+        this['non-recursive'] = config['non-recursive'];
+        this['use-mtime']     = config['use-mtime'];
+
+        return true;
+      } catch(e) {
+        console.log(e.toString());
+      }
+    }
+    return false;
+  }
+
+}

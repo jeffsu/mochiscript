@@ -1,0 +1,51 @@
+class RingoFileAdapter {
+  function initialize() {
+    this.fs = require('fs'); 
+  } 
+
+  function isDirectory(file) {
+    return this.fs.isDirectory(file);
+  }
+
+  function setInterval(code, interval) {
+    return setInterval(code, interval);
+  }
+
+  function dirname(file) {
+    var path = this.expandPath(file);
+    return file.replace(/[^\/]*$/, '');
+  }
+
+
+  function isFile(file) {
+    return this.fs.isFile(file);
+  }
+
+  function mkdir(file) {
+    return this.fs.makeDirectory(file);
+  }
+
+  function readdir(file) {
+    return this.fs.list(file);
+  }
+
+  function expandPath(file) {
+    return this.fs.canonical(file);
+  }
+
+  function read(file) {
+    return this.fs.read(file);
+  }
+
+  function write(file, data) {
+    return this.fs.write(file, data);
+  }
+
+  function mtime(file) {
+    try {
+      return this.fs.openRaw(file).lastModified().getTime();
+    } catch(e) {
+      return 0;
+    }
+  }
+}

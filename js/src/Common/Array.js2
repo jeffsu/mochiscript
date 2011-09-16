@@ -1,0 +1,87 @@
+JS2.Array = function (arr) {
+  if (arr instanceof Array) {
+    this.append(arr);
+  }
+};
+
+JS2.Array.prototype = new Array();
+JS2.Array.prototype.each = function(f) {
+  for (var i=0; i<this.length; i++) {
+    f.call(this, this[i], i );
+  }
+  return this;
+};
+
+JS2.Array.prototype.toString = function() {
+  return this.join(',');
+};
+
+
+JS2.Array.prototype.until = function(f) {
+  for (var i=0; i<this.length; i++) {
+    if (f.call(this, this[i], i )) return true;;
+  }
+  return false;
+};
+
+
+JS2.Array.prototype.collect = function(f) {
+  var ret  = new JS2.Array();
+  var self = this;
+  this.each(#{ ret.push(f.call(self, $1, $2)) });
+  return ret;
+};
+
+// http://clojure.github.com/clojure/clojure.core-api.html#clojure.core/reduce
+JS2.Array.prototype.reduce = function(f, val) {
+  if (this.length == 0) return val; 
+  if (this.length == 1) return val == null ? f(this[0]) : f(val, this[0]);
+
+  var i = 0;
+  if (val == null) val = this[i++];
+
+  for (var n=this.length;i<n;i++) {
+    val = f(val, this[i]);
+  }
+
+  return val;
+};
+
+JS2.Array.prototype.reject = function(f) {
+  var ret = new JS2.Array();
+  if (f instanceof RegExp) {
+    this.each(#{ if (!$1.match(f)) ret.push($1) });
+  } else if (typeof f == 'string' || typeof f == 'number') {
+    this.each(#{ if ($1 != f) ret.push($1) });
+  } else if (typeof f == 'function') {
+    var self = this;
+    this.each(#{ if (!f.call(self, $1, $2)) ret.push($1) });
+  }
+  return ret;
+};
+
+JS2.Array.prototype.select = function(f) {
+  var ret = new JS2.Array();
+  if (f instanceof RegExp) {
+    this.each(#{ if ($1.match(f)) ret.push($1) });
+  } else if (typeof f == 'string' || typeof f == 'number') {
+    this.each(#{ if ($1 == f) ret.push($1) });
+  } else if (typeof f == 'function') {
+    var self = this;
+    this.each(#{ if (f.call(self, $1, $2)) ret.push($1) });
+  }
+  return ret;
+};
+
+JS2.Array.prototype.append = function(arr) {
+  this.push.apply(this, arr);
+  return this;
+};
+
+JS2.Array.prototype.empty = function() {
+  return this.length == 0;
+};
+
+JS2.Array.prototype.any = function() {
+  return this.length > 0;
+};

@@ -1,0 +1,1 @@
+JS2.TEMPLATES = { jsml: JS2.JSML };

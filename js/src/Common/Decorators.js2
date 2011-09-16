@@ -1,0 +1,43 @@
+class BrowserDecorator {
+  function file(code) {
+    return code;
+  }
+
+  function klass(name, par, source) {
+    return par+".extend('"+name+"',"+source+");";
+  }
+
+  function createModule(name, source) {
+    return "JS2.Module.extend('"+name+"',"+source+");";
+  }
+}
+
+class NodeDecorator {
+  function file(code) {
+    return "var js2 = require('js2').js2;\nvar JS2 = js2;\n" + code;
+  }
+
+  function klass(name, par, source) {
+    return "var "+name+"=exports['"+name+"']="+par+".extend("+source+");";
+  }
+
+  function createModule(name, source) {
+    return "var "+name+"=exports['"+name+"']=JS2.Module.extend("+source+");";
+  }
+}
+
+class RingoDecorator {
+  function file(code) {
+    return "var js2 = require('js2').js2;\nvar JS2 = js2;\n" + code;
+  }
+
+  function klass(name, par, source) {
+    return "var "+name+"=exports['"+name+"']="+par+".extend("+source+");";
+  }
+
+  function createModule(name, source) {
+    return "var "+name+"=exports['"+name+"']=JS2.Module.extend("+source+");";
+  }
+}
+
+JS2.DECORATOR = JS2.DECORATOR || new JS2.BrowserDecorator();
