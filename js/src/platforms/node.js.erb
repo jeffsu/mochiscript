@@ -1,0 +1,9 @@
+var $m  = { ROOT: {} };
+var JS2 = $m;
+
+(function () {
+<%= @boot   %>
+<%= @parser %>
+})($m);
+
+exports.mochi = $m;

@@ -1,4 +1,5 @@
-var $m = {};
+var $m  = { ROOT: {} };
+var JS2 = $m;
 
 (function () {
 
@@ -216,4 +217,4 @@ JS2.Class.extend('Parser', function(KLASS, OO){
 
 })($m);
 
-export.Mochi = $m;
+exports.mochi = $m;
