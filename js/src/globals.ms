@@ -18,7 +18,6 @@ foreach (var t:i in TOKENS) {
 }
 
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
-var parsers    = null;
 
 $m.parse = function (str) {
   var parser = new $c.RootParser();

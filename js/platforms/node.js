@@ -204,7 +204,6 @@ for(var i=0,_c1=TOKENS,_l1=_c1.length,t;(t=_c1[i])||(i<_l1);i++){
 }
 
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
-var parsers    = null;
 
 $m.parse = function (str) {
   var parser = new $c.RootParser();
@@ -230,8 +229,8 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   });
 
   OO.addStaticMember("regex",function (str) {
-    var regexStr = str.replace(" ", "\\s+").replace(/\<(\w+)\>/g, function($1,$2,$3){
-      return "(" + TOKENS[TYPES[$2]][1] + ")\\s?";
+    var regexStr = str.replace(" ", "\\s+").replace("><", ">\\s*<").replace(/\<(\w+)\>/g, function($1,$2,$3){
+      return "(" + TOKENS[TYPES[$2]][1] + ")";
     });
 
     return new RegExp(regexStr);
@@ -253,6 +252,7 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
 
   OO.addMember("initialize",function () {
     this.out = [];
+    this.finished = false;
   });
 
   OO.addMember("parse",function (tokens) {
@@ -265,10 +265,15 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
         handler.parse(tokens);
         this.out.push(handler); 
       } else {
-        this.out.push(token[1]);
-        tokens.consume(token[1].length);
+        this.handleToken(token, tokens);
+        if (this.finished) return;
       }
     }
+  });
+
+  OO.addMember("handleToken",function (token, tokens) {
+    this.out.push(token[1]);
+    tokens.consume(token[1].length);
   });
 
   OO.addMember("toString",function () {
@@ -291,8 +296,31 @@ RootParser.extend('ClassParser', function(KLASS, OO){
   OO.addMember("parse",function (tokens) {
     var m = tokens.str.match(REGEX);
     var name = m[1];
-    tokens.consume(m[0].length);
-    this.out.push([ "(function () { }" ]);
+
+    tokens.consume(m[0].length-1);
+
+    var parser = new $c.CurlyParser();
+    parser.parse(tokens);
+
+    this.out = [ "(function (){", parser, ")();" ];
+  });
+});
+
+RootParser.extend('CurlyParser', function(KLASS, OO){
+  OO.addMember("initialize",function () {
+    this.curly = 0;
+    this.$super();
+  });
+
+  OO.addMember("handleToken",function (token, tokens) {
+    if (token[0] == TYPES.RCURLY) {
+      this.curly--;
+    } else if (token[0] == TYPES.LCURLY) {
+      this.curly++;
+    }
+
+    this.$super(token, tokens);
+    if (this.curly == 0) this.finished = true;
   });
 });
 
