@@ -3,7 +3,7 @@ require 'erb'
 
 SRC_DIR = %|./js/src|
 BOOT   = %W| class |
-PARSER = %W| globals parser |
+PARSER = %W| globals tokens parser |
 
 task :compile do
   @boot   = BOOT.collect { |f| `js2 render #{SRC_DIR}/#{f}.ms` }.join("\n")

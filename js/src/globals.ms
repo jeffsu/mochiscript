@@ -1,16 +1,19 @@
 var TOKENS = [
-  [ "SPACE",    "\s+" ],
-  [ "CLASS",    "class" ], 
+  [ "SPACE",    "\\s+"  ],
+  [ "CLASS",    "class", 'ClassParser' ], 
   [ "IDENT",    "[\\$\\w]+" ], 
-  [ "OPERATOR", "\\+|\\-|\\++" ]
+  [ "OPERATOR", "\\+|\\-|\\++" ],
+  [ "LCURLY",   "\\{" ],
+  [ "RCURLY",   "\\}" ]
 ];
 
+var $c      = $m.ROOT;
 var TYPES   = {};
 var REGEXES = [];
 var MAIN_REGEX = null;
 
 foreach (var t:i in TOKENS) {
-  TYPES[t[0]] = i + 1; 
+  TYPES[t[0]] = i; 
   REGEXES.push("(" + t[1] + ")");
 }
 
@@ -18,7 +21,7 @@ var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
 var parsers    = null;
 
 $m.parse = function (str) {
-  loadParsers();
-  var tokens = new Tokens(str);
-  return parsers.root.parse(tokens);
+  var parser = new $c.RootParser();
+  parser.parse(new $c.Tokens(str));
+  return parser.toString();
 };

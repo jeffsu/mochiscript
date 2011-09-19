@@ -185,18 +185,21 @@ var JS2 = $m;
 })(undefined, $m);
 
 var TOKENS = [
-  [ "SPACE",    "\s+" ],
-  [ "CLASS",    "class" ], 
+  [ "SPACE",    "\\s+"  ],
+  [ "CLASS",    "class", 'ClassParser' ], 
   [ "IDENT",    "[\\$\\w]+" ], 
-  [ "OPERATOR", "\\+|\\-|\\++" ]
+  [ "OPERATOR", "\\+|\\-|\\++" ],
+  [ "LCURLY",   "\\{" ],
+  [ "RCURLY",   "\\}" ]
 ];
 
+var $c      = $m.ROOT;
 var TYPES   = {};
 var REGEXES = [];
 var MAIN_REGEX = null;
 
 for(var i=0,_c1=TOKENS,_l1=_c1.length,t;(t=_c1[i])||(i<_l1);i++){
-  TYPES[t[0]] = i + 1; 
+  TYPES[t[0]] = i; 
   REGEXES.push("(" + t[1] + ")");
 }
 
@@ -204,16 +207,94 @@ var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
 var parsers    = null;
 
 $m.parse = function (str) {
-  loadParsers();
-  var tokens = new Tokens(str);
-  return parsers.root.parse(tokens);
+  var parser = new $c.RootParser();
+  parser.parse(new $c.Tokens(str));
+  return parser.toString();
 };
 
+JS2.Class.extend('Tokens', function(KLASS, OO){
+  OO.addMember("initialize",function (str) {
+    this.orig = str;
+    this.str  = str;
+  });
 
-JS2.Class.extend('Parser', function(KLASS, OO){
+  OO.addMember("peek",function () {
+    if (this._peek) return this._peek;
 
+    var m = this.str.match(MAIN_REGEX);
+    if (!m) return null;
+
+    for(var i=0,_c1=TOKENS,_l1=_c1.length,ele;(ele=_c1[i])||(i<_l1);i++){
+      if (m[i+1]) return this._peek = [ i, m[i+1], ele[2] ];
+    }
+  });
+
+  OO.addStaticMember("regex",function (str) {
+    var regexStr = str.replace(" ", "\\s+").replace(/\<(\w+)\>/g, function($1,$2,$3){
+      return "(" + TOKENS[TYPES[$2]][1] + ")\\s?";
+    });
+
+    return new RegExp(regexStr);
+  });
+
+  OO.addMember("consume",function (n) {
+    this.str   = this.str.substr(n, this.str.length-n);
+    this._peek = null;
+  });
+
+  OO.addMember("any",function () {
+    return this.str.length > 0;
+  });
+});
+var Tokens = $c.Tokens;
+
+JS2.Class.extend('RootParser', function(KLASS, OO){
+  OO.addMember("handlers",{});
+
+  OO.addMember("initialize",function () {
+    this.out = [];
+  });
+
+  OO.addMember("parse",function (tokens) {
+    while (tokens.any()) {
+      var token = tokens.peek();
+      if (!token) return;
+      var handlerClass = token[2];
+      if (handlerClass) {
+        var handler = new $c[handlerClass];
+        handler.parse(tokens);
+        this.out.push(handler); 
+      } else {
+        this.out.push(token[1]);
+        tokens.consume(token[1].length);
+      }
+    }
+  });
+
+  OO.addMember("toString",function () {
+    var ret = [];
+    for(var _i1=0,_c1=this.out,_l1=_c1.length,ele;(ele=_c1[_i1])||(_i1<_l1);_i1++){
+      ret.push(ele.toString()); 
+    }
+    return ret.join("");
+  });
 });
 
+var RootParser = $c.RootParser;
+
+RootParser.extend('ClassParser', function(KLASS, OO){
+  // private closure
+
+    var REGEX = Tokens.regex("<CLASS> <IDENT><LCURLY>");
+  
+
+  OO.addMember("parse",function (tokens) {
+    var m = tokens.str.match(REGEX);
+    var name = m[1];
+    tokens.consume(m[0].length);
+    this.out.push([ "(function () { }" ]);
+  });
+});
 
 })($m);
 
