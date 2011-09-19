@@ -1,4 +1,1 @@
-
-if ($m) console.log("hi");
-console.log($m.ROOT);
-console.log($m.parse("class Foo { }"));
+console.log($m.parse("class Foo { var hello = yay; }"));

@@ -1,10 +1,12 @@
 var TOKENS = [
-  [ "SPACE",    "\\s+"  ],
-  [ "CLASS",    "class", 'ClassParser' ], 
-  [ "IDENT",    "[\\$\\w]+" ], 
-  [ "OPERATOR", "\\+|\\-|\\++" ],
-  [ "LCURLY",   "\\{" ],
-  [ "RCURLY",   "\\}" ]
+  [ "SPACE",     "\\s+"  ],
+  [ "CLASS",     "class", 'ClassParser' ], 
+  [ "VAR",       "var\\b" ], 
+  [ "SEMICOLON", ";" ], 
+  [ "IDENT",     "[\\$\\w]+" ], 
+  [ "OPERATOR",  "\\+|\\-|\\++" ],
+  [ "LCURLY",    "\\{" ],
+  [ "RCURLY",    "\\}" ]
 ];
 
 var $c      = $m.ROOT;

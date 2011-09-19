@@ -10,7 +10,8 @@ class RootParser {
     while (tokens.any()) {
       var token = tokens.peek();
       if (!token) return;
-      var handlerClass = token[2];
+      var handlerClass = token[2] || this.getHandler(token);
+      console.log(handlerClass, this.handlers, token);
       if (handlerClass) {
         var handler = new $c[handlerClass];
         handler.parse(tokens);
@@ -34,6 +35,10 @@ class RootParser {
     }
     return ret.join("");
   }
+
+  function getHandler() {
+    return null;
+  }
 }
 
 var RootParser = $c.RootParser;
@@ -49,19 +54,14 @@ class ClassParser extends RootParser {
 
     tokens.consume(m[0].length-1);
 
-    var curlies = new $c.CurlyParser();
-    curlies.parse(tokens);
+    var content = new $c.ClassContentParser();
+    content.parse(tokens);
 
-    this.out = [ "(function ()", curlies, ")();" ];
+    this.out = [ "(function ()", content, ")();" ];
   }
 }
 
 class CurlyParser extends RootParser {
-  function initialize() {
-    this.curly = 0;
-    this.$super();
-  }
-
   function handleToken(token, tokens) {
     if (token[0] == TYPES.RCURLY) {
       this.curly--;
@@ -73,3 +73,38 @@ class CurlyParser extends RootParser {
     if (this.curly == 0) this.finished = true;
   }
 }
+
+var CurlyParser = $c.CurlyParser;
+
+class ClassContentParser extends CurlyParser {
+  function getHandler(token) {
+    if (token[0] == TYPES.VAR) {
+      return "MemberParser";
+    }
+  }
+}
+
+class LineParser extends RootParser {
+  function handleToken(token, tokens) {
+    this.$super(token, tokens);
+    if (token[0] == TYPES.SEMICOLON) this.finished = true;
+  }
+}
+
+class MemberParser extends RootParser {
+  private {
+    var REGEX = Tokens.regex("var <IDENT>\\s*=\\s*?");
+  }
+
+  function parse(tokens) {
+    var m = tokens.str.match(REGEX);
+    this.name = m[1];
+    tokens.consume(m[0].length);
+    var parser = new $c.LineParser();
+    parser.parse(tokens);
+
+    this.out = [ "member ", this.name, parser, ";" ];
+  }
+}
+
+

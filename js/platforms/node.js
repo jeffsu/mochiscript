@@ -185,12 +185,14 @@ var JS2 = $m;
 })(undefined, $m);
 
 var TOKENS = [
-  [ "SPACE",    "\\s+"  ],
-  [ "CLASS",    "class", 'ClassParser' ], 
-  [ "IDENT",    "[\\$\\w]+" ], 
-  [ "OPERATOR", "\\+|\\-|\\++" ],
-  [ "LCURLY",   "\\{" ],
-  [ "RCURLY",   "\\}" ]
+  [ "SPACE",     "\\s+"  ],
+  [ "CLASS",     "class", 'ClassParser' ], 
+  [ "VAR",       "var\\b" ], 
+  [ "SEMICOLON", ";" ], 
+  [ "IDENT",     "[\\$\\w]+" ], 
+  [ "OPERATOR",  "\\+|\\-|\\++" ],
+  [ "LCURLY",    "\\{" ],
+  [ "RCURLY",    "\\}" ]
 ];
 
 var $c      = $m.ROOT;
@@ -259,7 +261,8 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
     while (tokens.any()) {
       var token = tokens.peek();
       if (!token) return;
-      var handlerClass = token[2];
+      var handlerClass = token[2] || this.getHandler(token);
+      console.log(handlerClass, this.handlers, token);
       if (handlerClass) {
         var handler = new $c[handlerClass];
         handler.parse(tokens);
@@ -283,6 +286,10 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
     }
     return ret.join("");
   });
+
+  OO.addMember("getHandler",function () {
+    return null;
+  });
 });
 
 var RootParser = $c.RootParser;
@@ -299,19 +306,14 @@ RootParser.extend('ClassParser', function(KLASS, OO){
 
     tokens.consume(m[0].length-1);
 
-    var parser = new $c.CurlyParser();
-    parser.parse(tokens);
+    var content = new $c.ClassContentParser();
+    content.parse(tokens);
 
-    this.out = [ "(function (){", parser, ")();" ];
+    this.out = [ "(function ()", content, ")();" ];
   });
 });
 
 RootParser.extend('CurlyParser', function(KLASS, OO){
-  OO.addMember("initialize",function () {
-    this.curly = 0;
-    this.$super();
-  });
-
   OO.addMember("handleToken",function (token, tokens) {
     if (token[0] == TYPES.RCURLY) {
       this.curly--;
@@ -323,6 +325,42 @@ RootParser.extend('CurlyParser', function(KLASS, OO){
     if (this.curly == 0) this.finished = true;
   });
 });
+
+var CurlyParser = $c.CurlyParser;
+
+CurlyParser.extend('ClassContentParser', function(KLASS, OO){
+  OO.addMember("getHandler",function (token) {
+    if (token[0] == TYPES.VAR) {
+      return "MemberParser";
+    }
+  });
+});
+
+RootParser.extend('LineParser', function(KLASS, OO){
+  OO.addMember("handleToken",function (token, tokens) {
+    this.$super(token, tokens);
+    if (token[0] == TYPES.SEMICOLON) this.finished = true;
+  });
+});
+
+RootParser.extend('MemberParser', function(KLASS, OO){
+  // private closure
+
+    var REGEX = Tokens.regex("var <IDENT>\\s*=\\s*?");
+  
+
+  OO.addMember("parse",function (tokens) {
+    var m = tokens.str.match(REGEX);
+    this.name = m[1];
+    tokens.consume(m[0].length);
+    var parser = new $c.LineParser();
+    parser.parse(tokens);
+
+    this.out = [ "member ", this.name, parser, ";" ];
+  });
+});
+
+
 
 })($m);
 
