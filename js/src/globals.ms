@@ -1,14 +1,20 @@
+var IDENT  = "[\\$\\w]+";
 var TOKENS = [
-  [ "SPACE",     "\\s+"  ],
-  [ "CLASS",     "class", 'ClassParser' ], 
-  [ "FUNCTION",  "function\\b" ], 
-  [ "VAR",       "var\\b" ], 
-  [ "STATIC",    "static\\b" ], 
-  [ "SEMICOLON", ";" ], 
-  [ "IDENT",     "[\\$\\w]+" ], 
-  [ "OPERATOR",  "\\+|\\-|\\++" ],
-  [ "LCURLY",    "\\{" ],
-  [ "RCURLY",    "\\}" ]
+  [ "SPACE",        "\\s+"  ],
+  [ "CLASS",        "class", 'ClassParser' ], 
+  [ "FUNCTION",     "function\\b" ], 
+  [ "VAR",          "var\\b" ], 
+  [ "STATIC",       "static\\b" ], 
+  [ "DSTRING",      "\"(\\\\.|[^\"])*\"" ], 
+  [ "SSTRING",      "'(\\\\.|[^'])*'" ], 
+  [ "SEMICOLON",    ";" ], 
+  [ "OPERATOR",     "\\+|\\-|\\++" ],
+  [ "EQUALS",       "=" ],
+  [ "IDENT",        IDENT ], 
+  [ "LBRACE",       "\\(" ],
+  [ "RBRACE",       "\\)" ],
+  [ "LCURLY",       "\\{" ],
+  [ "RCURLY",       "\\}" ]
 ];
 
 var $c      = $m.ROOT;
@@ -20,6 +26,10 @@ foreach (var t:i in TOKENS) {
   TYPES[t[0]] = i; 
   REGEXES.push("(" + t[1] + ")");
 }
+
+var EXTRA_REGEX_STRINGS = {
+  ARGS: "\\(\s*" + IDENT + "(\\s*,\\s*" + IDENT + ")*\s*\\)"
+};
 
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
 

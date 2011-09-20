@@ -10,8 +10,7 @@ class RootParser {
     while (tokens.any()) {
       var token = tokens.peek();
       if (!token) return;
-      var handlerClass = token[2] || this.getHandler(token);
-      console.log(handlerClass, this.handlers, token);
+      var handlerClass = this.getHandler(token) || token[2];
       if (handlerClass) {
         var handler = new $c[handlerClass];
         handler.parse(tokens);
@@ -119,7 +118,11 @@ class MemberParser extends RootParser {
 
 class MethodParser extends RootParser {
   private {
-    var REGEX = Tokens.regex("<FUNCTION>\\s*=\\s*?");
+    var REGEX = Tokens.regex("<FUNCTION> <IDENT><ARGS>");
   }
 
+  function parse(tokens) {
+    var m = tokens.str.match(REGEX);
+    this.out = [ 'METHOD' ];
+  }
 }
