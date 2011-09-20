@@ -1,7 +1,9 @@
 var TOKENS = [
   [ "SPACE",     "\\s+"  ],
   [ "CLASS",     "class", 'ClassParser' ], 
+  [ "FUNCTION",  "function\\b" ], 
   [ "VAR",       "var\\b" ], 
+  [ "STATIC",    "static\\b" ], 
   [ "SEMICOLON", ";" ], 
   [ "IDENT",     "[\\$\\w]+" ], 
   [ "OPERATOR",  "\\+|\\-|\\++" ],

@@ -290,6 +290,10 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
   OO.addMember("getHandler",function () {
     return null;
   });
+
+  OO.addMember("chop",function () {
+    this.out.pop();
+  });
 });
 
 var RootParser = $c.RootParser;
@@ -338,11 +342,9 @@ CurlyParser.extend('ClassContentParser', function(KLASS, OO){
 
 RootParser.extend('LineParser', function(KLASS, OO){
   OO.addMember("handleToken",function (token, tokens) {
+    this.$super(token, tokens);
     if (token[0] == TYPES.SEMICOLON) {
       this.finished = true;
-      tokens.consume(1);
-    } else {
-      this.$super(token, tokens);
     }
   });
 });
@@ -360,6 +362,7 @@ RootParser.extend('MemberParser', function(KLASS, OO){
 
     var parser = new $c.LineParser();
     parser.parse(tokens);
+    parser.chop();
 
     this.out = [ "OO.addMember(", JSON.stringify(this.name), ",",  parser, ");" ];
   });

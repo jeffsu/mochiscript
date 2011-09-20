@@ -39,6 +39,10 @@ class RootParser {
   function getHandler() {
     return null;
   }
+
+  function chop() {
+    this.out.pop();
+  }
 }
 
 var RootParser = $c.RootParser;
@@ -80,17 +84,17 @@ class ClassContentParser extends CurlyParser {
   function getHandler(token) {
     switch(token[0]) {
       case TYPES.VAR: return "MemberParser";
+      case TYPES.FUNCTION: return "MethodParser";
+      case TYPES.PRIVATE: return "PrivateParser";
     }
   }
 }
 
 class LineParser extends RootParser {
   function handleToken(token, tokens) {
+    this.$super(token, tokens);
     if (token[0] == TYPES.SEMICOLON) {
       this.finished = true;
-      tokens.consume(1);
-    } else {
-      this.$super(token, tokens);
     }
   }
 }
@@ -107,9 +111,15 @@ class MemberParser extends RootParser {
 
     var parser = new $c.LineParser();
     parser.parse(tokens);
+    parser.chop();
 
     this.out = [ "OO.addMember(", JSON.stringify(this.name), ",",  parser, ");" ];
   }
 }
 
+class MethodParser extends RootParser {
+  private {
+    var REGEX = Tokens.regex("<FUNCTION>\\s*=\\s*?");
+  }
 
+}
