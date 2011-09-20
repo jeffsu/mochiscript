@@ -78,16 +78,20 @@ var CurlyParser = $c.CurlyParser;
 
 class ClassContentParser extends CurlyParser {
   function getHandler(token) {
-    if (token[0] == TYPES.VAR) {
-      return "MemberParser";
+    switch(token[0]) {
+      case TYPES.VAR: return "MemberParser";
     }
   }
 }
 
 class LineParser extends RootParser {
   function handleToken(token, tokens) {
-    this.$super(token, tokens);
-    if (token[0] == TYPES.SEMICOLON) this.finished = true;
+    if (token[0] == TYPES.SEMICOLON) {
+      this.finished = true;
+      tokens.consume(1);
+    } else {
+      this.$super(token, tokens);
+    }
   }
 }
 
@@ -100,10 +104,11 @@ class MemberParser extends RootParser {
     var m = tokens.str.match(REGEX);
     this.name = m[1];
     tokens.consume(m[0].length);
+
     var parser = new $c.LineParser();
     parser.parse(tokens);
 
-    this.out = [ "member ", this.name, parser, ";" ];
+    this.out = [ "OO.addMember(", JSON.stringify(this.name), ",",  parser, ");" ];
   }
 }
 

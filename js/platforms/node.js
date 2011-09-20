@@ -330,16 +330,20 @@ var CurlyParser = $c.CurlyParser;
 
 CurlyParser.extend('ClassContentParser', function(KLASS, OO){
   OO.addMember("getHandler",function (token) {
-    if (token[0] == TYPES.VAR) {
-      return "MemberParser";
+    switch(token[0]) {
+      case TYPES.VAR: return "MemberParser";
     }
   });
 });
 
 RootParser.extend('LineParser', function(KLASS, OO){
   OO.addMember("handleToken",function (token, tokens) {
-    this.$super(token, tokens);
-    if (token[0] == TYPES.SEMICOLON) this.finished = true;
+    if (token[0] == TYPES.SEMICOLON) {
+      this.finished = true;
+      tokens.consume(1);
+    } else {
+      this.$super(token, tokens);
+    }
   });
 });
 
@@ -353,10 +357,11 @@ RootParser.extend('MemberParser', function(KLASS, OO){
     var m = tokens.str.match(REGEX);
     this.name = m[1];
     tokens.consume(m[0].length);
+
     var parser = new $c.LineParser();
     parser.parse(tokens);
 
-    this.out = [ "member ", this.name, parser, ";" ];
+    this.out = [ "OO.addMember(", JSON.stringify(this.name), ",",  parser, ");" ];
   });
 });
 
