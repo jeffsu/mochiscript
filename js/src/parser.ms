@@ -157,3 +157,31 @@ class MethodParser extends RootParser {
     this.out = [ 'OO.addMember(', JSON.stringify(this.name), ', function', this.args, this.body, ');' ];
   }
 }
+
+class ForeachParser extends CurlyParser {
+  private {
+    var REGEX = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**{");
+  }
+
+  function startParse(tokens) {
+    var m = tokens.match(REGEX);
+    namespace = tokens.iterator++;
+
+    this.item     = m[4];
+    this.iterator = m[5] || "_i_" + namespace;
+    this.list     = m[6];
+
+
+    tokens.consume(m[0].length-1);
+    var declare = [ this.iterator + "=0", this.item + "=null", "_list_" + namespace + "=" + this.list, "_len_" + namespace + "=_list_.length" ].join(',');
+
+    var bool = "(" + this.item + "=" + "_list_" + namespace + "[" + this.iterator + "])||" + this.iterator + "<_len_" + namespace;
+
+    this.out = [ "for (", declare, ";", bool, ';', this.iterator + "++)" ];
+  }
+
+  function endParse(tokens) {
+    tokens.iterator--;
+  }
+ 
+}

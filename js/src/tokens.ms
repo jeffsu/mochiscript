@@ -2,6 +2,7 @@ class Tokens {
   function initialize(str) {
     this.orig = str;
     this.str  = str;
+    this.iterator = 0;
   }
 
   function peek() {
@@ -16,7 +17,7 @@ class Tokens {
   }
 
   static function regex(str) {
-    var regexStr = str.replace(" ", "\\s+").replace("><", ">\\s*<").replace(/\<(\w+)\>/g, #{
+    var regexStr = str.replace(/\*\*/g, "\\s*").replace(/\s+/g, "\\s+").replace(/\>\</g, ">\\s*<").replace(/\<(\w+)\>/g, #{
       return "(" + (EXTRA_REGEX_STRINGS[$2] || TOKENS[TYPES[$2]][1])  + ")";
     });
 

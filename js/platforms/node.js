@@ -194,6 +194,7 @@ var TOKENS = [
   [ "VAR",      "var\\b" ], 
   [ "STATIC",   "static\\b" ], 
   [ "PRIVATE",  "private\\b" ], 
+  [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
 
   [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
   [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ], 
@@ -237,6 +238,7 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   OO.addMember("initialize",function (str) {
     this.orig = str;
     this.str  = str;
+    this.iterator = 0;
   });
 
   OO.addMember("peek",function () {
@@ -251,7 +253,7 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   });
 
   OO.addStaticMember("regex",function (str) {
-    var regexStr = str.replace(" ", "\\s+").replace("><", ">\\s*<").replace(/\<(\w+)\>/g, function($1,$2,$3){
+    var regexStr = str.replace(/\*\*/g, "\\s*").replace(/\s+/g, "\\s+").replace(/\>\</g, ">\\s*<").replace(/\<(\w+)\>/g, function($1,$2,$3){
       return "(" + (EXTRA_REGEX_STRINGS[$2] || TOKENS[TYPES[$2]][1])  + ")";
     });
 
@@ -436,6 +438,35 @@ RootParser.extend('MethodParser', function(KLASS, OO){
 
     this.out = [ 'OO.addMember(', JSON.stringify(this.name), ', function', this.args, this.body, ');' ];
   });
+});
+
+CurlyParser.extend('ForeachParser', function(KLASS, OO){
+  // private closure
+
+    var REGEX = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**{");
+  
+
+  OO.addMember("startParse",function (tokens) {
+    var m = tokens.match(REGEX);
+    namespace = tokens.iterator++;
+
+    this.item     = m[4];
+    this.iterator = m[5] || "_i_" + namespace;
+    this.list     = m[6];
+
+
+    tokens.consume(m[0].length-1);
+    var declare = [ this.iterator + "=0", this.item + "=null", "_list_" + namespace + "=" + this.list, "_len_" + namespace + "=_list_.length" ].join(',');
+
+    var bool = "(" + this.item + "=" + "_list_" + namespace + "[" + this.iterator + "])||" + this.iterator + "<_len_" + namespace;
+
+    this.out = [ "for (", declare, ";", bool, ';', this.iterator + "++)" ];
+  });
+
+  OO.addMember("endParse",function (tokens) {
+    tokens.iterator--;
+  });
+ 
 });
 
 

@@ -7,6 +7,7 @@ var TOKENS = [
   [ "VAR",      "var\\b" ], 
   [ "STATIC",   "static\\b" ], 
   [ "PRIVATE",  "private\\b" ], 
+  [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
 
   [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
   [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ], 
