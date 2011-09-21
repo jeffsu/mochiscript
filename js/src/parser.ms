@@ -7,9 +7,11 @@ class RootParser {
   }
 
   function parse(tokens) {
+    this.startParse(tokens);
+
     while (tokens.any()) {
       var token = tokens.peek();
-      if (!token) return;
+      if (!token) break;
       var handlerClass = this.getHandler(token) || token[2];
       if (handlerClass) {
         var handler = new $c[handlerClass];
@@ -17,10 +19,15 @@ class RootParser {
         this.out.push(handler); 
       } else {
         this.handleToken(token, tokens);
-        if (this.finished) return;
       }
+      if (this.finished) break;
     }
+
+    this.endParse(tokens);
   }
+
+  function startParse() { }
+  function endParse() { }
 
   function handleToken(token, tokens) {
     this.out.push(token[1]);
@@ -35,7 +42,7 @@ class RootParser {
     return ret.join("");
   }
 
-  function getHandler() {
+  function getHandler(token) {
     return null;
   }
 
@@ -66,6 +73,7 @@ class ClassParser extends RootParser {
 
 class CurlyParser extends RootParser {
   function handleToken(token, tokens) {
+    if (this.curly === undefined) this.curly = 0;
     if (token[0] == TYPES.RCURLY) {
       this.curly--;
     } else if (token[0] == TYPES.LCURLY) {
@@ -98,6 +106,22 @@ class LineParser extends RootParser {
   }
 }
 
+class PrivateParser extends CurlyParser {
+  private {
+    var REGEX = Tokens.regex("<PRIVATE>\\s*");
+  }
+
+  function startParse(tokens) {
+    var m = tokens.match(REGEX);
+    tokens.consume(m[0].length);
+  }
+
+  function endParse(tokens) {
+    this.out.pop();
+    this.out.shift();
+  }
+}
+
 class MemberParser extends RootParser {
   private {
     var REGEX = Tokens.regex("var <IDENT>\\s*=\\s*?");
@@ -118,11 +142,18 @@ class MemberParser extends RootParser {
 
 class MethodParser extends RootParser {
   private {
-    var REGEX = Tokens.regex("<FUNCTION> <IDENT><ARGS>");
+    var REGEX = Tokens.regex("<FUNCTION> <IDENT><ARGS><SPACE>");
   }
 
   function parse(tokens) {
     var m = tokens.str.match(REGEX);
-    this.out = [ 'METHOD' ];
+    tokens.consume(m[0].length);
+    this.name = m[2];
+    this.args = m[3];
+    this.body = new CurlyParser();
+    this.body.foo = true;
+    this.body.parse(tokens);
+
+    this.out = [ 'OO.addMember(', JSON.stringify(this.name), ', function', this.args, this.body, ');' ];
   }
 }

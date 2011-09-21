@@ -6,8 +6,8 @@ BOOT   = %W| class |
 PARSER = %W| globals tokens parser |
 
 task :compile do
-  @boot   = BOOT.collect { |f| `js2 render #{SRC_DIR}/#{f}.ms` }.join("\n")
-  @parser = PARSER.collect { |f| `js2 render #{SRC_DIR}/#{f}.ms` }.join("\n")
+  @boot   = BOOT.collect { |f| `js2-node render #{SRC_DIR}/#{f}.ms` }.join("\n")
+  @parser = PARSER.collect { |f| `js2-node render #{SRC_DIR}/#{f}.ms` }.join("\n")
 
   Dir['./js/src/platforms/*'].each do |f|
     target = f.sub(%r|/src|, '').sub(/\.erb$/, '')

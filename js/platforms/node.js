@@ -187,21 +187,27 @@ var JS2 = $m;
 
 var IDENT  = "[\\$\\w]+";
 var TOKENS = [
-  [ "SPACE",        "\\s+"  ],
-  [ "CLASS",        "class", 'ClassParser' ], 
-  [ "FUNCTION",     "function\\b" ], 
-  [ "VAR",          "var\\b" ], 
-  [ "STATIC",       "static\\b" ], 
-  [ "DSTRING",      "\"(\\\\.|[^\"])*\"" ], 
-  [ "SSTRING",      "'(\\\\.|[^'])*'" ], 
-  [ "SEMICOLON",    ";" ], 
-  [ "OPERATOR",     "\\+|\\-|\\++" ],
-  [ "EQUALS",       "=" ],
-  [ "IDENT",        IDENT ], 
-  [ "LBRACE",       "\\(" ],
-  [ "RBRACE",       "\\)" ],
-  [ "LCURLY",       "\\{" ],
-  [ "RCURLY",       "\\}" ]
+  [ "SPACE", "\\s+"  ],
+
+  [ "CLASS",    "class", 'ClassParser' ], 
+  [ "FUNCTION", "function\\b" ], 
+  [ "VAR",      "var\\b" ], 
+  [ "STATIC",   "static\\b" ], 
+  [ "PRIVATE",  "private\\b" ], 
+
+  [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
+  [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ], 
+
+  [ "SEMICOLON", ";" ], 
+  [ "OPERATOR",  "\\+|\\-|\\++" ],
+  [ "EQUALS",    "=" ],
+
+  [ "LBRACE", "\\(" ],
+  [ "RBRACE", "\\)" ],
+  [ "LCURLY", "\\{" ],
+  [ "RCURLY", "\\}" ],
+
+  [ "IDENT", IDENT ] 
 ];
 
 var $c      = $m.ROOT;
@@ -215,7 +221,7 @@ for(var i=0,_c1=TOKENS,_l1=_c1.length,t;(t=_c1[i])||(i<_l1);i++){
 }
 
 var EXTRA_REGEX_STRINGS = {
-  ARGS: "\\(\s*" + IDENT + "(\\s*,\\s*" + IDENT + ")*\s*\\)"
+  ARGS: "\\(\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\s*\\)"
 };
 
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
@@ -260,6 +266,10 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   OO.addMember("any",function () {
     return this.str.length > 0;
   });
+
+  OO.addMember("match",function (regex) {
+    return this.str.match(regex);
+  });
 });
 var Tokens = $c.Tokens;
 
@@ -273,9 +283,11 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
   });
 
   OO.addMember("parse",function (tokens) {
+    this.startParse(tokens);
+
     while (tokens.any()) {
       var token = tokens.peek();
-      if (!token) return;
+      if (!token) break;
       var handlerClass = this.getHandler(token) || token[2];
       if (handlerClass) {
         var handler = new $c[handlerClass];
@@ -283,10 +295,15 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
         this.out.push(handler); 
       } else {
         this.handleToken(token, tokens);
-        if (this.finished) return;
       }
+      if (this.finished) break;
     }
+
+    this.endParse(tokens);
   });
+
+  OO.addMember("startParse",function () { });
+  OO.addMember("endParse",function () { });
 
   OO.addMember("handleToken",function (token, tokens) {
     this.out.push(token[1]);
@@ -301,7 +318,7 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
     return ret.join("");
   });
 
-  OO.addMember("getHandler",function () {
+  OO.addMember("getHandler",function (token) {
     return null;
   });
 
@@ -333,6 +350,7 @@ RootParser.extend('ClassParser', function(KLASS, OO){
 
 RootParser.extend('CurlyParser', function(KLASS, OO){
   OO.addMember("handleToken",function (token, tokens) {
+    if (this.curly === undefined) this.curly = 0;
     if (token[0] == TYPES.RCURLY) {
       this.curly--;
     } else if (token[0] == TYPES.LCURLY) {
@@ -348,7 +366,6 @@ var CurlyParser = $c.CurlyParser;
 
 CurlyParser.extend('ClassContentParser', function(KLASS, OO){
   OO.addMember("getHandler",function (token) {
-    console.log(token);
     switch(token[0]) {
       case TYPES.VAR: return "MemberParser";
       case TYPES.FUNCTION: return "MethodParser";
@@ -363,6 +380,23 @@ RootParser.extend('LineParser', function(KLASS, OO){
     if (token[0] == TYPES.SEMICOLON) {
       this.finished = true;
     }
+  });
+});
+
+CurlyParser.extend('PrivateParser', function(KLASS, OO){
+  // private closure
+
+    var REGEX = Tokens.regex("<PRIVATE>\\s*");
+  
+
+  OO.addMember("startParse",function (tokens) {
+    var m = tokens.match(REGEX);
+    tokens.consume(m[0].length);
+  });
+
+  OO.addMember("endParse",function (tokens) {
+    this.out.pop();
+    this.out.shift();
   });
 });
 
@@ -388,12 +422,19 @@ RootParser.extend('MemberParser', function(KLASS, OO){
 RootParser.extend('MethodParser', function(KLASS, OO){
   // private closure
 
-    var REGEX = Tokens.regex("<FUNCTION> <IDENT><ARGS>");
+    var REGEX = Tokens.regex("<FUNCTION> <IDENT><ARGS><SPACE>");
   
 
   OO.addMember("parse",function (tokens) {
     var m = tokens.str.match(REGEX);
-    this.out = [ 'METHOD' ];
+    tokens.consume(m[0].length);
+    this.name = m[2];
+    this.args = m[3];
+    this.body = new CurlyParser();
+    this.body.foo = true;
+    this.body.parse(tokens);
+
+    this.out = [ 'OO.addMember(', JSON.stringify(this.name), ', function', this.args, this.body, ');' ];
   });
 });
 

@@ -1,20 +1,26 @@
 var IDENT  = "[\\$\\w]+";
 var TOKENS = [
-  [ "SPACE",        "\\s+"  ],
-  [ "CLASS",        "class", 'ClassParser' ], 
-  [ "FUNCTION",     "function\\b" ], 
-  [ "VAR",          "var\\b" ], 
-  [ "STATIC",       "static\\b" ], 
-  [ "DSTRING",      "\"(\\\\.|[^\"])*\"" ], 
-  [ "SSTRING",      "'(\\\\.|[^'])*'" ], 
-  [ "SEMICOLON",    ";" ], 
-  [ "OPERATOR",     "\\+|\\-|\\++" ],
-  [ "EQUALS",       "=" ],
-  [ "IDENT",        IDENT ], 
-  [ "LBRACE",       "\\(" ],
-  [ "RBRACE",       "\\)" ],
-  [ "LCURLY",       "\\{" ],
-  [ "RCURLY",       "\\}" ]
+  [ "SPACE", "\\s+"  ],
+
+  [ "CLASS",    "class", 'ClassParser' ], 
+  [ "FUNCTION", "function\\b" ], 
+  [ "VAR",      "var\\b" ], 
+  [ "STATIC",   "static\\b" ], 
+  [ "PRIVATE",  "private\\b" ], 
+
+  [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
+  [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ], 
+
+  [ "SEMICOLON", ";" ], 
+  [ "OPERATOR",  "\\+|\\-|\\++" ],
+  [ "EQUALS",    "=" ],
+
+  [ "LBRACE", "\\(" ],
+  [ "RBRACE", "\\)" ],
+  [ "LCURLY", "\\{" ],
+  [ "RCURLY", "\\}" ],
+
+  [ "IDENT", IDENT ] 
 ];
 
 var $c      = $m.ROOT;
@@ -28,7 +34,7 @@ foreach (var t:i in TOKENS) {
 }
 
 var EXTRA_REGEX_STRINGS = {
-  ARGS: "\\(\s*" + IDENT + "(\\s*,\\s*" + IDENT + ")*\s*\\)"
+  ARGS: "\\(\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\s*\\)"
 };
 
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));

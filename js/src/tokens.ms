@@ -31,5 +31,9 @@ class Tokens {
   function any() {
     return this.str.length > 0;
   }
+
+  function match(regex) {
+    return this.str.match(regex);
+  }
 }
 var Tokens = $c.Tokens;
