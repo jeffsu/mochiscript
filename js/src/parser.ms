@@ -72,6 +72,11 @@ class ClassParser extends RootParser {
 }
 
 class CurlyParser extends RootParser {
+  function initialize(chop) {
+    this.chop = chop;
+    this.$super();
+  }
+
   function handleToken(token, tokens) {
     if (this.curly === undefined) this.curly = 0;
     if (token[0] == TYPES.RCURLY) {
@@ -82,6 +87,13 @@ class CurlyParser extends RootParser {
 
     this.$super(token, tokens);
     if (this.curly == 0) this.finished = true;
+  }
+
+  function endParse(tokens) {
+    if (this.chop) {
+      this.out.pop();
+      this.out.shift();
+    }
   }
 }
 
@@ -95,6 +107,7 @@ class ClassContentParser extends CurlyParser {
       case TYPES.PRIVATE: return "PrivateParser";
     }
   }
+
 }
 
 class LineParser extends RootParser {
@@ -119,6 +132,46 @@ class PrivateParser extends CurlyParser {
   function endParse(tokens) {
     this.out.pop();
     this.out.shift();
+  }
+}
+
+class IStringParser extends RootParser {
+  private {
+    var BEGIN = Tokens.regex("<ISTRING_START>");
+  }
+
+  function parse(tokens) {
+    var m = tokens.match(BEGIN);
+    tokens.consume(m[0].length);
+    this.out.push('"');
+
+    while (1) {
+      var m = tokens.match(/^((?:\\.|.)*?)(#\{|})/);
+      console.log(m);
+      var str = m[1];
+      var len = m[0].length;
+      str.replace(/"/, '\\"');
+
+      if (m[2] == '#{') {
+        this.out.push(str+'"+(');
+        tokens.consume(len-1);
+        this.parseMiddle(tokens);
+        this.out.push(')+"');
+      } 
+      
+      else if (m[2] == '}') {
+        this.out.push(str);
+        this.out.push('"');
+        tokens.consume(len);
+        return;
+      }
+    }
+  }
+
+  function parseMiddle(tokens) {
+    var parser = new CurlyParser(true); 
+    parser.parse(tokens);
+    this.out.push(parser);
   }
 }
 
@@ -171,7 +224,7 @@ class ForeachParser extends CurlyParser {
     this.iterator = m[5] || "_i_" + namespace;
     this.list     = m[6];
 
-
+    // TODO ugly, revisit this later
     tokens.consume(m[0].length-1);
     var declare = [ this.iterator + "=0", this.item + "=null", "_list_" + namespace + "=" + this.list, "_len_" + namespace + "=_list_.length" ].join(',');
 

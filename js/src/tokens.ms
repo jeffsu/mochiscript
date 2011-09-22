@@ -1,7 +1,7 @@
 class Tokens {
   function initialize(str) {
-    this.orig = str;
-    this.str  = str;
+    this.orig     = str;
+    this.str      = str;
     this.iterator = 0;
   }
 

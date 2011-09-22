@@ -9,6 +9,8 @@ var TOKENS = [
   [ "PRIVATE",  "private\\b" ], 
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
 
+  [ "ISTRING_START", "%{", 'IStringParser' ], 
+
   [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
   [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ], 
 

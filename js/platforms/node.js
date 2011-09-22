@@ -196,6 +196,8 @@ var TOKENS = [
   [ "PRIVATE",  "private\\b" ], 
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
 
+  [ "ISTRING_START", "%{", 'IStringParser' ], 
+
   [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
   [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ], 
 
@@ -236,8 +238,8 @@ $m.parse = function (str) {
 
 JS2.Class.extend('Tokens', function(KLASS, OO){
   OO.addMember("initialize",function (str) {
-    this.orig = str;
-    this.str  = str;
+    this.orig     = str;
+    this.str      = str;
     this.iterator = 0;
   });
 
@@ -351,6 +353,11 @@ RootParser.extend('ClassParser', function(KLASS, OO){
 });
 
 RootParser.extend('CurlyParser', function(KLASS, OO){
+  OO.addMember("initialize",function (chop) {
+    this.chop = chop;
+    this.$super();
+  });
+
   OO.addMember("handleToken",function (token, tokens) {
     if (this.curly === undefined) this.curly = 0;
     if (token[0] == TYPES.RCURLY) {
@@ -361,6 +368,13 @@ RootParser.extend('CurlyParser', function(KLASS, OO){
 
     this.$super(token, tokens);
     if (this.curly == 0) this.finished = true;
+  });
+
+  OO.addMember("endParse",function (tokens) {
+    if (this.chop) {
+      this.out.pop();
+      this.out.shift();
+    }
   });
 });
 
@@ -374,6 +388,7 @@ CurlyParser.extend('ClassContentParser', function(KLASS, OO){
       case TYPES.PRIVATE: return "PrivateParser";
     }
   });
+
 });
 
 RootParser.extend('LineParser', function(KLASS, OO){
@@ -399,6 +414,46 @@ CurlyParser.extend('PrivateParser', function(KLASS, OO){
   OO.addMember("endParse",function (tokens) {
     this.out.pop();
     this.out.shift();
+  });
+});
+
+RootParser.extend('IStringParser', function(KLASS, OO){
+  // private closure
+
+    var BEGIN = Tokens.regex("<ISTRING_START>");
+  
+
+  OO.addMember("parse",function (tokens) {
+    var m = tokens.match(BEGIN);
+    tokens.consume(m[0].length);
+    this.out.push('"');
+
+    while (1) {
+      var m = tokens.match(/^((?:\\.|.)*?)(#\{|})/);
+      console.log(m);
+      var str = m[1];
+      var len = m[0].length;
+
+      if (m[2] == '#{') {
+        this.out.push(str+'"+(');
+        tokens.consume(len-1);
+        this.parseMiddle(tokens);
+        this.out.push(')+');
+      } 
+      
+      else if (m[2] == '}') {
+        this.out.push(str);
+        this.out.push('"');
+        tokens.consume(len);
+        return;
+      }
+    }
+  });
+
+  OO.addMember("parseMiddle",function (tokens) {
+    var parser = new CurlyParser(true); 
+    parser.parse(tokens);
+    this.out.push(parser);
   });
 });
 
@@ -454,7 +509,7 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
     this.iterator = m[5] || "_i_" + namespace;
     this.list     = m[6];
 
-
+    // TODO ugly, revisit this later
     tokens.consume(m[0].length-1);
     var declare = [ this.iterator + "=0", this.item + "=null", "_list_" + namespace + "=" + this.list, "_len_" + namespace + "=_list_.length" ].join(',');
 
