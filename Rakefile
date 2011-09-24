@@ -12,7 +12,11 @@ task :test => :compile do
   Dir['./tests/*.ms'].each do |f|
     puts "Testing: " + f
     ctx = MochiScript::Context.new
-    ctx.eval_ms(File.read(f))
+    begin
+      ctx.eval_ms(File.read(f))
+    rescue
+      puts "Error: " + ctx.parse(File.read(f))
+    end
   end
 end
 

@@ -1,5 +1,15 @@
-var foo = <<END;
+// standard
+var test1 = <<END;
   hello
+  world
 END
 
-$m.out(foo);
+// interpolated
+var test2 = <<END;
+  #{test1}
+END
+
+$m.test(#{
+  $1.eq("hello\nworld", test1);
+  $1.eq("hello\nworld", test2);
+});

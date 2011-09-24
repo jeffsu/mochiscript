@@ -202,11 +202,20 @@ class HereDocParser extends RootParser {
     var beginning = tokens.match(/^<<(\w+)\s*([;\)])*\n/);
     tokens.consume(beginning[0].length);
 
-    var strMatch = tokens.match(new RegExp("^(.*)?\n\\s*" + beginning[1] + "\\s*\n"));
-    var string   = $m.parse('%{' + strMatch[1] + '}');
-    tokens.consume(strMatch[0].length);
+    var spacing = tokens.match(/^(\s*)/);
+    var regexSub = new RegExp("^" + (spacing[0] || ''), "mg");
 
-    this.out = [ string, beginning[2] ];
+
+    var strMatch = tokens.match(new RegExp("^([\\s\\S]*?)\\n\\s*" + beginning[1] + "\\s*\\n"));
+    var toParse  = strMatch[1] || '';
+
+    toParse = toParse.replace(regexSub, '');
+    toParse = toParse.replace("\n", "\\n");
+
+    var string = $m.parse('%{' + toParse + '}');
+    tokens.consume(strMatch[0] ? strMatch[0].length : 0);
+
+    this.out = [ string, beginning[2] || ';' ];
   }
 }
 
