@@ -1,3 +1,9 @@
+$m.parse = function (str) {
+  var parser = new $c.RootParser();
+  parser.parse(new $c.Tokens(str));
+  return parser.toString();
+};
+
 class RootParser {
   var handlers = {};
 

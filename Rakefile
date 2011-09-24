@@ -1,13 +1,12 @@
-require 'bundler/gem_tasks'
 require 'erb'
 require 'json'
 
-SRC_DIR = %|./js/src|
+SRC_DIR = %|./src|
 BOOT   = %W| class |
-PARSER = %W| globals tokens parser |
+PARSER = %W| tokens parsers |
 
 task :test => :compile do
-  require "./js/platforms/ruby"
+  require "./platforms/gem/lib/mochiscript"
 
   Dir['./tests/*.ms'].each do |f|
     puts "Testing: " + f
@@ -24,10 +23,13 @@ task :compile do
   @boot   = BOOT.collect { |f| `js2-node render #{SRC_DIR}/#{f}.ms` }.join("\n")
   @parser = PARSER.collect { |f| `js2-node render #{SRC_DIR}/#{f}.ms` }.join("\n")
 
-  Dir['./js/src/platforms/*.erb'].each do |f|
-    target = f.sub(%r|/src|, '').sub(/\.erb$/, '')
-    puts "Writing #{f} to #{target}"
-    File.open(target, "w") { |t| t << ERB.new(File.read(f)).result(binding) }
+  { 
+    'ruby.rb.erb' => './platforms/gem/lib/mochiscript.rb',
+    'node.js.erb' => './platforms/npm/lib/mochiscript.js' 
+  }.each_pair do |target, destination|
+    target = "./src/platforms/#{target}"
+    puts "Writing #{destination} to #{target}"
+    File.open(destination, "w") { |t| t << ERB.new(File.read(target)).result(binding) }
   end
 end
 
