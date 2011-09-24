@@ -60,14 +60,14 @@ class ClassParser extends RootParser {
 
   function parse(tokens) {
     var m = tokens.str.match(REGEX);
-    var name = m[1];
+    var name = m[2];
 
     tokens.consume(m[0].length-1);
 
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    this.out = [ "(function ()", content, ")();" ];
+    this.out = [ "var ", name, " = $m.Class.extend(function(KLASS, OO)", content, ");" ];
   }
 }
 
@@ -134,6 +134,7 @@ class PrivateParser extends CurlyParser {
     this.out.shift();
   }
 }
+
 
 class IStringParser extends RootParser {
   private {
@@ -208,6 +209,49 @@ class MethodParser extends RootParser {
     this.body.parse(tokens);
 
     this.out = [ 'OO.addMember(', JSON.stringify(this.name), ', function', this.args, this.body, ');' ];
+  }
+}
+
+class ShorthandFunctionParser extends RootParser {
+  private {
+    var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
+  }
+
+  function parse(tokens) {
+    tokens.consume(1);
+    var argsMatch = tokens.match(ARGS_REGEX);
+    var args = null;
+
+    if (argsMatch) {
+      args = argsMatch[0];
+      tokens.consume(argsMatch[0].length);
+    } else {
+      args = "($1,$2,$3)";
+    }
+
+    var body = new CurlyParser();
+    body.parse(tokens);
+    var semi = tokens.match(/^\s*[,;\)]/) ? '' : ';';
+
+    this.out = [ 'function', args, body, semi ];
+  }
+}
+
+class CommentParser extends RootParser {
+  function parse(tokens) {
+    var m = tokens.match(/^\/\/.*?\n/);
+    if (m) {
+      tokens.consume(m[0].length);
+      this.out = [ m[0] ];
+      return;
+    }
+
+    var m2 = tokens.match(/^\/\*.*?\*\//);
+    if (m2) {
+      tokens.consume(m2[0].length);
+      this.out = [ m2[0] ];
+      return;
+    }
   }
 }
 

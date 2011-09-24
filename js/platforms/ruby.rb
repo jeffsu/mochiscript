@@ -1,8 +1,45 @@
-var $m  = { ROOT: {} };
-var JS2 = $m;
+require 'v8'
+require 'json'
 
+module MochiScript
+  class Context
+    def initialize
+      @ctx = V8::Context.new 
+      @ctx['_$m_adapter'] = MochiScript::Adapter.new
+      @ctx.eval(MochiScript::Parser::JAVASCRIPT)
+    end
+
+    def parse(str)
+      @ctx.eval_js("$m.parse(#{str.to_json})")
+    end
+
+    def eval_ms(str)
+      @ctx.eval_js(parse(str))
+    end
+
+    protected
+
+    def method_missing(name, *args, &block)
+      @ctx.send(name, *args, &block)
+    end
+  end
+
+  class Adapter
+    def out(arg)
+      print arg
+    end
+
+    def outs(arg)
+      puts arg
+    end
+  end
+
+  class Parser
+JAVASCRIPT = <<'FINISH'
+var $m  = { ROOT: this, ADAPTER: _$m_adapter };
+var JS2 = $m; 
 (function () {
-
+  
 // CLASS HELPERS
 (function (undefined, $m) {
 
@@ -201,7 +238,7 @@ var JS2 = $m;
 })(undefined, $m);
 
 
-var IDENT  = "[\\$\\w]+";
+  var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
 
@@ -591,6 +628,7 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
 });
 
 
-})($m);
-
-exports.mochi = $m;
+})();
+FINISH
+  end
+end

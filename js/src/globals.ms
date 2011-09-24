@@ -9,6 +9,7 @@ var TOKENS = [
   [ "PRIVATE",  "private\\b" ], 
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
 
+  [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ], 
   [ "ISTRING_START", "%{", 'IStringParser' ], 
 
   [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
@@ -18,12 +19,15 @@ var TOKENS = [
   [ "OPERATOR",  "\\+|\\-|\\++" ],
   [ "EQUALS",    "=" ],
 
+  [ "COMMENT", "\\/\\/|\\/\\*", "CommentParser" ], 
+
   [ "LBRACE", "\\(" ],
   [ "RBRACE", "\\)" ],
   [ "LCURLY", "\\{" ],
   [ "RCURLY", "\\}" ],
 
-  [ "IDENT", IDENT ] 
+  [ "IDENT", IDENT ], 
+  [ "WHATEVER", "." ]
 ];
 
 var $c      = $m.ROOT;
