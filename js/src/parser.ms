@@ -148,7 +148,6 @@ class IStringParser extends RootParser {
 
     while (1) {
       var m = tokens.match(/^((?:\\.|.)*?)(#\{|})/);
-      console.log(m);
       var str = m[1];
       var len = m[0].length;
       str.replace(/"/, '\\"');
@@ -191,6 +190,23 @@ class MemberParser extends RootParser {
     parser.chop();
 
     this.out = [ "OO.addMember(", JSON.stringify(this.name), ",",  parser, ");" ];
+  }
+}
+
+class HereDocParser extends RootParser {
+  private {
+    var REGEX = Tokens.regex("<HEREDOC>");
+  }
+
+  function parse(tokens) {
+    var beginning = tokens.match(/^<<(\w+)\s*([;\)])*\n/);
+    tokens.consume(beginning[0].length);
+
+    var strMatch = tokens.match(new RegExp("^(.*)?\n\\s*" + beginning[1] + "\\s*\n"));
+    var string   = $m.parse('%{' + strMatch[1] + '}');
+    tokens.consume(strMatch[0].length);
+
+    this.out = [ string, beginning[2] ];
   }
 }
 

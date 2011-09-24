@@ -11,6 +11,7 @@ var TOKENS = [
 
   [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ], 
   [ "ISTRING_START", "%{", 'IStringParser' ], 
+  [ "HEREDOC", "<<[A-Z][0-9A-Z]*", 'HereDocParser' ], 
 
   [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
   [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ], 

@@ -214,6 +214,7 @@ var TOKENS = [
 
   [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ], 
   [ "ISTRING_START", "%{", 'IStringParser' ], 
+  [ "HEREDOC", "<<[A-Z][0-9A-Z]*", 'HereDocParser' ], 
 
   [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
   [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ], 
@@ -451,7 +452,6 @@ RootParser.extend('IStringParser', function(KLASS, OO){
 
     while (1) {
       var m = tokens.match(/^((?:\\.|.)*?)(#\{|})/);
-      console.log(m);
       var str = m[1];
       var len = m[0].length;
       str.replace(/"/, '\\"');
@@ -495,6 +495,24 @@ RootParser.extend('MemberParser', function(KLASS, OO){
     parser.chop();
 
     this.out = [ "OO.addMember(", JSON.stringify(this.name), ",",  parser, ");" ];
+  });
+});
+
+RootParser.extend('HereDocParser', function(KLASS, OO){
+  // private closure
+
+    var REGEX = Tokens.regex("<HEREDOC>");
+  
+
+  OO.addMember("parse",function (tokens) {
+    var beginning = tokens.match(/^<<(\w+)\s*([;\)])*\n/);
+    tokens.consume(beginning[0].length);
+
+    var strMatch = tokens.match(new RegExp("^(.*)?\n\\s*" + beginning[1] + "\\s*\n"));
+    var string   = $m.parse('%{' + strMatch[1] + '}');
+    tokens.consume(strMatch[0].length);
+
+    this.out = [ string, beginning[2] ];
   });
 });
 
