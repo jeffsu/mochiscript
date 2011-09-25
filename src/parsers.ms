@@ -61,19 +61,21 @@ var RootParser = $c.RootParser;
 
 class ClassParser extends RootParser {
   private {
-    var REGEX = Tokens.regex("<CLASS> <IDENT><LCURLY>");
+    var REGEX   = Tokens.regex("<CLASS> <CLASSNAME><LCURLY>");
+    var EXTENDS = Tokens.regex("<CLASS> <CLASSNAME><EXTENDS><CLASSNAME><LCURLY>");
   }
 
   function parse(tokens) {
-    var m = tokens.str.match(REGEX);
+    var m = tokens.match(REGEX) || tokens.match(EXTENDS);
     var name = m[2];
+    var extending = m[4] || "$m.Class";
 
     tokens.consume(m[0].length-1);
 
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    this.out = [ "var ", name, " = $m.Class.extend(function(KLASS, OO)", content, ");" ];
+    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");" ];
   }
 }
 

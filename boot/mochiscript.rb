@@ -1,8 +1,45 @@
-var $m  = { ROOT: {} };
-var JS2 = $m;
+require 'v8'
+require 'json'
 
+module Boot
+  class Context
+    def initialize
+      @ctx = V8::Context.new 
+      @ctx['_$m_adapter'] = Adapter.new
+      @ctx.eval(Parser::JAVASCRIPT)
+    end
+
+    def parse(str)
+      @ctx.eval_js("$m.parse(#{str.to_json})")
+    end
+
+    def eval_ms(str)
+      @ctx.eval_js(parse(str))
+    end
+
+    protected
+
+    def method_missing(name, *args, &block)
+      @ctx.send(name, *args, &block)
+    end
+  end
+
+  class Adapter
+    def out(arg)
+      print arg
+    end
+
+    def outs(arg)
+      puts arg
+    end
+  end
+
+  class Parser
+JAVASCRIPT = <<'FINISH'
+var $m  = { ROOT: this, ADAPTER: _$m_adapter };
+var JS2 = $m; 
 (function () {
-
+  
 // CLASS HELPERS
 (function (undefined, $m) {
 
@@ -200,7 +237,8 @@ var JS2 = $m;
   return $m;
 })(undefined, $m);
 
-var IDENT  = "[\\$\\w]+";
+
+  var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
 
@@ -209,7 +247,6 @@ var TOKENS = [
   [ "VAR",      "var\\b" ], 
   [ "STATIC",   "static\\b" ], 
   [ "PRIVATE",  "private\\b" ], 
-  [ "EXTENDS",  "extends\\b" ], 
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
 
   [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ], 
@@ -245,8 +282,7 @@ for(var i=0,_c1=TOKENS,_l1=_c1.length,t;(t=_c1[i])||(i<_l1);i++){
 }
 
 var EXTRA_REGEX_STRINGS = {
-  ARGS: "\\(\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\s*\\)",
-  CLASSNAME: "[\\$\\w\\.]+"
+  ARGS: "\\(\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\s*\\)"
 };
 
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
@@ -291,6 +327,7 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   });
 });
 var Tokens = $c.Tokens;
+
 
 $m.parse = function (str) {
   var parser = new $c.RootParser();
@@ -356,21 +393,19 @@ var RootParser = $c.RootParser;
 RootParser.extend('ClassParser', function(KLASS, OO){
   // private closure
 
-    var REGEX   = Tokens.regex("<CLASS> <CLASSNAME><LCURLY>");
-    var EXTENDS = Tokens.regex("<CLASS> <CLASSNAME><EXTENDS><CLASSNAME><LCURLY>");
+    var REGEX = Tokens.regex("<CLASS> <IDENT><LCURLY>");
   
 
   OO.addMember("parse",function (tokens) {
-    var m = tokens.match(REGEX) || tokens.match(EXTENDS);
+    var m = tokens.str.match(REGEX);
     var name = m[2];
-    var extending = m[4] || "$m.Class";
 
     tokens.consume(m[0].length-1);
 
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");" ];
+    this.out = [ "var ", name, " = $m.Class.extend(function(KLASS, OO)", content, ");" ];
   });
 });
 
@@ -618,6 +653,8 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
  
 });
 
-})($m);
 
-exports.mochi = $m;
+})();
+FINISH
+  end
+end

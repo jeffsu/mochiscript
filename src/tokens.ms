@@ -7,6 +7,7 @@ var TOKENS = [
   [ "VAR",      "var\\b" ], 
   [ "STATIC",   "static\\b" ], 
   [ "PRIVATE",  "private\\b" ], 
+  [ "EXTENDS",  "extends\\b" ], 
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
 
   [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ], 
@@ -42,7 +43,8 @@ foreach (var t:i in TOKENS) {
 }
 
 var EXTRA_REGEX_STRINGS = {
-  ARGS: "\\(\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\s*\\)"
+  ARGS: "\\(\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\s*\\)",
+  CLASSNAME: "[\\$\\w\\.]+"
 };
 
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));

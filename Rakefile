@@ -1,5 +1,6 @@
 require 'erb'
 require 'json'
+require './boot/mochiscript'
 
 SRC_DIR = %|./src|
 BOOT   = %W| class |
@@ -20,8 +21,8 @@ task :test => :compile do
 end
 
 task :compile do
-  @boot   = BOOT.collect { |f| `js2-node render #{SRC_DIR}/#{f}.ms` }.join("\n")
-  @parser = PARSER.collect { |f| `js2-node render #{SRC_DIR}/#{f}.ms` }.join("\n")
+  @boot   = BOOT.collect { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
+  @parser = PARSER.collect { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
 
   { 
     'ruby.rb.erb' => './platforms/gem/lib/mochiscript.rb',
@@ -33,3 +34,6 @@ task :compile do
   end
 end
 
+def parse(file)
+  `js2 render #{file}`
+end

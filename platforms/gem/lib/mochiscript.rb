@@ -237,7 +237,6 @@ var JS2 = $m;
   return $m;
 })(undefined, $m);
 
-
   var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
@@ -247,6 +246,7 @@ var TOKENS = [
   [ "VAR",      "var\\b" ], 
   [ "STATIC",   "static\\b" ], 
   [ "PRIVATE",  "private\\b" ], 
+  [ "EXTENDS",  "extends\\b" ], 
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
 
   [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ], 
@@ -282,7 +282,8 @@ for(var i=0,_c1=TOKENS,_l1=_c1.length,t;(t=_c1[i])||(i<_l1);i++){
 }
 
 var EXTRA_REGEX_STRINGS = {
-  ARGS: "\\(\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\s*\\)"
+  ARGS: "\\(\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\s*\\)",
+  CLASSNAME: "[\\$\\w\\.]+"
 };
 
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
@@ -327,7 +328,6 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   });
 });
 var Tokens = $c.Tokens;
-
 
 $m.parse = function (str) {
   var parser = new $c.RootParser();
@@ -393,19 +393,21 @@ var RootParser = $c.RootParser;
 RootParser.extend('ClassParser', function(KLASS, OO){
   // private closure
 
-    var REGEX = Tokens.regex("<CLASS> <IDENT><LCURLY>");
+    var REGEX   = Tokens.regex("<CLASS> <CLASSNAME><LCURLY>");
+    var EXTENDS = Tokens.regex("<CLASS> <CLASSNAME><EXTENDS><CLASSNAME><LCURLY>");
   
 
   OO.addMember("parse",function (tokens) {
-    var m = tokens.str.match(REGEX);
+    var m = tokens.match(REGEX) || tokens.match(EXTENDS);
     var name = m[2];
+    var extending = m[4] || "$m.Class";
 
     tokens.consume(m[0].length-1);
 
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    this.out = [ "var ", name, " = $m.Class.extend(function(KLASS, OO)", content, ");" ];
+    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");" ];
   });
 });
 
@@ -652,7 +654,6 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
   });
  
 });
-
 
 })();
 FINISH
