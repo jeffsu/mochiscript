@@ -2,8 +2,10 @@ var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
 
-  [ "CLASS",    "class", 'ClassParser' ], 
+  [ "MODULE",   "module\\b", 'ModuleParser' ], 
+  [ "CLASS",    "class\\b",  'ClassParser' ], 
   [ "FUNCTION", "function\\b" ], 
+  [ "INCLUDE",  "include\\b" ], 
   [ "VAR",      "var\\b" ], 
   [ "STATIC",   "static\\b" ], 
   [ "PRIVATE",  "private\\b" ], 
@@ -72,7 +74,7 @@ class Tokens {
       return "(" + (EXTRA_REGEX_STRINGS[$2] || TOKENS[TYPES[$2]][1])  + ")";
     });
 
-    return new RegExp(regexStr);
+    return new RegExp("^" + regexStr);
   }
 
   function consume(n) {

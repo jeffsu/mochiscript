@@ -204,8 +204,10 @@ var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
 
-  [ "CLASS",    "class", 'ClassParser' ], 
+  [ "MODULE",   "module\\b", 'ModuleParser' ], 
+  [ "CLASS",    "class\\b",  'ClassParser' ], 
   [ "FUNCTION", "function\\b" ], 
+  [ "INCLUDE",  "include\\b" ], 
   [ "VAR",      "var\\b" ], 
   [ "STATIC",   "static\\b" ], 
   [ "PRIVATE",  "private\\b" ], 
@@ -274,7 +276,7 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
       return "(" + (EXTRA_REGEX_STRINGS[$2] || TOKENS[TYPES[$2]][1])  + ")";
     });
 
-    return new RegExp(regexStr);
+    return new RegExp("^" + regexStr);
   });
 
   OO.addMember("consume",function (n) {
@@ -309,7 +311,9 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
   OO.addMember("parse",function (tokens) {
     this.startParse(tokens);
 
+    var sanity = 100;
     while (tokens.any()) {
+      var origLen = tokens.length;
       var token = tokens.peek();
       if (!token) break;
       var handlerClass = this.getHandler(token) || token[2];
@@ -321,6 +325,12 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
         this.handleToken(token, tokens);
       }
       if (this.finished) break;
+
+      if (origLen == tokens.length && sanity-- == 0) {
+        throw "parse error";
+      } else {
+        sanity = 100;
+      }
     }
 
     this.endParse(tokens);
@@ -362,7 +372,7 @@ RootParser.extend('ClassParser', function(KLASS, OO){
 
   OO.addMember("parse",function (tokens) {
     var m = tokens.match(REGEX) || tokens.match(EXTENDS);
-    var name = m[2];
+    var name      = m[2];
     var extending = m[4] || "$m.Class";
 
     tokens.consume(m[0].length-1);
@@ -371,6 +381,24 @@ RootParser.extend('ClassParser', function(KLASS, OO){
     content.parse(tokens);
 
     this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");" ];
+  });
+});
+
+RootParser.extend('ModuleParser', function(KLASS, OO){
+  // private closure
+
+    var REGEX = Tokens.regex("<MODULE> <CLASSNAME><LCURLY>");
+  
+
+  OO.addMember("parse",function (tokens) {
+    var m = tokens.match(REGEX);
+    var name      = m[2];
+    tokens.consume(m[0].length-1);
+
+    var content = new $c.ClassContentParser();
+    content.parse(tokens);
+
+    this.out = [ "var ", name, " = $m.Module.extend(function(KLASS, OO)", content, ");" ];
   });
 });
 
@@ -408,6 +436,7 @@ CurlyParser.extend('ClassContentParser', function(KLASS, OO){
       case TYPES.VAR: return "MemberParser";
       case TYPES.FUNCTION: return "MethodParser";
       case TYPES.PRIVATE: return "PrivateParser";
+      case TYPES.INCLUDE: return "IncludeParser";
     }
   });
 
@@ -496,6 +525,19 @@ RootParser.extend('MemberParser', function(KLASS, OO){
     parser.chop();
 
     this.out = [ "OO.addMember(", JSON.stringify(this.name), ",",  parser, ");" ];
+  });
+});
+
+RootParser.extend('IncludeParser', function(KLASS, OO){
+  // private closure
+
+    var REGEX = Tokens.regex("<INCLUDE> <CLASSNAME><SEMICOLON>");
+  
+
+  OO.addMember("parse",function (tokens) {
+    var m = tokens.match(REGEX);
+    tokens.consume(m[0].length);
+    this.out = [ 'OO.include(',  m[2], ');' ];
   });
 });
 

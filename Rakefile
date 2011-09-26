@@ -14,8 +14,9 @@ task :test => :compile do
     ctx = MochiScript::Context.new
     begin
       ctx.eval_ms(File.read(f))
-    rescue
+    rescue Exception => e
       puts "Error: " + ctx.parse(File.read(f))
+      puts e.to_s
     end
   end
 end

@@ -15,7 +15,9 @@ class RootParser {
   function parse(tokens) {
     this.startParse(tokens);
 
+    var sanity = 100;
     while (tokens.any()) {
+      var origLen = tokens.length;
       var token = tokens.peek();
       if (!token) break;
       var handlerClass = this.getHandler(token) || token[2];
@@ -27,6 +29,12 @@ class RootParser {
         this.handleToken(token, tokens);
       }
       if (this.finished) break;
+
+      if (origLen == tokens.length && sanity-- == 0) {
+        throw "parse error";
+      } else {
+        sanity = 100;
+      }
     }
 
     this.endParse(tokens);
@@ -67,7 +75,7 @@ class ClassParser extends RootParser {
 
   function parse(tokens) {
     var m = tokens.match(REGEX) || tokens.match(EXTENDS);
-    var name = m[2];
+    var name      = m[2];
     var extending = m[4] || "$m.Class";
 
     tokens.consume(m[0].length-1);
@@ -76,6 +84,23 @@ class ClassParser extends RootParser {
     content.parse(tokens);
 
     this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");" ];
+  }
+}
+
+class ModuleParser extends RootParser {
+  private {
+    var REGEX = Tokens.regex("<MODULE> <CLASSNAME><LCURLY>");
+  }
+
+  function parse(tokens) {
+    var m = tokens.match(REGEX);
+    var name      = m[2];
+    tokens.consume(m[0].length-1);
+
+    var content = new $c.ClassContentParser();
+    content.parse(tokens);
+
+    this.out = [ "var ", name, " = $m.Module.extend(function(KLASS, OO)", content, ");" ];
   }
 }
 
@@ -113,6 +138,7 @@ class ClassContentParser extends CurlyParser {
       case TYPES.VAR: return "MemberParser";
       case TYPES.FUNCTION: return "MethodParser";
       case TYPES.PRIVATE: return "PrivateParser";
+      case TYPES.INCLUDE: return "IncludeParser";
     }
   }
 
@@ -198,6 +224,18 @@ class MemberParser extends RootParser {
     parser.chop();
 
     this.out = [ "OO.addMember(", JSON.stringify(this.name), ",",  parser, ");" ];
+  }
+}
+
+class IncludeParser extends RootParser {
+  private {
+    var REGEX = Tokens.regex("<INCLUDE> <CLASSNAME><SEMICOLON>");
+  }
+
+  function parse(tokens) {
+    var m = tokens.match(REGEX);
+    tokens.consume(m[0].length);
+    this.out = [ 'OO.include(',  m[2], ');' ];
   }
 }
 
