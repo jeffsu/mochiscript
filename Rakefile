@@ -1,10 +1,9 @@
 require 'erb'
 require 'json'
-require './boot/mochiscript'
 
 SRC_DIR = %|./src|
 BOOT    = %W| class |
-PARSER  = %W| tokens parsers |
+PARSER  = %W| tokens parsers jsml cli |
 VERSION = File.read("./VERSION").strip;
 
 task :test => :compile do

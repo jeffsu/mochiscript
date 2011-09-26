@@ -14,7 +14,11 @@ class RootParser {
 
   function parse(tokens) {
     this.startParse(tokens);
+    this.parseTokens(tokens);
+    this.endParse(tokens);
+  }
 
+  function parseTokens(tokens) {
     var sanity = 100;
     while (tokens.any()) {
       var origLen = tokens.length;
@@ -36,8 +40,6 @@ class RootParser {
         sanity = 100;
       }
     }
-
-    this.endParse(tokens);
   }
 
   function startParse() { }
@@ -135,10 +137,11 @@ var CurlyParser = $c.CurlyParser;
 class ClassContentParser extends CurlyParser {
   function getHandler(token) {
     switch(token[0]) {
-      case TYPES.VAR: return "MemberParser";
+      case TYPES.STATIC:   return "StaticParser";
+      case TYPES.VAR:      return "MemberParser";
       case TYPES.FUNCTION: return "MethodParser";
-      case TYPES.PRIVATE: return "PrivateParser";
-      case TYPES.INCLUDE: return "IncludeParser";
+      case TYPES.PRIVATE:  return "PrivateParser";
+      case TYPES.INCLUDE:  return "IncludeParser";
     }
   }
 
@@ -209,6 +212,38 @@ class IStringParser extends RootParser {
   }
 }
 
+class StaticParser extends RootParser {
+  private {
+    var VAR_REGEX = Tokens.regex("(<STATIC>(\\s+))<VAR>");
+    var FUNCT_REGEX = Tokens.regex("(<STATIC>(\\s+))<FUNCTION>");
+  }
+
+  function parseTokens(tokens) {
+    var varMatch = tokens.match(VAR_REGEX);
+    if (varMatch) {
+      tokens.consume(varMatch[1].length);
+      var parser = new MemberParser();
+      parser.isStatic = true;
+      parser.parse(tokens);
+      this.out.push(parser);
+    } 
+    
+    else {
+      var functMatch = tokens.match(FUNCT_REGEX);
+      tokens.consume(functMatch[1].length);
+
+      var parser = new MethodParser();
+      parser.isStatic = true;
+      parser.parse(tokens);
+      this.out.push(parser);
+    }
+  }
+
+  
+
+
+}
+
 class MemberParser extends RootParser {
   private {
     var REGEX = Tokens.regex("var <IDENT>\\s*=\\s*?");
@@ -222,10 +257,13 @@ class MemberParser extends RootParser {
     var parser = new $c.LineParser();
     parser.parse(tokens);
     parser.chop();
+    var addMethod = this.isStatic ? 'addStaticMember' : 'addMember';
 
-    this.out = [ "OO.addMember(", JSON.stringify(this.name), ",",  parser, ");" ];
+    this.out = [ "OO." + addMethod + "(", JSON.stringify(this.name), ",",  parser, ");" ];
   }
 }
+
+
 
 class IncludeParser extends RootParser {
   private {
@@ -273,13 +311,16 @@ class MethodParser extends RootParser {
   function parse(tokens) {
     var m = tokens.str.match(REGEX);
     tokens.consume(m[0].length);
-    this.name = m[2];
-    this.args = m[3];
-    this.body = new CurlyParser();
-    this.body.foo = true;
-    this.body.parse(tokens);
+    var name = m[2];
+    var args = m[3];
 
-    this.out = [ 'OO.addMember(', JSON.stringify(this.name), ', function', this.args, this.body, ');' ];
+    var body = new CurlyParser();
+    body.parse(tokens);
+
+    var addMethod = this.isStatic ? 'addStaticMember' : 'addMember';
+    
+
+    this.out = [ 'OO.' + addMethod + '(', JSON.stringify(name), ', function', args, body, ');' ];
   }
 }
 

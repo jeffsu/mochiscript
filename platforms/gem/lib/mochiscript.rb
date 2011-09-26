@@ -242,12 +242,12 @@ var JS2 = $m;
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
 
+  [ "STATIC",   "static\\b" ], 
   [ "MODULE",   "module\\b", 'ModuleParser' ], 
   [ "CLASS",    "class\\b",  'ClassParser' ], 
   [ "FUNCTION", "function\\b" ], 
   [ "INCLUDE",  "include\\b" ], 
   [ "VAR",      "var\\b" ], 
-  [ "STATIC",   "static\\b" ], 
   [ "PRIVATE",  "private\\b" ], 
   [ "EXTENDS",  "extends\\b" ], 
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
@@ -348,7 +348,11 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
 
   OO.addMember("parse",function (tokens) {
     this.startParse(tokens);
+    this.parseTokens(tokens);
+    this.endParse(tokens);
+  });
 
+  OO.addMember("parseTokens",function (tokens) {
     var sanity = 100;
     while (tokens.any()) {
       var origLen = tokens.length;
@@ -370,8 +374,6 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
         sanity = 100;
       }
     }
-
-    this.endParse(tokens);
   });
 
   OO.addMember("startParse",function () { });
@@ -471,10 +473,11 @@ var CurlyParser = $c.CurlyParser;
 CurlyParser.extend('ClassContentParser', function(KLASS, OO){
   OO.addMember("getHandler",function (token) {
     switch(token[0]) {
-      case TYPES.VAR: return "MemberParser";
+      case TYPES.STATIC:   return "StaticParser";
+      case TYPES.VAR:      return "MemberParser";
       case TYPES.FUNCTION: return "MethodParser";
-      case TYPES.PRIVATE: return "PrivateParser";
-      case TYPES.INCLUDE: return "IncludeParser";
+      case TYPES.PRIVATE:  return "PrivateParser";
+      case TYPES.INCLUDE:  return "IncludeParser";
     }
   });
 
@@ -547,6 +550,39 @@ RootParser.extend('IStringParser', function(KLASS, OO){
   });
 });
 
+RootParser.extend('StaticParser', function(KLASS, OO){
+  // private closure
+
+    var VAR_REGEX = Tokens.regex("(<STATIC>(\\s+))<VAR>");
+    var FUNCT_REGEX = Tokens.regex("(<STATIC>(\\s+))<FUNCTION>");
+  
+
+  OO.addMember("parseTokens",function (tokens) {
+    var varMatch = tokens.match(VAR_REGEX);
+    if (varMatch) {
+      tokens.consume(varMatch[1].length);
+      var parser = new MemberParser();
+      parser.isStatic = true;
+      parser.parse(tokens);
+      this.out.push(parser);
+    } 
+    
+    else {
+      var functMatch = tokens.match(FUNCT_REGEX);
+      tokens.consume(functMatch[1].length);
+
+      var parser = new MethodParser();
+      parser.isStatic = true;
+      parser.parse(tokens);
+      this.out.push(parser);
+    }
+  });
+
+  
+
+
+});
+
 RootParser.extend('MemberParser', function(KLASS, OO){
   // private closure
 
@@ -561,10 +597,13 @@ RootParser.extend('MemberParser', function(KLASS, OO){
     var parser = new $c.LineParser();
     parser.parse(tokens);
     parser.chop();
+    var addMethod = this.isStatic ? 'addStaticMember' : 'addMember';
 
-    this.out = [ "OO.addMember(", JSON.stringify(this.name), ",",  parser, ");" ];
+    this.out = [ "OO." + addMethod + "(", JSON.stringify(this.name), ",",  parser, ");" ];
   });
 });
+
+
 
 RootParser.extend('IncludeParser', function(KLASS, OO){
   // private closure
@@ -615,13 +654,16 @@ RootParser.extend('MethodParser', function(KLASS, OO){
   OO.addMember("parse",function (tokens) {
     var m = tokens.str.match(REGEX);
     tokens.consume(m[0].length);
-    this.name = m[2];
-    this.args = m[3];
-    this.body = new CurlyParser();
-    this.body.foo = true;
-    this.body.parse(tokens);
+    var name = m[2];
+    var args = m[3];
 
-    this.out = [ 'OO.addMember(', JSON.stringify(this.name), ', function', this.args, this.body, ');' ];
+    var body = new CurlyParser();
+    body.parse(tokens);
+
+    var addMethod = this.isStatic ? 'addStaticMember' : 'addMember';
+    
+
+    this.out = [ 'OO.' + addMethod + '(', JSON.stringify(name), ', function', args, body, ');' ];
   });
 });
 
@@ -696,6 +738,251 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
     tokens.iterator--;
   });
  
+});
+
+JS2.Class.extend('JSML', function(KLASS, OO){
+  OO.addStaticMember("process",function (txt) {
+    return new KLASS(txt);
+  });
+
+  OO.addMember("initialize",function (txt) {
+    var lines = txt.split(/\n/);
+    this.root    = new JS2.JSMLElement();
+    this.stack   = [ this.root ];
+
+    for(var _i1=0,_c1=lines,_l1=_c1.length,l;(l=_c1[_i1])||(_i1<_l1);_i1++){
+      if (l.match(/^\s*$/)) continue;
+      this.processLine(l);
+    }
+
+    var toEval = 'function process() { var out = [];\n' + this.flatten().join('') + '\n return out.join("");\n}';
+    eval(toEval);
+
+    this.result = function(bound) {
+      bound = bound || {};
+      return process.call(bound);
+    };
+  });
+
+  OO.addMember("flatten",function () {
+    return this.root.flatten();
+  });
+
+  OO.addMember("processLine",function (line) {
+    if (line.match(/^\s*$/)) return;
+
+    var ele   = new JS2.JSMLElement(line);
+    var scope = this.getScope();
+
+    if (ele.scope == scope) {
+      this.stack.pop();
+      this.getLast().push(ele);
+      this.stack.push(ele);
+    } else if (ele.scope > scope) {
+      this.getLast().push(ele); 
+      this.stack.push(ele);
+    } else if (ele.scope < scope) {
+      var diff = scope - ele.scope + 1;
+      while(diff-- > 0) {
+        this.stack.pop();
+      }
+      this.getLast().push(ele);
+      this.stack.push(ele);
+    }
+  });
+
+
+  OO.addMember("getScope",function () {
+    return this.stack.length - 1;
+  });
+
+  OO.addMember("getLast",function () {
+    return this.stack[this.stack.length-1];
+  });
+
+});
+
+JS2.Class.extend('JSMLElement', function(KLASS, OO){
+  OO.addMember("SCOPE_REGEX",/^(\s*)(.*)$/);
+  OO.addMember("SPLIT_REGEX",/^((?:\.|\#|\%)[^=\s\{]*)?(\{.*\})?(=|-)?(?:\s*)(.*)$/);
+  OO.addMember("TOKEN_REGEX",/(\%|\#|\.)([\w][\w\-]*)/g);
+  OO.addMember("JS_REGEX",/^(-|=)(.*)$/g);
+  OO.addMember("SCOPE_OFFSET",1);
+  OO.addMember("SELF_CLOSING",{ area: null, basefont: null, br: null, hr: null, input: null, img: null, link: null, meta: null });
+
+  OO.addMember("initialize",function (line) {
+    this.children = [];
+
+    if (line == null) {
+      this.scope = this.SCOPE_OFFSET;
+      return;
+    }
+
+    var spaceMatch = line.match(this.SCOPE_REGEX);
+    this.scope = spaceMatch[1].length / 2 + this.SCOPE_OFFSET;
+
+    this.classes  = [];
+    this.nodeID   = null;
+
+    this.parse(spaceMatch[2]);
+  });
+
+  OO.addMember("push",function (child) {
+    this.children.push(child);
+  });
+
+  OO.addMember("parse",function (line) {
+    this.attributes;
+    this.line = line;
+    var self = this;
+
+    var splitted = line.match(this.SPLIT_REGEX);
+    var tokens   = splitted[1];
+    var attrs    = splitted[2];
+    var jsType   = splitted[3];
+    var content  = splitted[4];
+
+    if (tokens) {
+      tokens.replace(this.TOKEN_REGEX, function(match, type, name){ 
+        switch(type) {
+          case '%': self.nodeType = name; break;
+          case '.': self.classes.push(name); break;
+          case '#': self.nodeID = name; break;
+        } 
+        return '';
+      });
+    }
+
+    if (jsType == '=') {
+      this.jsEQ = content;
+    } else if (jsType == '-') {
+      this.jsExec = content;
+    } else {
+      this.content = content;
+    }
+
+    if (attrs) {
+      this.attributes = attrs;
+    }
+
+    if (!this.nodeType && (this.classes.length || this.nodeID)) {
+      this.nodeType = 'div';
+    }
+
+    if (this.SELF_CLOSING.hasOwnProperty(this.nodeType) && this.children.length == 0) {
+      this.selfClose = '/';
+    } else {
+      this.selfClose = '';
+    }
+  });
+
+  OO.addMember("flatten",function () {
+    var out = [];
+   
+    for(var _i1=0,_c1=this.children,_l1=_c1.length,c;(c=_c1[_i1])||(_i1<_l1);_i1++){
+      var arr = c.flatten();
+      for(var _i2=0,_c2=arr,_l2=_c2.length,item;(item=_c2[_i2])||(_i2<_l2);_i2++){
+        out.push(item);
+      }
+    }
+
+    if (this.nodeType) {
+      this.handleJsEQ(out);
+      this.handleContent(out);
+      out.unshift('out.push("<' + this.nodeType + '"+JS2.JSMLElement.parseAttributes(' + (this.attributes || "{}") + ', ' + JSON.stringify(this.classes || []) + ', ' + JSON.stringify(this.id || null) + ')+"' + this.selfClose + '>");\n');
+      if (this.selfClose == '') {
+        out.push('out.push(' + JSON.stringify("</"+(this.nodeType)+">") + ');\n');
+      }
+    } else {
+      this.handleJsExec(out);
+      this.handleJsEQ(out);
+      this.handleContent(out);
+    }
+
+    return out;
+  });
+
+  OO.addMember("handleJsEQ",function (out) {
+    if (this.jsEQ) {
+      this.jsEQ = this.jsEQ.replace(/;\s*$/, '');
+      out.unshift('out.push(' + this.jsEQ + ');\n');
+    }
+  });
+
+  OO.addMember("handleContent",function (out) {
+    if (this.content != null && this.content.length > 0) {
+      out.unshift('out.push(' + JSON.stringify(this.content) + ');\n');
+    }
+  });
+
+
+  OO.addMember("handleJsExec",function (out) {
+    if (this.jsExec) {
+      out.unshift(this.jsExec);
+      if (this.jsExec.match(/\{\s*$/)) {
+        out.push("}\n");
+      }
+    }
+  });
+
+  OO.addStaticMember("parseAttributes",function (hash, classes, id) {
+    var out = [];
+    classes = classes || [];
+    if (hash['class']) classes.push(hash['class']);
+    if (classes.length) hash['class'] = classes.join(" ");
+
+    for (var k in hash) {
+      if (hash.hasOwnProperty(k)) {
+        out.push(k + '=' + JSON.stringify(hash[k]));
+      }
+    }
+    return (out.length ? ' ' : '') + out.join(' ');
+  });
+});
+
+JS2.Class.extend('CLI', function(KLASS, OO){
+  // private closure
+
+    var COMMANDS = {
+      help:    'help',
+      render:  'render',
+      compile: 'compile',
+      watch:   'watch'
+    };
+  
+
+  OO.addMember("run",function (args) {
+    var opts = this.parseOpts(args);
+    var options = opts[0];
+    var command = opts[1];
+    var files   = opts[2];
+  });
+
+  OO.addMember("parseOpts",function (args) {
+    var files   = [];
+    var options = {};
+    var command = null;
+
+    var endedArgs = false;
+
+    for(var i=0,_c1=args,_l1=_c1.length,arg;(arg=_c1[i])||(i<_l1);i++){
+      if (endedArgs) {
+        files.push(arg);
+      }
+      
+      else if (COMMANDS[arg]) {
+        command   = arg;
+        endedArgs = true;
+      }
+
+      else {
+        var setting = arg.match(/^(\w+)(?:=(.*))?$/);
+        if (setting) options[setting[0]] = setting[1] || 'true';
+      }
+    }
+
+    return [ options, command, files ];
+  });
 });
 
 })();

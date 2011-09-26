@@ -2,12 +2,12 @@ var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
 
+  [ "STATIC",   "static\\b" ], 
   [ "MODULE",   "module\\b", 'ModuleParser' ], 
   [ "CLASS",    "class\\b",  'ClassParser' ], 
   [ "FUNCTION", "function\\b" ], 
   [ "INCLUDE",  "include\\b" ], 
   [ "VAR",      "var\\b" ], 
-  [ "STATIC",   "static\\b" ], 
   [ "PRIVATE",  "private\\b" ], 
   [ "EXTENDS",  "extends\\b" ], 
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
