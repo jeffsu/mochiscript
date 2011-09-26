@@ -1,12 +1,13 @@
 require 'v8'
 require 'json'
 
-module MochiScript
+module Mochiscript
+  VERSION = "0.4.0-pre1".sub("-", '.')
   class Context
     def initialize
       @ctx = V8::Context.new 
-      @ctx['_$m_adapter'] = MochiScript::Adapter.new
-      @ctx.eval(MochiScript::Parser::JAVASCRIPT)
+      @ctx['_$m_adapter'] = Adapter.new
+      @ctx.eval(Parser::JAVASCRIPT)
     end
 
     def parse(str)

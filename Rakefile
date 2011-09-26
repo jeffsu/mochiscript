@@ -3,15 +3,16 @@ require 'json'
 require './boot/mochiscript'
 
 SRC_DIR = %|./src|
-BOOT   = %W| class |
-PARSER = %W| tokens parsers |
+BOOT    = %W| class |
+PARSER  = %W| tokens parsers |
+VERSION = File.read("./VERSION").strip;
 
 task :test => :compile do
   require "./platforms/gem/lib/mochiscript"
 
   Dir['./tests/*.ms'].each do |f|
     puts "Testing: " + f
-    ctx = MochiScript::Context.new
+    ctx = Mochiscript::Context.new
     begin
       ctx.eval_ms(File.read(f))
     rescue Exception => e
