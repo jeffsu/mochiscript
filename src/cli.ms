@@ -8,7 +8,14 @@ class CLI {
     };
   }
 
-  function getOptions(args) {
+  function run(args) {
+    var opts = this.parseOpts(args);
+    var options = opts[0];
+    var command = opts[1];
+    var files   = opts[2];
+  }
+
+  function parseOpts(args) {
     var files   = [];
     var options = {};
     var command = null;
