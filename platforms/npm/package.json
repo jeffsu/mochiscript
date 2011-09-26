@@ -5,7 +5,7 @@
   "author":       "Jeff Su",
   "version":      "0.4.0-pre1",
   "licenses":     [{
-    "type":       "MIT",
+    "type":       "MIT"
   }],
   "engines":      {
     "node":       ">=0.4.0"
@@ -14,7 +14,7 @@
     "lib" : "./lib/mochiscript"
   },
   "main" : "./lib/mochiscript/mochiscript",
-  "bin":          { },
+  "bin":          {},
   "repository":   {
     "type": "git",
     "url": "git://github.com/jeffsu/mochiscript.git"
