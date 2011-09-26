@@ -1,0 +1,5 @@
+0.4.0.pre2
+----------
+  * adding static var/function
+  * adding jsml
+  * adding divide/regex parsing support
