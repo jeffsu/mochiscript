@@ -663,3 +663,14 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
 })($m);
 
 exports.mochi = $m;
+
+var fs = require('fs');
+if (require.extensions) {
+  require.extensions['.ms'] = function(module, filename) {
+    return $m.parse(fs.readFileSync(filename, 'utf8'));
+  };
+} else if (require.registerExtension) {
+  require.registerExtension('.coffee', function(content) {
+    return $m.parse(content);
+  });
+}
