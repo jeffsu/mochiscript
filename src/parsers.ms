@@ -367,6 +367,30 @@ class CommentParser extends RootParser {
   }
 }
 
+class RegexParser extends RootParser {
+  private {
+    var REGEX  = /^\/(?!\s)[^[\/\n\\]*(?:(?:\\[\s\S]|\[[^\]\n\\]*(?:\\[\s\S][^\]\n\\]*)*])[^[\/\n\\]*)*\/[imgy]{0,4}(?!\w)/;
+    var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$])$/;
+  }
+
+  function parseTokens(tokens) {
+    var back = tokens.lookback(2);
+    if (back.match(DIVIDE)) {
+      tokens.consume(1);
+      this.out.push("/"); 
+    } 
+    
+    else {
+      var m = tokens.match(REGEX);
+      if (m) {
+        this.out.push(m[0]);
+        tokens.consume(m[0].length);
+      }
+    }
+  }
+
+}
+
 class ForeachParser extends CurlyParser {
   private {
     var REGEX = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**{");

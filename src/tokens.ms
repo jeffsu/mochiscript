@@ -1,6 +1,7 @@
 var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
+  [ "REGEX", "/", 'RegexParser' ], 
 
   [ "STATIC",   "static\\b" ], 
   [ "MODULE",   "module\\b", 'ModuleParser' ], 
@@ -56,6 +57,7 @@ class Tokens {
     this.orig     = str;
     this.str      = str;
     this.iterator = 0;
+    this.consumed = 0;
   }
 
   function peek() {
@@ -80,6 +82,11 @@ class Tokens {
   function consume(n) {
     this.str   = this.str.substr(n, this.str.length-n);
     this._peek = null;
+    this.consumed += n;
+  }
+
+  function lookback(n) {
+    return this.orig.substr(this.consumed-n, this.consumed);
   }
 
   function any() {

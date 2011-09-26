@@ -241,6 +241,7 @@ var JS2 = $m;
   var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
+  [ "REGEX", "/", 'RegexParser' ], 
 
   [ "STATIC",   "static\\b" ], 
   [ "MODULE",   "module\\b", 'ModuleParser' ], 
@@ -296,6 +297,7 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
     this.orig     = str;
     this.str      = str;
     this.iterator = 0;
+    this.consumed = 0;
   });
 
   OO.addMember("peek",function () {
@@ -320,6 +322,11 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   OO.addMember("consume",function (n) {
     this.str   = this.str.substr(n, this.str.length-n);
     this._peek = null;
+    this.consumed += n;
+  });
+
+  OO.addMember("lookback",function (n) {
+    return this.orig.substr(this.consumed-n, this.consumed);
   });
 
   OO.addMember("any",function () {
@@ -709,6 +716,31 @@ RootParser.extend('CommentParser', function(KLASS, OO){
       return;
     }
   });
+});
+
+RootParser.extend('RegexParser', function(KLASS, OO){
+  // private closure
+
+    var REGEX  = /^\/(?!\s)[^[\/\n\\]*(?:(?:\\[\s\S]|\[[^\]\n\\]*(?:\\[\s\S][^\]\n\\]*)*])[^[\/\n\\]*)*\/[imgy]{0,4}(?!\w)/;
+    var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$])$/;
+  
+
+  OO.addMember("parseTokens",function (tokens) {
+    var back = tokens.lookback(2);
+    if (back.match(DIVIDE)) {
+      tokens.consume(1);
+      this.out.push("/"); 
+    } 
+    
+    else {
+      var m = tokens.match(REGEX);
+      if (m) {
+        this.out.push(m[0]);
+        tokens.consume(m[0].length);
+      }
+    }
+  });
+
 });
 
 CurlyParser.extend('ForeachParser', function(KLASS, OO){
