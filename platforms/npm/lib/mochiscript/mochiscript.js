@@ -665,12 +665,13 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
 exports.mochi = $m;
 
 var fs = require('fs');
+var requireScript = "var $m = require('mochiscript').mochi;\n";
 if (require.extensions) {
   require.extensions['.ms'] = function(module, filename) {
-    return $m.parse(fs.readFileSync(filename, 'utf8'));
+    return $m.parse(requireScript + fs.readFileSync(filename, 'utf8'));
   };
 } else if (require.registerExtension) {
   require.registerExtension('.coffee', function(content) {
-    return $m.parse(content);
+    return $m.parse(requireScript + content);
   });
 }

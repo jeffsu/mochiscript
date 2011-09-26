@@ -27,10 +27,10 @@ task :compile do
 
   { 
     'ruby.rb.erb' => './platforms/gem/lib/mochiscript.rb',
-    'node.js.erb' => './platforms/npm/lib/mochiscript.js' 
+    'node.js.erb' => './platforms/npm/lib/mochiscript/mochiscript.js' 
   }.each_pair do |target, destination|
     target = "./src/platforms/#{target}"
-    puts "Writing #{destination} to #{target}"
+    puts "Writing #{target} to #{destination}"
     File.open(destination, "w") { |t| t << ERB.new(File.read(target)).result(binding) }
   end
 end
