@@ -1,4 +1,14 @@
-var $m  = { ROOT: {} };
+var $m  = {                                                                                              
+  ROOT: {},
+  ADAPTER: {                                                                                             
+    out: function () { print.call(null, arguments); },
+    outs: function () { 
+      for (var i=0; i<arguments.length; i++) {
+        console.log(arguments[i]);
+      }
+    }
+  }
+}; 
 var JS2 = $m;
 
 (function () {
