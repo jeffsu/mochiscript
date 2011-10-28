@@ -27,8 +27,11 @@ class RootParser {
       var handlerClass = this.getHandler(token) || token[2];
       if (handlerClass) {
         var handler = new $c[handlerClass];
-        handler.parse(tokens);
-        this.out.push(handler); 
+        if (handler.parse(tokens) === false) {
+          this.handleToken(token, tokens);
+        } else {
+          this.out.push(handler); 
+        }
       } else {
         this.handleToken(token, tokens);
       }
@@ -96,7 +99,8 @@ class ModuleParser extends RootParser {
 
   function parse(tokens) {
     var m = tokens.match(REGEX);
-    var name      = m[2];
+    if (!m) return false;
+    var name = m[2];
     tokens.consume(m[0].length-1);
 
     var content = new $c.ClassContentParser();
@@ -406,7 +410,7 @@ class ForeachParser extends CurlyParser {
 
     // TODO ugly, revisit this later
     tokens.consume(m[0].length-1);
-    var declare = [ this.iterator + "=0", this.item + "=null", "_list_" + namespace + "=" + this.list, "_len_" + namespace + "=_list_.length" ].join(',');
+    var declare = [ this.iterator + "=0", this.item + "=null", "_list_" + namespace + "=" + this.list, "_len_" + namespace + "=_list_" + namespace + ".length" ].join(',');
 
     var bool = "(" + this.item + "=" + "_list_" + namespace + "[" + this.iterator + "])||" + this.iterator + "<_len_" + namespace;
 

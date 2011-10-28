@@ -2,7 +2,7 @@ require 'v8'
 require 'json'
 
 module Mochiscript
-  VERSION = "0.4.0-pre1".sub("-", '.')
+  VERSION = "0.4.0-pre3".sub("-", '.')
   class Context
     def initialize
       @ctx = V8::Context.new 
@@ -238,6 +238,7 @@ var JS2 = $m;
   return $m;
 })(undefined, $m);
 
+
   var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
@@ -339,6 +340,7 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
 });
 var Tokens = $c.Tokens;
 
+
 $m.parse = function (str) {
   var parser = new $c.RootParser();
   parser.parse(new $c.Tokens(str));
@@ -368,8 +370,11 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
       var handlerClass = this.getHandler(token) || token[2];
       if (handlerClass) {
         var handler = new $c[handlerClass];
-        handler.parse(tokens);
-        this.out.push(handler); 
+        if (handler.parse(tokens) === false) {
+          this.handleToken(token, tokens);
+        } else {
+          this.out.push(handler); 
+        }
       } else {
         this.handleToken(token, tokens);
       }
@@ -439,7 +444,8 @@ RootParser.extend('ModuleParser', function(KLASS, OO){
 
   OO.addMember("parse",function (tokens) {
     var m = tokens.match(REGEX);
-    var name      = m[2];
+    if (!m) return false;
+    var name = m[2];
     tokens.consume(m[0].length-1);
 
     var content = new $c.ClassContentParser();
@@ -759,7 +765,7 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
 
     // TODO ugly, revisit this later
     tokens.consume(m[0].length-1);
-    var declare = [ this.iterator + "=0", this.item + "=null", "_list_" + namespace + "=" + this.list, "_len_" + namespace + "=_list_.length" ].join(',');
+    var declare = [ this.iterator + "=0", this.item + "=null", "_list_" + namespace + "=" + this.list, "_len_" + namespace + "=_list_" + namespace + ".length" ].join(',');
 
     var bool = "(" + this.item + "=" + "_list_" + namespace + "[" + this.iterator + "])||" + this.iterator + "<_len_" + namespace;
 
@@ -771,6 +777,7 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
   });
  
 });
+
 
 JS2.Class.extend('JSML', function(KLASS, OO){
   OO.addStaticMember("process",function (txt) {
@@ -972,6 +979,7 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
   });
 });
 
+
 JS2.Class.extend('CLI', function(KLASS, OO){
   // private closure
 
@@ -1016,6 +1024,7 @@ JS2.Class.extend('CLI', function(KLASS, OO){
     return [ options, command, files ];
   });
 });
+
 
 })();
 FINISH

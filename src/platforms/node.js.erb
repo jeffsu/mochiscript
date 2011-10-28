@@ -12,10 +12,10 @@ var fs = require('fs');
 var requireScript = "var $m = require('mochiscript').mochi;\n";
 if (require.extensions) {
   require.extensions['.ms'] = function(module, filename) {
-    return $m.parse(requireScript + fs.readFileSync(filename, 'utf8'));
+    return module._compile($m.parse(requireScript + fs.readFileSync(filename, 'utf8')));
   };
 } else if (require.registerExtension) {
-  require.registerExtension('.coffee', function(content) {
+  require.registerExtension('.ms', function(content) {
     return $m.parse(requireScript + content);
   });
 }
