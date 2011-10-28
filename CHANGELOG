@@ -1,3 +1,7 @@
+0.4.0.pre6
+----------
+  * fixed divide/regex bug with spacing
+
 0.4.0.pre5
 ----------
   * fixed bad merge

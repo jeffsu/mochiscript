@@ -389,6 +389,8 @@ class RegexParser extends RootParser {
       if (m) {
         this.out.push(m[0]);
         tokens.consume(m[0].length);
+      } else {
+        return false;
       }
     }
   }

@@ -1,7 +1,6 @@
 var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
-  [ "REGEX", "/", 'RegexParser' ], 
 
   [ "STATIC",   "static\\b" ], 
   [ "MODULE",   "module\\b", 'ModuleParser' ], 
@@ -25,6 +24,7 @@ var TOKENS = [
   [ "EQUALS",    "=" ],
 
   [ "COMMENT", "\\/\\/|\\/\\*", "CommentParser" ], 
+  [ "REGEX", "/", 'RegexParser' ], 
 
   [ "LBRACE", "\\(" ],
   [ "RBRACE", "\\)" ],
@@ -86,7 +86,9 @@ class Tokens {
   }
 
   function lookback(n) {
-    return this.orig.substr(this.consumed-n, this.consumed);
+    var starting = this.consumed;
+    while (this.orig.charAt(starting).match(/\s/)) starting--;
+    return this.orig.substr(starting-1-n, n);
   }
 
   function any() {

@@ -2,7 +2,7 @@ require 'v8'
 require 'json'
 
 module Mochiscript
-  VERSION = "0.4.0-pre5".sub("-", '.')
+  VERSION = "0.4.0-pre6".sub("-", '.')
   class Context
     def initialize
       @ctx = V8::Context.new 
@@ -242,7 +242,6 @@ var JS2 = $m;
   var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
-  [ "REGEX", "/", 'RegexParser' ], 
 
   [ "STATIC",   "static\\b" ], 
   [ "MODULE",   "module\\b", 'ModuleParser' ], 
@@ -266,6 +265,7 @@ var TOKENS = [
   [ "EQUALS",    "=" ],
 
   [ "COMMENT", "\\/\\/|\\/\\*", "CommentParser" ], 
+  [ "REGEX", "/", 'RegexParser' ], 
 
   [ "LBRACE", "\\(" ],
   [ "RBRACE", "\\)" ],
@@ -327,7 +327,9 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   });
 
   OO.addMember("lookback",function (n) {
-    return this.orig.substr(this.consumed-n, this.consumed);
+    var starting = this.consumed;
+    while (this.orig.charAt(starting).match(/\s/)) starting--;
+    return this.orig.substr(starting-1-n, n);
   });
 
   OO.addMember("any",function () {
@@ -743,6 +745,8 @@ RootParser.extend('RegexParser', function(KLASS, OO){
       if (m) {
         this.out.push(m[0]);
         tokens.consume(m[0].length);
+      } else {
+        return false;
       }
     }
   });
