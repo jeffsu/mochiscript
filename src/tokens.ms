@@ -85,6 +85,10 @@ class Tokens {
     this.consumed += n;
   }
 
+  function length() {
+    return this.str.length;
+  }
+
   function lookback(n) {
     var starting = this.consumed;
     while (this.orig.charAt(starting).match(/\s/)) starting--;

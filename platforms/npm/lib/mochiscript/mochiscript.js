@@ -298,6 +298,10 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
     this.consumed += n;
   });
 
+  OO.addMember("length",function () {
+    return this.str.length;
+  });
+
   OO.addMember("lookback",function (n) {
     var starting = this.consumed;
     while (this.orig.charAt(starting).match(/\s/)) starting--;
@@ -330,31 +334,31 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
   });
 
   OO.addMember("parse",function (tokens) {
-    this.startParse(tokens);
-    this.parseTokens(tokens);
-    this.endParse(tokens);
+    var len = tokens.length();
+    if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) == false) return false 
+    return len != tokens.length();
   });
 
   OO.addMember("parseTokens",function (tokens) {
     var sanity = 100;
     while (tokens.any()) {
-      var origLen = tokens.length;
-      var token = tokens.peek();
+      var origLen = tokens.length();
+      var token   = tokens.peek();
       if (!token) break;
       var handlerClass = this.getHandler(token) || token[2];
       if (handlerClass) {
         var handler = new $c[handlerClass];
-        if (handler.parse(tokens) === false) {
-          this.handleToken(token, tokens);
-        } else {
+        if (handler.parse(tokens) !== false) {
           this.out.push(handler); 
+        } else {
+          this.handleToken(token, tokens);
         }
       } else {
         this.handleToken(token, tokens);
       }
       if (this.finished) break;
 
-      if (origLen == tokens.length && sanity-- == 0) {
+      if (origLen == tokens.length() && sanity-- == 0) {
         throw "parse error";
       } else {
         sanity = 100;
@@ -701,7 +705,7 @@ RootParser.extend('CommentParser', function(KLASS, OO){
 RootParser.extend('RegexParser', function(KLASS, OO){
   // private closure
 
-    var REGEX  = /^\/(?!\s)[^[\/\n\\]*(?:(?:\\[\s\S]|\[[^\]\n\\]*(?:\\[\s\S][^\]\n\\]*)*])[^[\/\n\\]*)*\/[imgy]{0,4}(?!\w)/;
+    var REGEX  = /^\/(\\.|[^\/])+\/[imgy]{0,4}/;
     var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$])$/;
   
 
@@ -724,6 +728,8 @@ RootParser.extend('RegexParser', function(KLASS, OO){
   });
 
 });
+
+
 
 CurlyParser.extend('ForeachParser', function(KLASS, OO){
   // private closure
@@ -1010,7 +1016,7 @@ var fs = require('fs');
 var requireScript = "var $m = require('mochiscript').mochi;\n";
 if (require.extensions) {
   require.extensions['.ms'] = function(module, filename) {
-    return module._compile($m.parse(requireScript + fs.readFileSync(filename, 'utf8')));
+    return module._compile($m.parse(requireScript + fs.readFileSync(filename, 'utf8')), filename);
   };
 } else if (require.registerExtension) {
   require.registerExtension('.ms', function(content) {

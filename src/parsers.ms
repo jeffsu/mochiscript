@@ -13,31 +13,31 @@ class RootParser {
   }
 
   function parse(tokens) {
-    this.startParse(tokens);
-    this.parseTokens(tokens);
-    this.endParse(tokens);
+    var len = tokens.length();
+    if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) == false) return false 
+    return len != tokens.length();
   }
 
   function parseTokens(tokens) {
     var sanity = 100;
     while (tokens.any()) {
-      var origLen = tokens.length;
-      var token = tokens.peek();
+      var origLen = tokens.length();
+      var token   = tokens.peek();
       if (!token) break;
       var handlerClass = this.getHandler(token) || token[2];
       if (handlerClass) {
         var handler = new $c[handlerClass];
-        if (handler.parse(tokens) === false) {
-          this.handleToken(token, tokens);
-        } else {
+        if (handler.parse(tokens) !== false) {
           this.out.push(handler); 
+        } else {
+          this.handleToken(token, tokens);
         }
       } else {
         this.handleToken(token, tokens);
       }
       if (this.finished) break;
 
-      if (origLen == tokens.length && sanity-- == 0) {
+      if (origLen == tokens.length() && sanity-- == 0) {
         throw "parse error";
       } else {
         sanity = 100;
@@ -373,7 +373,7 @@ class CommentParser extends RootParser {
 
 class RegexParser extends RootParser {
   private {
-    var REGEX  = /^\/(?!\s)[^[\/\n\\]*(?:(?:\\[\s\S]|\[[^\]\n\\]*(?:\\[\s\S][^\]\n\\]*)*])[^[\/\n\\]*)*\/[imgy]{0,4}(?!\w)/;
+    var REGEX  = /^\/(\\.|[^\/])+\/[imgy]{0,4}/;
     var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$])$/;
   }
 
@@ -396,6 +396,8 @@ class RegexParser extends RootParser {
   }
 
 }
+
+
 
 class ForeachParser extends CurlyParser {
   private {
