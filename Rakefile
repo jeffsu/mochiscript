@@ -26,6 +26,7 @@ task :compile do
   @parser = PARSER.collect { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
 
   { 
+    'ruby_boot.js.erb' => './platforms/gem/vendor/assets/javascripts/mochiscript-boot.js',
     'ruby.rb.erb' => './platforms/gem/lib/mochiscript.rb',
     'node.js.erb' => './platforms/npm/lib/mochiscript/mochiscript.js' 
   }.each_pair do |target, destination|
