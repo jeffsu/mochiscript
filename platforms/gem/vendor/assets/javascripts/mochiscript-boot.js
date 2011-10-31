@@ -1,3 +1,15 @@
+(function (window) {
+var $m  = {
+  ROOT: window,
+  ADAPTER: {                                                                                             
+    out: console.log,
+    outs: console.log,
+  },
+  PLATFORM: 'browser'
+}; 
+
+window.$m = $m;
+
 
 // CLASS HELPERS
 (function (undefined, $m) {
@@ -197,3 +209,4 @@
 })(undefined, $m);
 
 
+})(window);
