@@ -10,7 +10,6 @@ var $m  = {
 
 window.$m = $m;
 
-
 // CLASS HELPERS
 (function (undefined, $m) {
 
@@ -207,6 +206,5 @@ window.$m = $m;
 
   return $m;
 })(undefined, $m);
-
 
 })(window);

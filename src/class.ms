@@ -1,4 +1,3 @@
-
 // CLASS HELPERS
 (function (undefined, $m) {
 
