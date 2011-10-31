@@ -210,6 +210,7 @@ var JS2 = $m;
   return $m;
 })(undefined, $m);
 
+
 var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
@@ -251,9 +252,11 @@ var $c      = $m.ROOT;
 var TYPES   = {};
 var REGEXES = [];
 var MAIN_REGEX = null;
+var RTYPES  = {};
 
 for(var i=0,_c1=TOKENS,_l1=_c1.length,t;(t=_c1[i])||(i<_l1);i++){
   TYPES[t[0]] = i; 
+  RTYPES[i]   = t[0];
   REGEXES.push("(" + t[1] + ")");
 }
 
@@ -304,7 +307,7 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   OO.addMember("lookback",function (n) {
     var starting = this.consumed;
     while (this.orig.charAt(starting).match(/\s/)) starting--;
-    return this.orig.substr(starting-1-n, n);
+    return this.orig.substr(starting-n, n);
   });
 
   OO.addMember("any",function () {
@@ -317,11 +320,19 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
 });
 var Tokens = $c.Tokens;
 
+
 $m.parse = function (str) {
   var parser = new $c.RootParser();
   parser.parse(new $c.Tokens(str));
   return parser.toString();
 };
+
+$m.toJSON = function (str) {
+  var parser = new $c.RootParser();
+  parser.parse(new $c.Tokens(str));
+  return parser.toJSON();
+};
+
 
 JS2.Class.extend('RootParser', function(KLASS, OO){
   OO.addMember("handlers",{});
@@ -379,6 +390,18 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
       ret.push(ele.toString()); 
     }
     return ret.join("");
+  });
+
+  OO.addMember("toJSON",function () {
+    return JSON.stringify(this.toStruct());
+  });
+
+  OO.addMember("toStruct",function () {
+    var ret = [];
+    for(var _i1=0,_c1=this.out,_l1=_c1.length,ele;(ele=_c1[_i1])||(_i1<_l1);_i1++){
+      ret.push(ele.toStruct ? ele.toStruct() : ele);
+    }
+    return ret;
   });
 
   OO.addMember("getHandler",function (token) {
@@ -445,6 +468,7 @@ RootParser.extend('CurlyParser', function(KLASS, OO){
 
   OO.addMember("handleToken",function (token, tokens) {
     if (this.curly === undefined) this.curly = 0;
+    if (this.foo) console.log(RTYPES[token[0]], token[1]);
     if (token[0] == TYPES.RCURLY) {
       this.curly--;
     } else if (token[0] == TYPES.LCURLY) {
@@ -452,7 +476,10 @@ RootParser.extend('CurlyParser', function(KLASS, OO){
     }
 
     this.$super(token, tokens);
-    if (this.curly == 0) this.finished = true;
+
+    if (this.curly == 0) {
+      this.finished = true;
+    }
   });
 
   OO.addMember("endParse",function (tokens) {
@@ -697,7 +724,7 @@ RootParser.extend('CommentParser', function(KLASS, OO){
       return;
     }
 
-    var m2 = tokens.match(/^\/\*.*?\*\//);
+    var m2 = tokens.match(/^\/\*[\s\S]*?\*\//);
     if (m2) {
       tokens.consume(m2[0].length);
       this.out = [ m2[0] ];
@@ -709,12 +736,13 @@ RootParser.extend('CommentParser', function(KLASS, OO){
 RootParser.extend('RegexParser', function(KLASS, OO){
   // private closure
 
-    var REGEX  = /^\/(\\.|[^\/])+\/[imgy]{0,4}/;
+    var REGEX  = /^\/(\\.|[^\\])+?\/[imgy]{0,4}/;
     var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$])$/;
   
 
   OO.addMember("parseTokens",function (tokens) {
     var back = tokens.lookback(2);
+
     if (back.match(DIVIDE)) {
       tokens.consume(1);
       this.out.push("/"); 
@@ -729,6 +757,7 @@ RootParser.extend('RegexParser', function(KLASS, OO){
         return false;
       }
     }
+
   });
 
 });
@@ -763,6 +792,7 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
   });
  
 });
+
 
 
 JS2.Class.extend('JSML', function(KLASS, OO){
@@ -965,6 +995,7 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
   });
 });
 
+
 JS2.Class.extend('CLI', function(KLASS, OO){
   // private closure
 
@@ -1009,6 +1040,7 @@ JS2.Class.extend('CLI', function(KLASS, OO){
     return [ options, command, files ];
   });
 });
+
 
 })($m);
 

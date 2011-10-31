@@ -1,5 +1,6 @@
 require 'erb'
 require 'json'
+require 'pp'
 
 SRC_DIR = %|./src|
 BOOT    = %W| class |

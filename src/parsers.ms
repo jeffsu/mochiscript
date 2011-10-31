@@ -4,6 +4,13 @@ $m.parse = function (str) {
   return parser.toString();
 };
 
+$m.toJSON = function (str) {
+  var parser = new $c.RootParser();
+  parser.parse(new $c.Tokens(str));
+  return parser.toJSON();
+};
+
+
 class RootParser {
   var handlers = {};
 
@@ -60,6 +67,18 @@ class RootParser {
       ret.push(ele.toString()); 
     }
     return ret.join("");
+  }
+
+  function toJSON() {
+    return JSON.stringify(this.toStruct());
+  }
+
+  function toStruct() {
+    var ret = [];
+    foreach (var ele in this.out) {
+      ret.push(ele.toStruct ? ele.toStruct() : ele);
+    }
+    return ret;
   }
 
   function getHandler(token) {
@@ -124,6 +143,7 @@ class CurlyParser extends RootParser {
 
   function handleToken(token, tokens) {
     if (this.curly === undefined) this.curly = 0;
+    if (this.foo) console.log(RTYPES[token[0]], token[1]);
     if (token[0] == TYPES.RCURLY) {
       this.curly--;
     } else if (token[0] == TYPES.LCURLY) {
@@ -131,7 +151,10 @@ class CurlyParser extends RootParser {
     }
 
     this.$super(token, tokens);
-    if (this.curly == 0) this.finished = true;
+
+    if (this.curly == 0) {
+      this.finished = true;
+    }
   }
 
   function endParse(tokens) {
@@ -368,7 +391,7 @@ class CommentParser extends RootParser {
       return;
     }
 
-    var m2 = tokens.match(/^\/\*.*?\*\//);
+    var m2 = tokens.match(/^\/\*[\s\S]*?\*\//);
     if (m2) {
       tokens.consume(m2[0].length);
       this.out = [ m2[0] ];
@@ -379,12 +402,13 @@ class CommentParser extends RootParser {
 
 class RegexParser extends RootParser {
   private {
-    var REGEX  = /^\/(\\.|[^\/])+\/[imgy]{0,4}/;
+    var REGEX  = /^\/(\\.|[^\\])+?\/[imgy]{0,4}/;
     var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$])$/;
   }
 
   function parseTokens(tokens) {
     var back = tokens.lookback(2);
+
     if (back.match(DIVIDE)) {
       tokens.consume(1);
       this.out.push("/"); 
@@ -399,6 +423,7 @@ class RegexParser extends RootParser {
         return false;
       }
     }
+
   }
 
 }

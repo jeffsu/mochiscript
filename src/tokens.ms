@@ -39,9 +39,11 @@ var $c      = $m.ROOT;
 var TYPES   = {};
 var REGEXES = [];
 var MAIN_REGEX = null;
+var RTYPES  = {};
 
 foreach (var t:i in TOKENS) {
   TYPES[t[0]] = i; 
+  RTYPES[i]   = t[0];
   REGEXES.push("(" + t[1] + ")");
 }
 
@@ -92,7 +94,7 @@ class Tokens {
   function lookback(n) {
     var starting = this.consumed;
     while (this.orig.charAt(starting).match(/\s/)) starting--;
-    return this.orig.substr(starting-1-n, n);
+    return this.orig.substr(starting-n, n);
   }
 
   function any() {
