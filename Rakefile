@@ -1,5 +1,6 @@
 require 'erb'
 require 'json'
+require 'pp'
 
 SRC_DIR = %|./src|
 BOOT    = %W| class |
@@ -26,7 +27,8 @@ task :compile do
   @parser = PARSER.collect { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
 
   { 
-    'ruby.rb.erb' => './platforms/gem/lib/mochiscript.rb',
+    'boot.js.erb' => './platforms/gem/vendor/assets/javascripts/mochiscript.js',
+    'ruby.rb.erb' => './platforms/gem/lib/mochiscript/core.rb',
     'node.js.erb' => './platforms/npm/lib/mochiscript/mochiscript.js' 
   }.each_pair do |target, destination|
     target = "./src/platforms/#{target}"

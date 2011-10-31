@@ -1,3 +1,15 @@
+(function (window) {
+var $m  = {
+  ROOT: window,
+  ADAPTER: {                                                                                             
+    out: console.log,
+    outs: console.log,
+  },
+  PLATFORM: 'browser'
+}; 
+
+window.$m = $m;
+
 // CLASS HELPERS
 (function (undefined, $m) {
 
@@ -177,7 +189,7 @@
   });
 
   $m.out = function () {
-    foreach (var arg:i in arguments) {
+    for(var i=0,_c1=arguments,_l1=_c1.length,arg;(arg=_c1[i])||(i<_l1);i++){
       $m.ADAPTER.out(arg);
       if (i < arguments.length-1) {
         $m.ADAPTER.out(',');
@@ -186,7 +198,7 @@
   };
 
   $m.outs = function () {
-    foreach (var arg in arguments) {
+    for(var _i1=0,_c1=arguments,_l1=_c1.length,arg;(arg=_c1[_i1])||(_i1<_l1);_i1++){
       $m.ADAPTER.outs(arg);
     }
   };
@@ -194,3 +206,6 @@
 
   return $m;
 })(undefined, $m);
+
+
+})(window);

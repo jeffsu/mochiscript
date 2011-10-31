@@ -1,19 +1,50 @@
-var $m  = {                                                                                              
-  ROOT: {},
-  ADAPTER: {                                                                                             
-    out: function () { print.call(null, arguments); },
-    outs: function () { 
-      for (var i=0; i<arguments.length; i++) {
-        console.log(arguments[i]);
-      }
-    }
-  },
-  PLATFORM: 'node'
-}; 
-var JS2 = $m;
+require 'v8'
+require 'json'
 
+module Mochiscript
+  VERSION = "0.4.0-pre10".sub("-", '.')
+  class Context
+    def initialize
+      @ctx = V8::Context.new 
+      @ctx['_$m_adapter'] = Adapter.new
+      @ctx.eval(Parser::JAVASCRIPT)
+    end
+
+    def parse(str)
+      @ctx.eval_js("$m.parse(#{str.to_json})")
+    end
+
+    def to_json(str)
+      @ctx.eval_js("$m.toJSON(#{str.to_json})")
+    end
+
+    def eval_ms(str)
+      @ctx.eval_js(parse(str))
+    end
+
+    protected
+
+    def method_missing(name, *args, &block)
+      @ctx.send(name, *args, &block)
+    end
+  end
+
+  class Adapter
+    def out(arg)
+      print arg
+    end
+
+    def outs(arg)
+      puts arg
+    end
+  end
+
+  class Parser
+JAVASCRIPT = <<'FINISH'
+var $m  = { ROOT: this, ADAPTER: _$m_adapter, PLATFORM: 'ruby' };
+var JS2 = $m; 
 (function () {
-// CLASS HELPERS
+  // CLASS HELPERS
 (function (undefined, $m) {
 
   var OO = function (klass, par) {
@@ -211,7 +242,7 @@ var JS2 = $m;
 })(undefined, $m);
 
 
-var IDENT  = "[\\$\\w]+";
+  var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
 
@@ -1054,18 +1085,7 @@ JS2.Class.extend('CLI', function(KLASS, OO){
 });
 
 
-})($m);
-
-exports.mochi = $m;
-
-var fs = require('fs');
-var requireScript = "var $m = require('mochiscript').mochi;\n";
-if (require.extensions) {
-  require.extensions['.ms'] = function(module, filename) {
-    return module._compile($m.parse(requireScript + fs.readFileSync(filename, 'utf8')), filename);
-  };
-} else if (require.registerExtension) {
-  require.registerExtension('.ms', function(content) {
-    return $m.parse(requireScript + content);
-  });
-}
+})();
+FINISH
+  end
+end

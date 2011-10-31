@@ -4,6 +4,13 @@ $m.parse = function (str) {
   return parser.toString();
 };
 
+$m.toJSON = function (str) {
+  var parser = new $c.RootParser();
+  parser.parse(new $c.Tokens(str));
+  return parser.toJSON();
+};
+
+
 class RootParser {
   var handlers = {};
 
@@ -18,6 +25,7 @@ class RootParser {
     return len != tokens.length();
   }
 
+  // TODO: messy clean this process up
   function parseTokens(tokens) {
     var sanity  = 100;
     var origLen = tokens.length();
@@ -69,6 +77,18 @@ class RootParser {
     return ret.join("");
   }
 
+  function toJSON() {
+    return JSON.stringify(this.toStruct());
+  }
+
+  function toStruct() {
+    var ret = [];
+    foreach (var ele in this.out) {
+      ret.push(ele.toStruct ? ele.toStruct() : ele);
+    }
+    return ret;
+  }
+
   // intercepts parser class for special cases
   function getHandler(token) {
     return null;
@@ -97,7 +117,12 @@ class ClassParser extends RootParser {
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");" ];
+    var behind = tokens.lookback(7);
+    var isPublic  = ($m.PLATFORM == 'node' && behind.match(/public$/)) ? "\nexports." + name + '=' + name + ';' : '';
+    var isExports = ($m.PLATFORM == 'node' && behind == 'export') ? "\nmodule.exports." + name + '=' + name + ';' : '';
+
+
+    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");", isPublic, isExports ];
   }
 }
 
@@ -127,6 +152,7 @@ class CurlyParser extends RootParser {
 
   function handleToken(token, tokens) {
     if (this.curly === undefined) this.curly = 0;
+    if (this.foo) console.log(RTYPES[token[0]], token[1]);
     if (token[0] == TYPES.RCURLY) {
       this.curly--;
     } else if (token[0] == TYPES.LCURLY) {
@@ -134,7 +160,10 @@ class CurlyParser extends RootParser {
     }
 
     this.$super(token, tokens);
-    if (this.curly == 0) this.finished = true;
+
+    if (this.curly == 0) {
+      this.finished = true;
+    }
   }
 
   function endParse(tokens) {
@@ -386,6 +415,7 @@ class RegexParser extends RootParser {
 
   function parseTokens(tokens) {
     var back = tokens.lookback(2);
+
     if (back.match(DIVIDE)) {
       tokens.consume(1);
       this.out.push("/"); 
@@ -400,6 +430,7 @@ class RegexParser extends RootParser {
         return false;
       }
     }
+
   }
 
 }
@@ -431,3 +462,4 @@ class ForeachParser extends CurlyParser {
   }
  
 }
+

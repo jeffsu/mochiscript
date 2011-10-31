@@ -1,0 +1,14 @@
+(function (window) {
+var $m  = {
+  ROOT: window,
+  ADAPTER: {                                                                                             
+    out: console.log,
+    outs: console.log,
+  },
+  PLATFORM: 'browser'
+}; 
+
+window.$m = $m;
+
+<%= @boot %>
+})(window);
