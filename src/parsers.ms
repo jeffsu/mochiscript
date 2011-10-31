@@ -18,6 +18,7 @@ class RootParser {
     return len != tokens.length();
   }
 
+  // TODO: messy clean this process up
   function parseTokens(tokens) {
     var sanity = 100;
     while (tokens.any()) {
@@ -88,7 +89,12 @@ class ClassParser extends RootParser {
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");" ];
+    var behind = tokens.lookback(7);
+    var isPublic  = behind.match(/public$/) ? "\nexports." + name + '=' + name + ';' : '';
+    var isExports = behind == 'export' ? "\nmodule.exports." + name + '=' + name + ';' : '';
+
+
+    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");", isPublic, isExports ];
   }
 }
 
@@ -426,3 +432,4 @@ class ForeachParser extends CurlyParser {
   }
  
 }
+

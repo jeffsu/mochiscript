@@ -367,6 +367,7 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
     return len != tokens.length();
   });
 
+  // TODO: messy clean this process up
   OO.addMember("parseTokens",function (tokens) {
     var sanity = 100;
     while (tokens.any()) {
@@ -438,7 +439,12 @@ RootParser.extend('ClassParser', function(KLASS, OO){
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");" ];
+    var behind = tokens.lookback(7);
+    var isPublic  = behind.match(/public$/) ? "\nexports." + name + '=' + name + ';' : '';
+    var isExports = behind == 'export' ? "\nmodule.exports." + name + '=' + name + ';' : '';
+
+
+    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");", isPublic, isExports ];
   });
 });
 
@@ -787,6 +793,7 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
   });
  
 });
+
 
 
 JS2.Class.extend('JSML', function(KLASS, OO){
