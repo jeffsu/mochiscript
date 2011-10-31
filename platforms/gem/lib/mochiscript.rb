@@ -2,7 +2,7 @@ require 'v8'
 require 'json'
 
 module Mochiscript
-  VERSION = "0.4.0-pre9".sub("-", '.')
+  VERSION = "0.4.0-pre10".sub("-", '.')
   class Context
     def initialize
       @ctx = V8::Context.new 
@@ -336,6 +336,13 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
     return this.orig.substr(starting-1-n, n);
   });
 
+  OO.addMember("lookahead",function (n) {
+    var starting = this.consumed;
+    while (this.orig.charAt(starting).match(/\s/)) starting++;
+    return this.orig.substr(starting, n);
+  });
+
+
   OO.addMember("any",function () {
     return this.str.length > 0;
   });
@@ -363,27 +370,35 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
 
   OO.addMember("parse",function (tokens) {
     var len = tokens.length();
-    if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) == false) return false 
+    if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) === false) return false 
     return len != tokens.length();
   });
 
   OO.addMember("parseTokens",function (tokens) {
-    var sanity = 100;
+    var sanity  = 100;
+    var origLen = tokens.length();
+
     while (tokens.any()) {
-      var origLen = tokens.length();
       var token   = tokens.peek();
       if (!token) break;
+
+      // has a parser class associated with this token
       var handlerClass = this.getHandler(token) || token[2];
       if (handlerClass) {
         var handler = new $c[handlerClass];
         if (handler.parse(tokens) !== false) {
           this.out.push(handler); 
+          tokens.lastHandler = handler;
         } else {
           this.handleToken(token, tokens);
         }
-      } else {
+      } 
+      
+      // no parser class, use "this" to just consume it
+      else {
         this.handleToken(token, tokens);
       }
+
       if (this.finished) break;
 
       if (origLen == tokens.length() && sanity-- == 0) {
@@ -410,6 +425,7 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
     return ret.join("");
   });
 
+  // intercepts parser class for special cases
   OO.addMember("getHandler",function (token) {
     return null;
   });
@@ -596,10 +612,6 @@ RootParser.extend('StaticParser', function(KLASS, OO){
       this.out.push(parser);
     }
   });
-
-  
-
-
 });
 
 RootParser.extend('MemberParser', function(KLASS, OO){
@@ -721,12 +733,14 @@ RootParser.extend('CommentParser', function(KLASS, OO){
       return;
     }
 
-    var m2 = tokens.match(/^\/\*.*?\*\//);
+    var m2 = tokens.match(/^\/\*[\s\S]*?\*\//);
     if (m2) {
       tokens.consume(m2[0].length);
       this.out = [ m2[0] ];
       return;
-    }
+    } 
+
+    return false;
   });
 });
 
@@ -756,8 +770,6 @@ RootParser.extend('RegexParser', function(KLASS, OO){
   });
 
 });
-
-
 
 CurlyParser.extend('ForeachParser', function(KLASS, OO){
   // private closure

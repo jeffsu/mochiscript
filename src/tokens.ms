@@ -95,6 +95,13 @@ class Tokens {
     return this.orig.substr(starting-1-n, n);
   }
 
+  function lookahead(n) {
+    var starting = this.consumed;
+    while (this.orig.charAt(starting).match(/\s/)) starting++;
+    return this.orig.substr(starting, n);
+  }
+
+
   function any() {
     return this.str.length > 0;
   }
