@@ -767,7 +767,7 @@ RootParser.extend('CommentParser', function(KLASS, OO){
 RootParser.extend('RegexParser', function(KLASS, OO){
   // private closure
 
-    var REGEX  = /^\/(\\.|[^\\])+?\/[imgy]{0,4}/;
+    var REGEX  = /^\/(\\.|[^\/])+\/[imgy]{0,4}/;
     var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$])$/;
   
 
