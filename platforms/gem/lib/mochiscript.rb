@@ -37,7 +37,7 @@ module Mochiscript
 
   class Parser
 JAVASCRIPT = <<'FINISH'
-var $m  = { ROOT: this, ADAPTER: _$m_adapter };
+var $m  = { ROOT: this, ADAPTER: _$m_adapter, PLATFORM: 'ruby' };
 var JS2 = $m; 
 (function () {
   
@@ -440,8 +440,8 @@ RootParser.extend('ClassParser', function(KLASS, OO){
     content.parse(tokens);
 
     var behind = tokens.lookback(7);
-    var isPublic  = behind.match(/public$/) ? "\nexports." + name + '=' + name + ';' : '';
-    var isExports = behind == 'export' ? "\nmodule.exports." + name + '=' + name + ';' : '';
+    var isPublic  = ($m.PLATFORM == 'node' && behind.match(/public$/)) ? "\nexports." + name + '=' + name + ';' : '';
+    var isExports = ($m.PLATFORM == 'node' && behind == 'export') ? "\nmodule.exports." + name + '=' + name + ';' : '';
 
 
     this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");", isPublic, isExports ];

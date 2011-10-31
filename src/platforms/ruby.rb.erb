@@ -37,7 +37,7 @@ module Mochiscript
 
   class Parser
 JAVASCRIPT = <<'FINISH'
-var $m  = { ROOT: this, ADAPTER: _$m_adapter };
+var $m  = { ROOT: this, ADAPTER: _$m_adapter, PLATFORM: 'ruby' };
 var JS2 = $m; 
 (function () {
   <%= @boot.gsub(%r|\\|, '\\\\') %>

@@ -90,8 +90,8 @@ class ClassParser extends RootParser {
     content.parse(tokens);
 
     var behind = tokens.lookback(7);
-    var isPublic  = behind.match(/public$/) ? "\nexports." + name + '=' + name + ';' : '';
-    var isExports = behind == 'export' ? "\nmodule.exports." + name + '=' + name + ';' : '';
+    var isPublic  = ($m.PLATFORM == 'node' && behind.match(/public$/)) ? "\nexports." + name + '=' + name + ';' : '';
+    var isExports = ($m.PLATFORM == 'node' && behind == 'export') ? "\nmodule.exports." + name + '=' + name + ';' : '';
 
 
     this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");", isPublic, isExports ];
