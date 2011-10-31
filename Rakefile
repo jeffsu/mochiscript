@@ -28,8 +28,11 @@ task :compile do
 
   { 
     'boot.js.erb' => './platforms/gem/vendor/assets/javascripts/mochiscript.js',
-    'ruby.rb.erb' => './platforms/gem/lib/mochiscript/core.rb',
-    'node.js.erb' => './platforms/npm/lib/mochiscript/mochiscript.js' 
+    'core.rb.erb' => './platforms/gem/lib/mochiscript/core.rb',
+    'mochiscript.rb.erb' => './platforms/gem/lib/mochiscript.rb',
+
+    'node.js.erb' => './platforms/npm/lib/mochiscript/mochiscript.js',
+    'package.json.erb' => './platforms/npm/lib/package.json'
   }.each_pair do |target, destination|
     target = "./src/platforms/#{target}"
     puts "Writing #{target} to #{destination}"

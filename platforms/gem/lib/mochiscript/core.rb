@@ -2,7 +2,7 @@ require 'v8'
 require 'json'
 
 module Mochiscript
-  VERSION = "0.4.0-pre10".sub("-", '.')
+  VERSION = "0.4.0-pre12".sub("-", '.')
   class Context
     def initialize
       @ctx = V8::Context.new 
