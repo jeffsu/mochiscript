@@ -102,7 +102,7 @@ class Tokens {
     }
 
     //$m.outs(n + "= " + JSON.stringify(this.orig.substr(starting-n, n)));
-    return this.orig.substr(starting-n, n);
+    return this.orig.substr(starting-n+1, n);
   }
 
   function lookahead(n) {
