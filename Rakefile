@@ -9,14 +9,16 @@ VERSION = File.read("./VERSION").strip;
 
 task :test => :compile do
   require "./platforms/gem/lib/mochiscript"
+  files = ENV['TEST'] ? [ "./tests/#{ENV['TEST']}.ms" ] : Dir['./tests/*.ms']
 
-  Dir['./tests/*.ms'].each do |f|
+  files.each do |f|
     puts "Testing: " + f
     ctx = Mochiscript::Context.new
     begin
       ctx.eval_ms(File.read(f))
     rescue Exception => e
       puts "Error: " + ctx.parse(File.read(f))
+      puts "TREE:\n" + ctx.pp(File.read(f))
       puts e.to_s
     end
   end

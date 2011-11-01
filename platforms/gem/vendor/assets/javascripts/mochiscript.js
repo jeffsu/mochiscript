@@ -117,6 +117,7 @@ window.$m = $m;
   $m.Class.extend = function(name, klassDef) {
     var klass = function() { if (!noInit) this.initialize.apply(this, arguments); };
     klass.OO  = new OO(klass, this);
+    if (klassDef) klass.name = name;
 
     if (typeof name != 'string') {
       klassDef = name;

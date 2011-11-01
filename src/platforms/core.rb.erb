@@ -17,6 +17,10 @@ module Mochiscript
       @ctx.eval_js("$m.toJSON(#{str.to_json})")
     end
 
+    def pp(str)
+      return @ctx.eval_js("$m.pp(#{str.to_json})")
+    end
+
     def eval_ms(str)
       @ctx.eval_js(parse(str))
     end

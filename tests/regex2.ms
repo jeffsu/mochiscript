@@ -1,7 +1,10 @@
 class Hello {
   function foo() {
     var foo = "hello?";
+    foo.replace(  /\?/, '');
     foo.replace(/\?/, '');
+    foo.replace(/\?/, '');
+    var n = ((10) / foo);
 
     return {
       foo     : foo,

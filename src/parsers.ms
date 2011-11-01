@@ -10,6 +10,13 @@ $m.toJSON = function (str) {
   return parser.toJSON();
 };
 
+$m.pp = function (str) {
+  var parser = new $c.RootParser();
+  parser.parse(new $c.Tokens(str));
+  return parser.pp();
+};
+
+
 
 class RootParser {
   var handlers = {};
@@ -38,6 +45,7 @@ class RootParser {
       var handlerClass = this.getHandler(token) || token[2];
       if (handlerClass) {
         var handler = new $c[handlerClass];
+        handler._TYPE = handlerClass;
         if (handler.parse(tokens) !== false) {
           this.out.push(handler); 
           tokens.lastHandler = handler;
@@ -79,6 +87,32 @@ class RootParser {
 
   function toJSON() {
     return JSON.stringify(this.toStruct());
+  }
+
+  function pp(space) {
+    space = space == null ? "  " : space + "  ";
+
+    var ret = [ space + (this._TYPE || 'NODE') ];
+    var generic = [];
+    foreach (var ele in this.out) {
+      if (ele.pp) {
+        if (generic.length) {
+          ret.push(space + "  TOKENS:" + JSON.stringify(generic.join('')));
+          generic = [];
+        }
+        ret.push(ele.pp(space));
+      } 
+      
+      else {
+        generic.push(ele);
+      }
+    }
+
+    if (generic.length) {
+      ret.push(space + "  TOKENS:" + JSON.stringify(generic.join('')));
+    }
+
+    return ret.join("\n");
   }
 
   function toStruct() {
@@ -145,6 +179,8 @@ class ModuleParser extends RootParser {
 }
 
 class CurlyParser extends RootParser {
+  var _TYPE = 'CurlyParser';
+
   function initialize(chop) {
     this.chop = chop;
     this.$super();
@@ -417,6 +453,7 @@ class RegexParser extends RootParser {
     var back = tokens.lookback(2);
 
     if (back.match(DIVIDE)) {
+      this._TYPE = 'DIVIDE';
       tokens.consume(1);
       this.out.push("/"); 
     } 
@@ -436,6 +473,8 @@ class RegexParser extends RootParser {
 }
 
 class ForeachParser extends CurlyParser {
+  var _TYPE = 'Foreach';
+
   private {
     var REGEX = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**{");
   }

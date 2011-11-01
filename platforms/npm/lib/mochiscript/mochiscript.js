@@ -120,6 +120,7 @@ var JS2 = $m;
   $m.Class.extend = function(name, klassDef) {
     var klass = function() { if (!noInit) this.initialize.apply(this, arguments); };
     klass.OO  = new OO(klass, this);
+    if (klassDef) klass.name = name;
 
     if (typeof name != 'string') {
       klassDef = name;
@@ -305,8 +306,16 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   });
 
   OO.addMember("lookback",function (n) {
-    var starting = this.consumed;
-    while (this.orig.charAt(starting).match(/\s/)) starting--;
+    var starting = this.consumed - 1;
+
+    //$m.outs(JSON.stringify(this.orig.substr(starting-10, 10)));
+    //$m.outs(JSON.stringify(this.orig.charAt(starting)));
+    while (this.orig.charAt(starting).match(/\s/)) {
+      //$m.outs("back");
+      starting--;
+    }
+
+    //$m.outs(n + "= " + JSON.stringify(this.orig.substr(starting-n, n)));
     return this.orig.substr(starting-n, n);
   });
 
@@ -340,6 +349,13 @@ $m.toJSON = function (str) {
   return parser.toJSON();
 };
 
+$m.pp = function (str) {
+  var parser = new $c.RootParser();
+  parser.parse(new $c.Tokens(str));
+  return parser.pp();
+};
+
+
 
 JS2.Class.extend('RootParser', function(KLASS, OO){
   OO.addMember("handlers",{});
@@ -368,6 +384,7 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
       var handlerClass = this.getHandler(token) || token[2];
       if (handlerClass) {
         var handler = new $c[handlerClass];
+        handler._TYPE = handlerClass;
         if (handler.parse(tokens) !== false) {
           this.out.push(handler); 
           tokens.lastHandler = handler;
@@ -409,6 +426,32 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
 
   OO.addMember("toJSON",function () {
     return JSON.stringify(this.toStruct());
+  });
+
+  OO.addMember("pp",function (space) {
+    space = space == null ? "  " : space + "  ";
+
+    var ret = [ space + (this._TYPE || 'NODE') ];
+    var generic = [];
+    for(var _i1=0,_c1=this.out,_l1=_c1.length,ele;(ele=_c1[_i1])||(_i1<_l1);_i1++){
+      if (ele.pp) {
+        if (generic.length) {
+          ret.push(space + "  TOKENS:" + JSON.stringify(generic.join('')));
+          generic = [];
+        }
+        ret.push(ele.pp(space));
+      } 
+      
+      else {
+        generic.push(ele);
+      }
+    }
+
+    if (generic.length) {
+      ret.push(space + "  TOKENS:" + JSON.stringify(generic.join('')));
+    }
+
+    return ret.join("\n");
   });
 
   OO.addMember("toStruct",function () {
@@ -477,6 +520,8 @@ RootParser.extend('ModuleParser', function(KLASS, OO){
 });
 
 RootParser.extend('CurlyParser', function(KLASS, OO){
+  OO.addMember("_TYPE",'CurlyParser');
+
   OO.addMember("initialize",function (chop) {
     this.chop = chop;
     this.$super();
@@ -758,6 +803,7 @@ RootParser.extend('RegexParser', function(KLASS, OO){
     var back = tokens.lookback(2);
 
     if (back.match(DIVIDE)) {
+      this._TYPE = 'DIVIDE';
       tokens.consume(1);
       this.out.push("/"); 
     } 
@@ -777,6 +823,8 @@ RootParser.extend('RegexParser', function(KLASS, OO){
 });
 
 CurlyParser.extend('ForeachParser', function(KLASS, OO){
+  OO.addMember("_TYPE",'Foreach');
+
   // private closure
 
     var REGEX = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**{");
