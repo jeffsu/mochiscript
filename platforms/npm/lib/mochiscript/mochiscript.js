@@ -311,7 +311,7 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
     //$m.outs(JSON.stringify(this.orig.substr(starting-10, 10)));
     //$m.outs(JSON.stringify(this.orig.charAt(starting)));
     while (this.orig.charAt(starting).match(/\s/)) {
-      $m.outs("back");
+      //$m.outs("back");
       starting--;
     }
 

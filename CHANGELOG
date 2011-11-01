@@ -1,3 +1,7 @@
+0.4.0.pre14
+-----------
+  * lookback error when no spacing
+ 
 0.4.0.pre13
 -----------
   * lookback off by 1
