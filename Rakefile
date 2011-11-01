@@ -24,6 +24,11 @@ task :test => :compile do
   end
 end
 
+task :push do
+  sh "cd ./platforms/gem; rm *.gem; gem build mochiscript.gemspec; gem push *.gem; "
+  sh "cd ./platforms/npm; npm publish;"
+end
+
 task :compile do
   @boot   = BOOT.collect { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
   @parser = PARSER.collect { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
@@ -34,7 +39,7 @@ task :compile do
     'mochiscript.rb.erb' => './platforms/gem/lib/mochiscript.rb',
 
     'node.js.erb' => './platforms/npm/lib/mochiscript/mochiscript.js',
-    'package.json.erb' => './platforms/npm/lib/package.json'
+    'package.json.erb' => './platforms/npm/package.json'
   }.each_pair do |target, destination|
     target = "./src/platforms/#{target}"
     puts "Writing #{target} to #{destination}"
