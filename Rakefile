@@ -29,9 +29,15 @@ namespace :test do
   end
 
   task :node => :compile  do
+    require "./platforms/gem/lib/mochiscript"
+
     get_files.each do |f|
       puts "Testing: " + f
-      sh "node ./tests/node-runner.js #{f.sub(%r|^./tests/|, '')}"
+      unless system("node ./tests/node-runner.js #{f.sub(%r|^./tests/|, '')}")
+        ctx = Mochiscript::Context.new
+        puts "Error: " + ctx.parse(File.read(f))
+        puts "TREE:\n" + ctx.pp(File.read(f))
+      end
     end
   end
 end

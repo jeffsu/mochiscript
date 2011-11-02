@@ -1,5 +1,5 @@
 var $m  = {                                                                                              
-  ROOT: {},
+  ROOT: this,
   ADAPTER: {                                                                                             
     out: function () { print.call(null, arguments); },
     outs: function () { 
@@ -634,7 +634,7 @@ RootParser.extend('IStringParser', function(KLASS, OO){
   });
 
   OO.addMember("parseMiddle",function (tokens) {
-    var parser = new CurlyParser(true); 
+    var parser = new $c.CurlyParser(true); 
     parser.parse(tokens);
     this.out.push(parser);
   });
@@ -651,7 +651,7 @@ RootParser.extend('StaticParser', function(KLASS, OO){
     var varMatch = tokens.match(VAR_REGEX);
     if (varMatch) {
       tokens.consume(varMatch[1].length);
-      var parser = new MemberParser();
+      var parser = new $c.MemberParser();
       parser.isStatic = true;
       parser.parse(tokens);
       this.out.push(parser);
@@ -661,7 +661,7 @@ RootParser.extend('StaticParser', function(KLASS, OO){
       var functMatch = tokens.match(FUNCT_REGEX);
       tokens.consume(functMatch[1].length);
 
-      var parser = new MethodParser();
+      var parser = new $c.MethodParser();
       parser.isStatic = true;
       parser.parse(tokens);
       this.out.push(parser);
@@ -688,6 +688,8 @@ RootParser.extend('MemberParser', function(KLASS, OO){
     this.out = [ "OO." + addMethod + "(", JSON.stringify(this.name), ",",  parser, ");" ];
   });
 });
+
+var MemberParser = $m.MemberParser;
 
 
 
@@ -743,7 +745,7 @@ RootParser.extend('MethodParser', function(KLASS, OO){
     var name = m[2];
     var args = m[3];
 
-    var body = new CurlyParser();
+    var body = new $c.CurlyParser();
     body.parse(tokens);
 
     var addMethod = this.isStatic ? 'addStaticMember' : 'addMember';
@@ -771,7 +773,7 @@ RootParser.extend('ShorthandFunctionParser', function(KLASS, OO){
       args = "($1,$2,$3)";
     }
 
-    var body = new CurlyParser();
+    var body = new $c.CurlyParser();
     body.parse(tokens);
     var semi = tokens.match(/^\s*[,;\)]/) ? '' : ';';
 
@@ -1109,12 +1111,12 @@ JS2.Class.extend('CLI', function(KLASS, OO){
 });
 
 
-})($m);
+})();
 
 exports.mochi = $m;
 
 var fs = require('fs');
-var requireScript = "var $m = require('mochiscript').mochi;\n";
+var requireScript = "var $m = require('mochiscript').mochi; $m.ROOT=this;\n";
 if (require.extensions) {
   require.extensions['.ms'] = function(module, filename) {
     return module._compile($m.parse(requireScript + fs.readFileSync(filename, 'utf8')), filename);

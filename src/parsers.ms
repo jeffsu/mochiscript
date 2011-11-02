@@ -287,7 +287,7 @@ class IStringParser extends RootParser {
   }
 
   function parseMiddle(tokens) {
-    var parser = new CurlyParser(true); 
+    var parser = new $c.CurlyParser(true); 
     parser.parse(tokens);
     this.out.push(parser);
   }
@@ -303,7 +303,7 @@ class StaticParser extends RootParser {
     var varMatch = tokens.match(VAR_REGEX);
     if (varMatch) {
       tokens.consume(varMatch[1].length);
-      var parser = new MemberParser();
+      var parser = new $c.MemberParser();
       parser.isStatic = true;
       parser.parse(tokens);
       this.out.push(parser);
@@ -313,7 +313,7 @@ class StaticParser extends RootParser {
       var functMatch = tokens.match(FUNCT_REGEX);
       tokens.consume(functMatch[1].length);
 
-      var parser = new MethodParser();
+      var parser = new $c.MethodParser();
       parser.isStatic = true;
       parser.parse(tokens);
       this.out.push(parser);
@@ -339,6 +339,8 @@ class MemberParser extends RootParser {
     this.out = [ "OO." + addMethod + "(", JSON.stringify(this.name), ",",  parser, ");" ];
   }
 }
+
+var MemberParser = $m.MemberParser;
 
 
 
@@ -391,7 +393,7 @@ class MethodParser extends RootParser {
     var name = m[2];
     var args = m[3];
 
-    var body = new CurlyParser();
+    var body = new $c.CurlyParser();
     body.parse(tokens);
 
     var addMethod = this.isStatic ? 'addStaticMember' : 'addMember';
@@ -418,7 +420,7 @@ class ShorthandFunctionParser extends RootParser {
       args = "($1,$2,$3)";
     }
 
-    var body = new CurlyParser();
+    var body = new $c.CurlyParser();
     body.parse(tokens);
     var semi = tokens.match(/^\s*[,;\)]/) ? '' : ';';
 

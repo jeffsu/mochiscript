@@ -1,5 +1,5 @@
 var $m  = {                                                                                              
-  ROOT: {},
+  ROOT: this,
   ADAPTER: {                                                                                             
     out: function () { print.call(null, arguments); },
     outs: function () { 
@@ -15,12 +15,12 @@ var JS2 = $m;
 (function () {
 <%= @boot   %>
 <%= @parser %>
-})($m);
+})();
 
 exports.mochi = $m;
 
 var fs = require('fs');
-var requireScript = "var $m = require('mochiscript').mochi;\n";
+var requireScript = "var $m = require('mochiscript').mochi; $m.ROOT=this;\n";
 if (require.extensions) {
   require.extensions['.ms'] = function(module, filename) {
     return module._compile($m.parse(requireScript + fs.readFileSync(filename, 'utf8')), filename);
