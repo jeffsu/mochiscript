@@ -1,3 +1,7 @@
+0.4.0
+-----
+  * adding experimental export and public classes for common.js
+
 0.4.0.pre14
 -----------
   * lookback error when no spacing

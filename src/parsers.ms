@@ -80,7 +80,7 @@ class RootParser {
   function toString() {
     var ret = [];
     foreach (var ele in this.out) {
-      ret.push(ele.toString()); 
+      ret.push(ele === undefined ? '' : ele.toString()); 
     }
     return ret.join("");
   }
@@ -95,6 +95,11 @@ class RootParser {
     var ret = [ space + (this._TYPE || 'NODE') ];
     var generic = [];
     foreach (var ele in this.out) {
+      if (ele === undefined) {
+        ret.push(space + "  UNDEFINED!");
+        continue;
+      }
+
       if (ele.pp) {
         if (generic.length) {
           ret.push(space + "  TOKENS:" + JSON.stringify(generic.join('')));
@@ -137,24 +142,22 @@ var RootParser = $c.RootParser;
 
 class ClassParser extends RootParser {
   private {
-    var REGEX   = Tokens.regex("<CLASS> <CLASSNAME><LCURLY>");
-    var EXTENDS = Tokens.regex("<CLASS> <CLASSNAME><EXTENDS><CLASSNAME><LCURLY>");
+    var REGEX   = Tokens.regex("(?:<EXPORT>|<PUBLIC>|<CLASS>) <CLASSNAME><LCURLY>");
+    var EXTENDS = Tokens.regex("(?:<EXPORT>|<PUBLIC>|<CLASS>) <CLASSNAME><EXTENDS><CLASSNAME><LCURLY>");
   }
 
   function parse(tokens) {
     var m = tokens.match(REGEX) || tokens.match(EXTENDS);
-    var name      = m[2];
-    var extending = m[4] || "$m.Class";
+    var name      = m[4];
+    var extending = m[6] || "$m.Class";
 
     tokens.consume(m[0].length-1);
 
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    var behind = tokens.lookback(7);
-    var isPublic  = ($m.PLATFORM == 'node' && behind.match(/public$/)) ? "\nexports." + name + '=' + name + ';' : '';
-    var isExports = ($m.PLATFORM == 'node' && behind == 'export') ? "\nmodule.exports." + name + '=' + name + ';' : '';
-
+    var isPublic  = ($m.PLATFORM == 'node' && m[2] == 'public') ? "\nexports." + name + '=' + name + ';' : '';
+    var isExports = ($m.PLATFORM == 'node' && m[1] == 'export') ? "\nmodule.exports." + name + '=' + name + ';' : '';
 
     this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");", isPublic, isExports ];
   }

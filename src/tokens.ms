@@ -4,6 +4,10 @@ var TOKENS = [
 
   [ "STATIC",   "static\\b" ], 
   [ "MODULE",   "module\\b", 'ModuleParser' ], 
+
+  [ "EXPORT",   "export\\s+class\\b", 'ClassParser' ], 
+  [ "PUBLIC",   "public\\s+class\\b", 'ClassParser' ], 
+
   [ "CLASS",    "class\\b",  'ClassParser' ], 
   [ "FUNCTION", "function\\b" ], 
   [ "INCLUDE",  "include\\b" ], 

@@ -218,6 +218,10 @@ var TOKENS = [
 
   [ "STATIC",   "static\\b" ], 
   [ "MODULE",   "module\\b", 'ModuleParser' ], 
+
+  [ "EXPORT",   "export\\s+class\\b", 'ClassParser' ], 
+  [ "PUBLIC",   "public\\s+class\\b", 'ClassParser' ], 
+
   [ "CLASS",    "class\\b",  'ClassParser' ], 
   [ "FUNCTION", "function\\b" ], 
   [ "INCLUDE",  "include\\b" ], 
@@ -419,7 +423,7 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
   OO.addMember("toString",function () {
     var ret = [];
     for(var _i1=0,_c1=this.out,_l1=_c1.length,ele;(ele=_c1[_i1])||(_i1<_l1);_i1++){
-      ret.push(ele.toString()); 
+      ret.push(ele === undefined ? '' : ele.toString()); 
     }
     return ret.join("");
   });
@@ -434,6 +438,11 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
     var ret = [ space + (this._TYPE || 'NODE') ];
     var generic = [];
     for(var _i1=0,_c1=this.out,_l1=_c1.length,ele;(ele=_c1[_i1])||(_i1<_l1);_i1++){
+      if (ele === undefined) {
+        ret.push(space + "  UNDEFINED!");
+        continue;
+      }
+
       if (ele.pp) {
         if (generic.length) {
           ret.push(space + "  TOKENS:" + JSON.stringify(generic.join('')));
@@ -477,24 +486,22 @@ var RootParser = $c.RootParser;
 RootParser.extend('ClassParser', function(KLASS, OO){
   // private closure
 
-    var REGEX   = Tokens.regex("<CLASS> <CLASSNAME><LCURLY>");
-    var EXTENDS = Tokens.regex("<CLASS> <CLASSNAME><EXTENDS><CLASSNAME><LCURLY>");
+    var REGEX   = Tokens.regex("(?:<EXPORT>|<PUBLIC>|<CLASS>) <CLASSNAME><LCURLY>");
+    var EXTENDS = Tokens.regex("(?:<EXPORT>|<PUBLIC>|<CLASS>) <CLASSNAME><EXTENDS><CLASSNAME><LCURLY>");
   
 
   OO.addMember("parse",function (tokens) {
     var m = tokens.match(REGEX) || tokens.match(EXTENDS);
-    var name      = m[2];
-    var extending = m[4] || "$m.Class";
+    var name      = m[4];
+    var extending = m[6] || "$m.Class";
 
     tokens.consume(m[0].length-1);
 
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    var behind = tokens.lookback(7);
-    var isPublic  = ($m.PLATFORM == 'node' && behind.match(/public$/)) ? "\nexports." + name + '=' + name + ';' : '';
-    var isExports = ($m.PLATFORM == 'node' && behind == 'export') ? "\nmodule.exports." + name + '=' + name + ';' : '';
-
+    var isPublic  = ($m.PLATFORM == 'node' && m[2] == 'public') ? "\nexports." + name + '=' + name + ';' : '';
+    var isExports = ($m.PLATFORM == 'node' && m[1] == 'export') ? "\nmodule.exports." + name + '=' + name + ';' : '';
 
     this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");", isPublic, isExports ];
   });
