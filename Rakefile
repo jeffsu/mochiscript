@@ -7,22 +7,37 @@ BOOT    = %W| class |
 PARSER  = %W| tokens parsers jsml cli |
 VERSION = File.read("./VERSION").strip;
 
-task :test => :compile do
-  require "./platforms/gem/lib/mochiscript"
-  files = ENV['TEST'] ? [ "./tests/#{ENV['TEST']}.ms" ] : Dir['./tests/*.ms']
+namespace :test do
+  def get_files
+    ENV['TEST'] ? [ "./tests/#{ENV['TEST']}.ms" ] : Dir['./tests/*.ms']
+  end
 
-  files.each do |f|
-    puts "Testing: " + f
-    ctx = Mochiscript::Context.new
-    begin
-      ctx.eval_ms(File.read(f))
-    rescue Exception => e
-      puts "Error: " + ctx.parse(File.read(f))
-      puts "TREE:\n" + ctx.pp(File.read(f))
-      puts e.to_s
+  task :ruby => :compile  do
+    require "./platforms/gem/lib/mochiscript"
+
+    get_files.each do |f|
+      puts "Testing: " + f
+      ctx = Mochiscript::Context.new
+      begin
+        ctx.eval_ms(File.read(f))
+      rescue Exception => e
+        puts "Error: " + ctx.parse(File.read(f))
+        puts "TREE:\n" + ctx.pp(File.read(f))
+        puts e.to_s
+      end
+    end
+  end
+
+  task :node => :compile  do
+    get_files.each do |f|
+      puts "Testing: " + f
+      sh "node tests/node-runner #{f.sub(%r|^./tests/|, '')}"
     end
   end
 end
+
+task :test => [ 'test:ruby', 'test:node' ]
+
 
 task :push do
   sh "cd ./platforms/gem; rm *.gem; gem build mochiscript.gemspec; gem push *.gem; "
