@@ -31,7 +31,7 @@ namespace :test do
   task :node => :compile  do
     get_files.each do |f|
       puts "Testing: " + f
-      sh "node tests/node-runner #{f.sub(%r|^./tests/|, '')}"
+      sh "node ./tests/node-runner.js #{f.sub(%r|^./tests/|, '')}"
     end
   end
 end
