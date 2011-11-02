@@ -156,8 +156,8 @@ class ClassParser extends RootParser {
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    var isPublic  = ($m.PLATFORM == 'node' && m[2] == 'public') ? "\nexports." + name + '=' + name + ';' : '';
-    var isExports = ($m.PLATFORM == 'node' && m[1] == 'export') ? "\nmodule.exports." + name + '=' + name + ';' : '';
+    var isPublic  = ($m.PLATFORM == 'node' && m[2] && m[2].indexOf('public') == 0) ? "exports." + name + '=' + name + ';' : '';
+    var isExports = ($m.PLATFORM == 'node' && m[1] && m[1].indexOf('export') == 0) ? "module.exports=" + name + ';' : '';
 
     this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");", isPublic, isExports ];
   }
