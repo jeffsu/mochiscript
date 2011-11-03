@@ -1,12 +1,12 @@
 (function (window) {
 var $m  = {
   ROOT: window,
-  ADAPTER: {                                                                                             
-    out: console.log,
+  ADAPTER: {
+    out:  console.log,
     outs: console.log,
   },
   PLATFORM: 'browser'
-}; 
+};
 
 window.$m = $m;
 
@@ -25,12 +25,27 @@ window.$m = $m;
     if (this.par) this.par.OO.children.push(klass);
   };
 
+  $m.PUSH_ROOT = function (r) {
+    this.ROOTS = this.ROOTS || [];
+    this.ROOTS.push(r);
+    this.ROOT = r;
+  };
+
+  $m.POP_ROOT = function () {
+    this.ROOTS = this.ROOTS || [];
+    if (this.ROOTS.length) {
+      this.ROOTS.pop();
+      this.ROOT = this.ROOTS[this.ROOTS.length-1];
+    }
+
+  };
+
   OO.prototype = {
-    forbiddenMembers: { 
-      'prototype': undefined, 
-      'OO': undefined 
+    forbiddenMembers: {
+      'prototype': undefined,
+      'OO': undefined
     },
- 
+
     include: function(module) {
       this.included.push(module);
       var members = module.OO.members;
@@ -95,7 +110,7 @@ window.$m = $m;
           member = this.makeSuper(member, this.klass[name]);
         }
       }
-      
+
       this.klass[name] = member;
       this.staticMembers[name] = member;
     }
@@ -117,7 +132,6 @@ window.$m = $m;
   $m.Class.extend = function(name, klassDef) {
     var klass = function() { if (!noInit) this.initialize.apply(this, arguments); };
     klass.OO  = new OO(klass, this);
-    if (klassDef) klass.name = name;
 
     if (typeof name != 'string') {
       klassDef = name;
@@ -204,9 +218,7 @@ window.$m = $m;
     }
   };
 
-
   return $m;
 })(undefined, $m);
-
 
 })(window);

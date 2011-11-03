@@ -4,7 +4,7 @@ require 'json'
 module Mochiscript
   class Context
     def initialize
-      @ctx = V8::Context.new 
+      @ctx = V8::Context.new
       @ctx['_$m_adapter'] = Adapter.new
       @ctx.eval(Parser::JAVASCRIPT)
     end
@@ -45,7 +45,7 @@ module Mochiscript
   class Parser
 JAVASCRIPT = <<'FINISH'
 var $m  = { ROOT: this, ADAPTER: _$m_adapter, PLATFORM: 'ruby' };
-var JS2 = $m; 
+var JS2 = $m;
 (function () {
   // CLASS HELPERS
 (function (undefined, $m) {
@@ -62,12 +62,27 @@ var JS2 = $m;
     if (this.par) this.par.OO.children.push(klass);
   };
 
+  $m.PUSH_ROOT = function (r) {
+    this.ROOTS = this.ROOTS || [];
+    this.ROOTS.push(r);
+    this.ROOT = r;
+  };
+
+  $m.POP_ROOT = function () {
+    this.ROOTS = this.ROOTS || [];
+    if (this.ROOTS.length) {
+      this.ROOTS.pop();
+      this.ROOT = this.ROOTS[this.ROOTS.length-1];
+    }
+
+  };
+
   OO.prototype = {
-    forbiddenMembers: { 
-      'prototype': undefined, 
-      'OO': undefined 
+    forbiddenMembers: {
+      'prototype': undefined,
+      'OO': undefined
     },
- 
+
     include: function(module) {
       this.included.push(module);
       var members = module.OO.members;
@@ -132,7 +147,7 @@ var JS2 = $m;
           member = this.makeSuper(member, this.klass[name]);
         }
       }
-      
+
       this.klass[name] = member;
       this.staticMembers[name] = member;
     }
@@ -154,7 +169,6 @@ var JS2 = $m;
   $m.Class.extend = function(name, klassDef) {
     var klass = function() { if (!noInit) this.initialize.apply(this, arguments); };
     klass.OO  = new OO(klass, this);
-    if (klassDef) klass.name = name;
 
     if (typeof name != 'string') {
       klassDef = name;
@@ -241,49 +255,47 @@ var JS2 = $m;
     }
   };
 
-
   return $m;
 })(undefined, $m);
-
 
   var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
 
-  [ "STATIC",   "static\\b" ], 
-  [ "MODULE",   "module\\b", 'ModuleParser' ], 
+  [ "STATIC",   "static\\b" ],
+  [ "MODULE",   "module\\b", 'ModuleParser' ],
 
-  [ "EXPORT",   "export\\s+class\\b", 'ClassParser' ], 
-  [ "PUBLIC",   "public\\s+class\\b", 'ClassParser' ], 
+  [ "EXPORT",   "export\\s+class\\b", 'ClassParser' ],
+  [ "PUBLIC",   "public\\s+class\\b", 'ClassParser' ],
 
-  [ "CLASS",    "class\\b",  'ClassParser' ], 
-  [ "FUNCTION", "function\\b" ], 
-  [ "INCLUDE",  "include\\b" ], 
-  [ "VAR",      "var\\b" ], 
-  [ "PRIVATE",  "private\\b" ], 
-  [ "EXTENDS",  "extends\\b" ], 
-  [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
+  [ "CLASS",    "class\\b",  'ClassParser' ],
+  [ "FUNCTION", "function\\b" ],
+  [ "INCLUDE",  "include\\b" ],
+  [ "VAR",      "var\\b" ],
+  [ "PRIVATE",  "private\\b" ],
+  [ "EXTENDS",  "extends\\b" ],
+  [ "FOREACH",  "foreach\\b", 'ForeachParser' ],
 
-  [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ], 
-  [ "ISTRING_START", "%{", 'IStringParser' ], 
-  [ "HEREDOC", "<<[A-Z][0-9A-Z]*", 'HereDocParser' ], 
+  [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ],
+  [ "ISTRING_START", "%{", 'IStringParser' ],
+  [ "HEREDOC", "<<[A-Z][0-9A-Z]*", 'HereDocParser' ],
 
-  [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
-  [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ], 
+  [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ],
+  [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ],
 
-  [ "SEMICOLON", ";" ], 
+  [ "SEMICOLON", ";" ],
   [ "OPERATOR",  "\\+|\\-|\\++" ],
   [ "EQUALS",    "=" ],
 
-  [ "COMMENT", "\\/\\/|\\/\\*", "CommentParser" ], 
-  [ "REGEX", "/", 'RegexParser' ], 
+  [ "COMMENT", "\\/\\/|\\/\\*", "CommentParser" ],
+  [ "REGEX", "/", 'RegexParser' ],
 
   [ "LBRACE", "\\(" ],
   [ "RBRACE", "\\)" ],
   [ "LCURLY", "\\{" ],
   [ "RCURLY", "\\}" ],
 
-  [ "IDENT", IDENT ], 
+  [ "IDENT", IDENT ],
   [ "WHATEVER", "." ]
 ];
 
@@ -294,7 +306,7 @@ var MAIN_REGEX = null;
 var RTYPES  = {};
 
 for(var i=0,_c1=TOKENS,_l1=_c1.length,t;(t=_c1[i])||(i<_l1);i++){
-  TYPES[t[0]] = i; 
+  TYPES[t[0]] = i;
   RTYPES[i]   = t[0];
   REGEXES.push("(" + t[1] + ")");
 }
@@ -374,7 +386,6 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
 });
 var Tokens = $c.Tokens;
 
-
 $m.parse = function (str) {
   var parser = new $c.RootParser();
   parser.parse(new $c.Tokens(str));
@@ -405,7 +416,7 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
 
   OO.addMember("parse",function (tokens) {
     var len = tokens.length();
-    if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) === false) return false 
+    if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) === false) return false
     return len != tokens.length();
   });
 
@@ -424,13 +435,13 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
         var handler = new $c[handlerClass];
         handler._TYPE = handlerClass;
         if (handler.parse(tokens) !== false) {
-          this.out.push(handler); 
+          this.out.push(handler);
           tokens.lastHandler = handler;
         } else {
           this.handleToken(token, tokens);
         }
-      } 
-      
+      }
+
       // no parser class, use "this" to just consume it
       else {
         this.handleToken(token, tokens);
@@ -457,7 +468,7 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
   OO.addMember("toString",function () {
     var ret = [];
     for(var _i1=0,_c1=this.out,_l1=_c1.length,ele;(ele=_c1[_i1])||(_i1<_l1);_i1++){
-      ret.push(ele === undefined ? '' : ele.toString()); 
+      ret.push(ele === undefined ? '' : ele.toString());
     }
     return ret.join("");
   });
@@ -483,8 +494,8 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
           generic = [];
         }
         ret.push(ele.pp(space));
-      } 
-      
+      }
+
       else {
         generic.push(ele);
       }
@@ -537,7 +548,7 @@ RootParser.extend('ClassParser', function(KLASS, OO){
     var isPublic  = ($m.PLATFORM == 'node' && m[2] && m[2].indexOf('public') == 0) ? "exports." + name + '=' + name + ';' : '';
     var isExports = ($m.PLATFORM == 'node' && m[1] && m[1].indexOf('export') == 0) ? "module.exports=" + name + ';' : '';
 
-    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");", isPublic, isExports ];
+    this.out = [ extending, ".extend(", JSON.stringify(name), ", function(KLASS, OO)", content, ");", isPublic, isExports ];
   });
 });
 
@@ -556,7 +567,7 @@ RootParser.extend('ModuleParser', function(KLASS, OO){
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    this.out = [ "var ", name, " = $m.Module.extend(function(KLASS, OO)", content, ");" ];
+    this.out = [ "$m.Module.extend(", JSON.stringify(name), ", function(KLASS, OO)", content, ");" ];
   });
 });
 
@@ -656,8 +667,8 @@ RootParser.extend('IStringParser', function(KLASS, OO){
         tokens.consume(len-1);
         this.parseMiddle(tokens);
         this.out.push(')+"');
-      } 
-      
+      }
+
       else if (m[2] == '}') {
         this.out.push(str);
         this.out.push('"');
@@ -668,7 +679,7 @@ RootParser.extend('IStringParser', function(KLASS, OO){
   });
 
   OO.addMember("parseMiddle",function (tokens) {
-    var parser = new $c.CurlyParser(true); 
+    var parser = new $c.CurlyParser(true);
     parser.parse(tokens);
     this.out.push(parser);
   });
@@ -689,8 +700,8 @@ RootParser.extend('StaticParser', function(KLASS, OO){
       parser.isStatic = true;
       parser.parse(tokens);
       this.out.push(parser);
-    } 
-    
+    }
+
     else {
       var functMatch = tokens.match(FUNCT_REGEX);
       tokens.consume(functMatch[1].length);
@@ -783,7 +794,7 @@ RootParser.extend('MethodParser', function(KLASS, OO){
     body.parse(tokens);
 
     var addMethod = this.isStatic ? 'addStaticMember' : 'addMember';
-    
+
 
     this.out = [ 'OO.' + addMethod + '(', JSON.stringify(name), ', function', args, body, ');' ];
   });
@@ -829,7 +840,7 @@ RootParser.extend('CommentParser', function(KLASS, OO){
       tokens.consume(m2[0].length);
       this.out = [ m2[0] ];
       return;
-    } 
+    }
 
     return false;
   });
@@ -848,9 +859,9 @@ RootParser.extend('RegexParser', function(KLASS, OO){
     if (back.match(DIVIDE)) {
       this._TYPE = 'DIVIDE';
       tokens.consume(1);
-      this.out.push("/"); 
-    } 
-    
+      this.out.push("/");
+    }
+
     else {
       var m = tokens.match(REGEX);
       if (m) {
@@ -893,9 +904,8 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
   OO.addMember("endParse",function (tokens) {
     tokens.iterator--;
   });
- 
-});
 
+});
 
 
 JS2.Class.extend('JSML', function(KLASS, OO){
@@ -937,7 +947,7 @@ JS2.Class.extend('JSML', function(KLASS, OO){
       this.getLast().push(ele);
       this.stack.push(ele);
     } else if (ele.scope > scope) {
-      this.getLast().push(ele); 
+      this.getLast().push(ele);
       this.stack.push(ele);
     } else if (ele.scope < scope) {
       var diff = scope - ele.scope + 1;
@@ -1001,12 +1011,12 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     var content  = splitted[4];
 
     if (tokens) {
-      tokens.replace(this.TOKEN_REGEX, function(match, type, name){ 
+      tokens.replace(this.TOKEN_REGEX, function(match, type, name){
         switch(type) {
           case '%': self.nodeType = name; break;
           case '.': self.classes.push(name); break;
           case '#': self.nodeID = name; break;
-        } 
+        }
         return '';
       });
     }
@@ -1036,7 +1046,7 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
 
   OO.addMember("flatten",function () {
     var out = [];
-   
+
     for(var _i1=0,_c1=this.children,_l1=_c1.length,c;(c=_c1[_i1])||(_i1<_l1);_i1++){
       var arr = c.flatten();
       for(var _i2=0,_c2=arr,_l2=_c2.length,item;(item=_c2[_i2])||(_i2<_l2);_i2++){
@@ -1098,7 +1108,6 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
   });
 });
 
-
 JS2.Class.extend('CLI', function(KLASS, OO){
   // private closure
 
@@ -1128,7 +1137,7 @@ JS2.Class.extend('CLI', function(KLASS, OO){
       if (endedArgs) {
         files.push(arg);
       }
-      
+
       else if (COMMANDS[arg]) {
         command   = arg;
         endedArgs = true;
@@ -1143,7 +1152,6 @@ JS2.Class.extend('CLI', function(KLASS, OO){
     return [ options, command, files ];
   });
 });
-
 
 })();
 FINISH

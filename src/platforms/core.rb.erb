@@ -4,7 +4,7 @@ require 'json'
 module Mochiscript
   class Context
     def initialize
-      @ctx = V8::Context.new 
+      @ctx = V8::Context.new
       @ctx['_$m_adapter'] = Adapter.new
       @ctx.eval(Parser::JAVASCRIPT)
     end
@@ -45,7 +45,7 @@ module Mochiscript
   class Parser
 JAVASCRIPT = <<'FINISH'
 var $m  = { ROOT: this, ADAPTER: _$m_adapter, PLATFORM: 'ruby' };
-var JS2 = $m; 
+var JS2 = $m;
 (function () {
   <%= @boot.gsub(%r|\\|, '\\\\') %>
   <%= @parser.gsub(%r|\\|, '\\\\') %>

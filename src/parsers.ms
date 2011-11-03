@@ -28,7 +28,7 @@ class RootParser {
 
   function parse(tokens) {
     var len = tokens.length();
-    if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) === false) return false 
+    if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) === false) return false
     return len != tokens.length();
   }
 
@@ -47,13 +47,13 @@ class RootParser {
         var handler = new $c[handlerClass];
         handler._TYPE = handlerClass;
         if (handler.parse(tokens) !== false) {
-          this.out.push(handler); 
+          this.out.push(handler);
           tokens.lastHandler = handler;
         } else {
           this.handleToken(token, tokens);
         }
-      } 
-      
+      }
+
       // no parser class, use "this" to just consume it
       else {
         this.handleToken(token, tokens);
@@ -80,7 +80,7 @@ class RootParser {
   function toString() {
     var ret = [];
     foreach (var ele in this.out) {
-      ret.push(ele === undefined ? '' : ele.toString()); 
+      ret.push(ele === undefined ? '' : ele.toString());
     }
     return ret.join("");
   }
@@ -106,8 +106,8 @@ class RootParser {
           generic = [];
         }
         ret.push(ele.pp(space));
-      } 
-      
+      }
+
       else {
         generic.push(ele);
       }
@@ -159,7 +159,7 @@ class ClassParser extends RootParser {
     var isPublic  = ($m.PLATFORM == 'node' && m[2] && m[2].indexOf('public') == 0) ? "exports." + name + '=' + name + ';' : '';
     var isExports = ($m.PLATFORM == 'node' && m[1] && m[1].indexOf('export') == 0) ? "module.exports=" + name + ';' : '';
 
-    this.out = [ "var ", name, " = " + extending + ".extend(function(KLASS, OO)", content, ");", isPublic, isExports ];
+    this.out = [ extending, ".extend(", JSON.stringify(name), ", function(KLASS, OO)", content, ");", isPublic, isExports ];
   }
 }
 
@@ -177,7 +177,7 @@ class ModuleParser extends RootParser {
     var content = new $c.ClassContentParser();
     content.parse(tokens);
 
-    this.out = [ "var ", name, " = $m.Module.extend(function(KLASS, OO)", content, ");" ];
+    this.out = [ "$m.Module.extend(", JSON.stringify(name), ", function(KLASS, OO)", content, ");" ];
   }
 }
 
@@ -275,8 +275,8 @@ class IStringParser extends RootParser {
         tokens.consume(len-1);
         this.parseMiddle(tokens);
         this.out.push(')+"');
-      } 
-      
+      }
+
       else if (m[2] == '}') {
         this.out.push(str);
         this.out.push('"');
@@ -287,7 +287,7 @@ class IStringParser extends RootParser {
   }
 
   function parseMiddle(tokens) {
-    var parser = new $c.CurlyParser(true); 
+    var parser = new $c.CurlyParser(true);
     parser.parse(tokens);
     this.out.push(parser);
   }
@@ -307,8 +307,8 @@ class StaticParser extends RootParser {
       parser.isStatic = true;
       parser.parse(tokens);
       this.out.push(parser);
-    } 
-    
+    }
+
     else {
       var functMatch = tokens.match(FUNCT_REGEX);
       tokens.consume(functMatch[1].length);
@@ -397,7 +397,7 @@ class MethodParser extends RootParser {
     body.parse(tokens);
 
     var addMethod = this.isStatic ? 'addStaticMember' : 'addMember';
-    
+
 
     this.out = [ 'OO.' + addMethod + '(', JSON.stringify(name), ', function', args, body, ');' ];
   }
@@ -442,7 +442,7 @@ class CommentParser extends RootParser {
       tokens.consume(m2[0].length);
       this.out = [ m2[0] ];
       return;
-    } 
+    }
 
     return false;
   }
@@ -460,9 +460,9 @@ class RegexParser extends RootParser {
     if (back.match(DIVIDE)) {
       this._TYPE = 'DIVIDE';
       tokens.consume(1);
-      this.out.push("/"); 
-    } 
-    
+      this.out.push("/");
+    }
+
     else {
       var m = tokens.match(REGEX);
       if (m) {
@@ -504,6 +504,6 @@ class ForeachParser extends CurlyParser {
   function endParse(tokens) {
     tokens.iterator--;
   }
- 
+
 }
 

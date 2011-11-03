@@ -2,40 +2,40 @@ var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
 
-  [ "STATIC",   "static\\b" ], 
-  [ "MODULE",   "module\\b", 'ModuleParser' ], 
+  [ "STATIC",   "static\\b" ],
+  [ "MODULE",   "module\\b", 'ModuleParser' ],
 
-  [ "EXPORT",   "export\\s+class\\b", 'ClassParser' ], 
-  [ "PUBLIC",   "public\\s+class\\b", 'ClassParser' ], 
+  [ "EXPORT",   "export\\s+class\\b", 'ClassParser' ],
+  [ "PUBLIC",   "public\\s+class\\b", 'ClassParser' ],
 
-  [ "CLASS",    "class\\b",  'ClassParser' ], 
-  [ "FUNCTION", "function\\b" ], 
-  [ "INCLUDE",  "include\\b" ], 
-  [ "VAR",      "var\\b" ], 
-  [ "PRIVATE",  "private\\b" ], 
-  [ "EXTENDS",  "extends\\b" ], 
-  [ "FOREACH",  "foreach\\b", 'ForeachParser' ], 
+  [ "CLASS",    "class\\b",  'ClassParser' ],
+  [ "FUNCTION", "function\\b" ],
+  [ "INCLUDE",  "include\\b" ],
+  [ "VAR",      "var\\b" ],
+  [ "PRIVATE",  "private\\b" ],
+  [ "EXTENDS",  "extends\\b" ],
+  [ "FOREACH",  "foreach\\b", 'ForeachParser' ],
 
-  [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ], 
-  [ "ISTRING_START", "%{", 'IStringParser' ], 
-  [ "HEREDOC", "<<[A-Z][0-9A-Z]*", 'HereDocParser' ], 
+  [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ],
+  [ "ISTRING_START", "%{", 'IStringParser' ],
+  [ "HEREDOC", "<<[A-Z][0-9A-Z]*", 'HereDocParser' ],
 
-  [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ], 
-  [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ], 
+  [ "DSTRING", "\"(?:\\\\.|[^\"])*\"" ],
+  [ "SSTRING", "\'(?:\\\\.|[^\'])*\'" ],
 
-  [ "SEMICOLON", ";" ], 
+  [ "SEMICOLON", ";" ],
   [ "OPERATOR",  "\\+|\\-|\\++" ],
   [ "EQUALS",    "=" ],
 
-  [ "COMMENT", "\\/\\/|\\/\\*", "CommentParser" ], 
-  [ "REGEX", "/", 'RegexParser' ], 
+  [ "COMMENT", "\\/\\/|\\/\\*", "CommentParser" ],
+  [ "REGEX", "/", 'RegexParser' ],
 
   [ "LBRACE", "\\(" ],
   [ "RBRACE", "\\)" ],
   [ "LCURLY", "\\{" ],
   [ "RCURLY", "\\}" ],
 
-  [ "IDENT", IDENT ], 
+  [ "IDENT", IDENT ],
   [ "WHATEVER", "." ]
 ];
 
@@ -46,7 +46,7 @@ var MAIN_REGEX = null;
 var RTYPES  = {};
 
 foreach (var t:i in TOKENS) {
-  TYPES[t[0]] = i; 
+  TYPES[t[0]] = i;
   RTYPES[i]   = t[0];
   REGEXES.push("(" + t[1] + ")");
 }

@@ -12,6 +12,7 @@ namespace :test do
     ENV['TEST'] ? [ "./tests/#{ENV['TEST']}.ms" ] : Dir['./tests/*.ms']
   end
 
+  desc "run all tests on ruby platform"
   task :ruby => :compile  do
     require "./platforms/gem/lib/mochiscript"
 
@@ -28,38 +29,41 @@ namespace :test do
     end
   end
 
+  desc "run all tests on node platform"
   task :node => :compile  do
     require "./platforms/gem/lib/mochiscript"
 
     get_files.each do |f|
       puts "Testing: " + f
       unless system("node ./tests/node-runner.js #{f.sub(%r|^./tests/|, '')}")
-        ctx = Mochiscript::Context.new
-        puts "Error: " + ctx.parse(File.read(f))
-        puts "TREE:\n" + ctx.pp(File.read(f))
+        system("node ./tests/node-parser.js #{f.sub(%r|^./tests/|, '')}")
       end
     end
   end
 end
 
+desc "run all platforms' tests"
 task :test => [ 'test:ruby', 'test:node' ]
 
-
-task :push do
+desc "publich both gem and npm"
+task :push => :compile do
   sh "cd ./platforms/gem; rm *.gem; gem build mochiscript.gemspec; gem push *.gem; "
   sh "cd ./platforms/npm; npm publish;"
 end
 
+desc "compile src to target"
 task :compile do
   @boot   = BOOT.collect { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
   @parser = PARSER.collect { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
 
-  { 
-    'boot.js.erb' => './platforms/gem/vendor/assets/javascripts/mochiscript.js',
-    'core.rb.erb' => './platforms/gem/lib/mochiscript/core.rb',
+  {
+    # gem
+    'boot.js.erb'        => './platforms/gem/vendor/assets/javascripts/mochiscript.js',
+    'core.rb.erb'        => './platforms/gem/lib/mochiscript/core.rb',
     'mochiscript.rb.erb' => './platforms/gem/lib/mochiscript.rb',
 
-    'node.js.erb' => './platforms/npm/lib/mochiscript/mochiscript.js',
+    # npm
+    'node.js.erb'      => './platforms/npm/lib/mochiscript/mochiscript.js',
     'package.json.erb' => './platforms/npm/package.json'
   }.each_pair do |target, destination|
     target = "./src/platforms/#{target}"

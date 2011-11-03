@@ -37,7 +37,7 @@ class JSML {
       this.getLast().push(ele);
       this.stack.push(ele);
     } else if (ele.scope > scope) {
-      this.getLast().push(ele); 
+      this.getLast().push(ele);
       this.stack.push(ele);
     } else if (ele.scope < scope) {
       var diff = scope - ele.scope + 1;
@@ -101,12 +101,12 @@ class JSMLElement {
     var content  = splitted[4];
 
     if (tokens) {
-      tokens.replace(this.TOKEN_REGEX, #(match, type, name) { 
+      tokens.replace(this.TOKEN_REGEX, #(match, type, name) {
         switch(type) {
           case '%': self.nodeType = name; break;
           case '.': self.classes.push(name); break;
           case '#': self.nodeID = name; break;
-        } 
+        }
         return '';
       });
     }
@@ -136,7 +136,7 @@ class JSMLElement {
 
   function flatten() {
     var out = [];
-   
+
     foreach (var c in this.children) {
       var arr = c.flatten();
       foreach (var item in arr) {

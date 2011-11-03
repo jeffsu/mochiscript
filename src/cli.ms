@@ -26,7 +26,7 @@ class CLI {
       if (endedArgs) {
         files.push(arg);
       }
-      
+
       else if (COMMANDS[arg]) {
         command   = arg;
         endedArgs = true;

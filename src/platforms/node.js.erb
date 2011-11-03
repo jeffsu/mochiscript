@@ -1,15 +1,15 @@
-var $m  = {                                                                                              
-  ROOT: this,
-  ADAPTER: {                                                                                             
+var $m  = {
+  ROOT: root,
+  ADAPTER: {
     out: function () { print.call(null, arguments); },
-    outs: function () { 
+    outs: function () {
       for (var i=0; i<arguments.length; i++) {
         console.log(arguments[i]);
       }
     }
   },
   PLATFORM: 'node'
-}; 
+};
 var JS2 = $m;
 
 (function () {
@@ -20,10 +20,11 @@ var JS2 = $m;
 exports.mochi = $m;
 
 var fs = require('fs');
-var requireScript = "var $m = require('mochiscript').mochi; $m.ROOT=this;\n";
+var requireScript = "var $m = require('mochiscript').mochi; $m.PUSH_ROOT(root);";
+var endScript = "$m.POP_ROOT();";
 if (require.extensions) {
   require.extensions['.ms'] = function(module, filename) {
-    return module._compile($m.parse(requireScript + fs.readFileSync(filename, 'utf8')), filename);
+    return module._compile($m.parse(requireScript + fs.readFileSync(filename, 'utf8') + endScript), filename);
   };
 } else if (require.registerExtension) {
   require.registerExtension('.ms', function(content) {
