@@ -1,5 +1,5 @@
 module Mochiscript
-  VERSION = "0.4.1".sub("-", '.')
+  VERSION = "0.4.2".sub("-", '.')
 end
 
 require File.dirname(__FILE__) + '/mochiscript/core'
