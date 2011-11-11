@@ -204,7 +204,7 @@ window.$m = $m;
   });
 
   $m.out = function () {
-    for(var i=0,_c1=arguments,_l1=_c1.length,arg;(arg=_c1[i])||(i<_l1);i++){
+    for (var i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
       $m.ADAPTER.out(arg);
       if (i < arguments.length-1) {
         $m.ADAPTER.out(',');
@@ -213,7 +213,7 @@ window.$m = $m;
   };
 
   $m.outs = function () {
-    for(var _i1=0,_c1=arguments,_l1=_c1.length,arg;(arg=_c1[_i1])||(_i1<_l1);_i1++){
+    for (var _i_0=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       $m.ADAPTER.outs(arg);
     }
   };
@@ -221,17 +221,18 @@ window.$m = $m;
   return $m;
 })(undefined, $m);
 
-JS2.Class.extend('JSML', function(KLASS, OO){
-  OO.addStaticMember("process",function (txt) {
+
+$m.Class.extend("JSML", function(KLASS, OO){
+  OO.addStaticMember("process", function(txt){
     return new $m.JSML(txt);
   });
 
-  OO.addMember("initialize",function (txt) {
+  OO.addMember("initialize", function(txt){
     var lines = txt.split(/\n/);
     this.root    = new $c.JSMLElement();
     this.stack   = [ this.root ];
 
-    for(var _i1=0,_c1=lines,_l1=_c1.length,l;(l=_c1[_i1])||(_i1<_l1);_i1++){
+    for (var _i_0=0,l=null,_list_0=lines,_len_0=_list_0.length;(l=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       if (l.match(/^\s*$/)) continue;
       this.processLine(l);
     }
@@ -245,11 +246,11 @@ JS2.Class.extend('JSML', function(KLASS, OO){
     };
   });
 
-  OO.addMember("flatten",function () {
+  OO.addMember("flatten", function(){
     return this.root.flatten();
   });
 
-  OO.addMember("processLine",function (line) {
+  OO.addMember("processLine", function(line){
     if (line.match(/^\s*$/)) return;
 
     var ele   = new $m.JSMLElement(line);
@@ -273,25 +274,25 @@ JS2.Class.extend('JSML', function(KLASS, OO){
   });
 
 
-  OO.addMember("getScope",function () {
+  OO.addMember("getScope", function(){
     return this.stack.length - 1;
   });
 
-  OO.addMember("getLast",function () {
+  OO.addMember("getLast", function(){
     return this.stack[this.stack.length-1];
   });
 
 });
 
-JS2.Class.extend('JSMLElement', function(KLASS, OO){
-  OO.addMember("SCOPE_REGEX",/^(\s*)(.*)$/);
-  OO.addMember("SPLIT_REGEX",/^((?:\.|\#|\%)[^=\s\{]*)?(\{.*\})?(=|-)?(?:\s*)(.*)$/);
-  OO.addMember("TOKEN_REGEX",/(\%|\#|\.)([\w][\w\-]*)/g);
-  OO.addMember("JS_REGEX",/^(-|=)(.*)$/g);
-  OO.addMember("SCOPE_OFFSET",1);
-  OO.addMember("SELF_CLOSING",{ area: null, basefont: null, br: null, hr: null, input: null, img: null, link: null, meta: null });
+$m.Class.extend("JSMLElement", function(KLASS, OO){
+  OO.addMember("SCOPE_REGEX", /^(\s*)(.*)$/);
+  OO.addMember("SPLIT_REGEX", /^((?:\.|\#|\%)[^=\s\{]*)?(\{.*\})?(=|-)?(?:\s*)(.*)$/);
+  OO.addMember("TOKEN_REGEX", /(\%|\#|\.)([\w][\w\-]*)/g);
+  OO.addMember("JS_REGEX", /^(-|=)(.*)$/g);
+  OO.addMember("SCOPE_OFFSET", 1);
+  OO.addMember("SELF_CLOSING", { area: null, basefont: null, br: null, hr: null, input: null, img: null, link: null, meta: null });
 
-  OO.addMember("initialize",function (line) {
+  OO.addMember("initialize", function(line){
     this.children = [];
 
     if (line == null) {
@@ -308,11 +309,11 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     this.parse(spaceMatch[2]);
   });
 
-  OO.addMember("push",function (child) {
+  OO.addMember("push", function(child){
     this.children.push(child);
   });
 
-  OO.addMember("parse",function (line) {
+  OO.addMember("parse", function(line){
     this.attributes;
     this.line = line;
     var self = this;
@@ -324,7 +325,7 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     var content  = splitted[4];
 
     if (tokens) {
-      tokens.replace(this.TOKEN_REGEX, function(match, type, name){
+      tokens.replace(this.TOKEN_REGEX, function(match, type, name) {
         switch(type) {
           case '%': self.nodeType = name; break;
           case '.': self.classes.push(name); break;
@@ -357,12 +358,12 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     }
   });
 
-  OO.addMember("flatten",function () {
+  OO.addMember("flatten", function(){
     var out = [];
 
-    for(var _i1=0,_c1=this.children,_l1=_c1.length,c;(c=_c1[_i1])||(_i1<_l1);_i1++){
+    for (var _i_0=0,c=null,_list_0=this.children,_len_0=_list_0.length;(c=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       var arr = c.flatten();
-      for(var _i2=0,_c2=arr,_l2=_c2.length,item;(item=_c2[_i2])||(_i2<_l2);_i2++){
+      for (var _i_1=0,item=null,_list_1=arr,_len_1=_list_1.length;(item=_list_1[_i_1])||_i_1<_len_1;_i_1++){
         out.push(item);
       }
     }
@@ -383,21 +384,21 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     return out;
   });
 
-  OO.addMember("handleJsEQ",function (out) {
+  OO.addMember("handleJsEQ", function(out){
     if (this.jsEQ) {
       this.jsEQ = this.jsEQ.replace(/;\s*$/, '');
       out.unshift('out.push(' + this.jsEQ + ');\n');
     }
   });
 
-  OO.addMember("handleContent",function (out) {
+  OO.addMember("handleContent", function(out){
     if (this.content != null && this.content.length > 0) {
       out.unshift('out.push(' + JSON.stringify(this.content) + ');\n');
     }
   });
 
 
-  OO.addMember("handleJsExec",function (out) {
+  OO.addMember("handleJsExec", function(out){
     if (this.jsExec) {
       out.unshift(this.jsExec);
       if (this.jsExec.match(/\{\s*$/)) {
@@ -406,7 +407,7 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     }
   });
 
-  OO.addStaticMember("parseAttributes",function (hash, classes, id) {
+  OO.addStaticMember("parseAttributes", function(hash, classes, id){
     var out = [];
     classes = classes || [];
     if (hash['class']) classes.push(hash['class']);
@@ -423,5 +424,6 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
 
 $m.JSML = $m.ROOT.JSML;
 $m.JSMLElement = $m.ROOT.JSMLElement;
+
 
 })(window);

@@ -207,7 +207,7 @@ var JS2 = $m;
   });
 
   $m.out = function () {
-    for(var i=0,_c1=arguments,_l1=_c1.length,arg;(arg=_c1[i])||(i<_l1);i++){
+    for (var i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
       $m.ADAPTER.out(arg);
       if (i < arguments.length-1) {
         $m.ADAPTER.out(',');
@@ -216,7 +216,7 @@ var JS2 = $m;
   };
 
   $m.outs = function () {
-    for(var _i1=0,_c1=arguments,_l1=_c1.length,arg;(arg=_c1[_i1])||(_i1<_l1);_i1++){
+    for (var _i_0=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       $m.ADAPTER.outs(arg);
     }
   };
@@ -224,17 +224,18 @@ var JS2 = $m;
   return $m;
 })(undefined, $m);
 
-JS2.Class.extend('JSML', function(KLASS, OO){
-  OO.addStaticMember("process",function (txt) {
+
+$m.Class.extend("JSML", function(KLASS, OO){
+  OO.addStaticMember("process", function(txt){
     return new $m.JSML(txt);
   });
 
-  OO.addMember("initialize",function (txt) {
+  OO.addMember("initialize", function(txt){
     var lines = txt.split(/\n/);
     this.root    = new $c.JSMLElement();
     this.stack   = [ this.root ];
 
-    for(var _i1=0,_c1=lines,_l1=_c1.length,l;(l=_c1[_i1])||(_i1<_l1);_i1++){
+    for (var _i_0=0,l=null,_list_0=lines,_len_0=_list_0.length;(l=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       if (l.match(/^\s*$/)) continue;
       this.processLine(l);
     }
@@ -248,11 +249,11 @@ JS2.Class.extend('JSML', function(KLASS, OO){
     };
   });
 
-  OO.addMember("flatten",function () {
+  OO.addMember("flatten", function(){
     return this.root.flatten();
   });
 
-  OO.addMember("processLine",function (line) {
+  OO.addMember("processLine", function(line){
     if (line.match(/^\s*$/)) return;
 
     var ele   = new $m.JSMLElement(line);
@@ -276,25 +277,25 @@ JS2.Class.extend('JSML', function(KLASS, OO){
   });
 
 
-  OO.addMember("getScope",function () {
+  OO.addMember("getScope", function(){
     return this.stack.length - 1;
   });
 
-  OO.addMember("getLast",function () {
+  OO.addMember("getLast", function(){
     return this.stack[this.stack.length-1];
   });
 
 });
 
-JS2.Class.extend('JSMLElement', function(KLASS, OO){
-  OO.addMember("SCOPE_REGEX",/^(\s*)(.*)$/);
-  OO.addMember("SPLIT_REGEX",/^((?:\.|\#|\%)[^=\s\{]*)?(\{.*\})?(=|-)?(?:\s*)(.*)$/);
-  OO.addMember("TOKEN_REGEX",/(\%|\#|\.)([\w][\w\-]*)/g);
-  OO.addMember("JS_REGEX",/^(-|=)(.*)$/g);
-  OO.addMember("SCOPE_OFFSET",1);
-  OO.addMember("SELF_CLOSING",{ area: null, basefont: null, br: null, hr: null, input: null, img: null, link: null, meta: null });
+$m.Class.extend("JSMLElement", function(KLASS, OO){
+  OO.addMember("SCOPE_REGEX", /^(\s*)(.*)$/);
+  OO.addMember("SPLIT_REGEX", /^((?:\.|\#|\%)[^=\s\{]*)?(\{.*\})?(=|-)?(?:\s*)(.*)$/);
+  OO.addMember("TOKEN_REGEX", /(\%|\#|\.)([\w][\w\-]*)/g);
+  OO.addMember("JS_REGEX", /^(-|=)(.*)$/g);
+  OO.addMember("SCOPE_OFFSET", 1);
+  OO.addMember("SELF_CLOSING", { area: null, basefont: null, br: null, hr: null, input: null, img: null, link: null, meta: null });
 
-  OO.addMember("initialize",function (line) {
+  OO.addMember("initialize", function(line){
     this.children = [];
 
     if (line == null) {
@@ -311,11 +312,11 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     this.parse(spaceMatch[2]);
   });
 
-  OO.addMember("push",function (child) {
+  OO.addMember("push", function(child){
     this.children.push(child);
   });
 
-  OO.addMember("parse",function (line) {
+  OO.addMember("parse", function(line){
     this.attributes;
     this.line = line;
     var self = this;
@@ -327,7 +328,7 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     var content  = splitted[4];
 
     if (tokens) {
-      tokens.replace(this.TOKEN_REGEX, function(match, type, name){
+      tokens.replace(this.TOKEN_REGEX, function(match, type, name) {
         switch(type) {
           case '%': self.nodeType = name; break;
           case '.': self.classes.push(name); break;
@@ -360,12 +361,12 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     }
   });
 
-  OO.addMember("flatten",function () {
+  OO.addMember("flatten", function(){
     var out = [];
 
-    for(var _i1=0,_c1=this.children,_l1=_c1.length,c;(c=_c1[_i1])||(_i1<_l1);_i1++){
+    for (var _i_0=0,c=null,_list_0=this.children,_len_0=_list_0.length;(c=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       var arr = c.flatten();
-      for(var _i2=0,_c2=arr,_l2=_c2.length,item;(item=_c2[_i2])||(_i2<_l2);_i2++){
+      for (var _i_1=0,item=null,_list_1=arr,_len_1=_list_1.length;(item=_list_1[_i_1])||_i_1<_len_1;_i_1++){
         out.push(item);
       }
     }
@@ -386,21 +387,21 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     return out;
   });
 
-  OO.addMember("handleJsEQ",function (out) {
+  OO.addMember("handleJsEQ", function(out){
     if (this.jsEQ) {
       this.jsEQ = this.jsEQ.replace(/;\s*$/, '');
       out.unshift('out.push(' + this.jsEQ + ');\n');
     }
   });
 
-  OO.addMember("handleContent",function (out) {
+  OO.addMember("handleContent", function(out){
     if (this.content != null && this.content.length > 0) {
       out.unshift('out.push(' + JSON.stringify(this.content) + ');\n');
     }
   });
 
 
-  OO.addMember("handleJsExec",function (out) {
+  OO.addMember("handleJsExec", function(out){
     if (this.jsExec) {
       out.unshift(this.jsExec);
       if (this.jsExec.match(/\{\s*$/)) {
@@ -409,7 +410,7 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
     }
   });
 
-  OO.addStaticMember("parseAttributes",function (hash, classes, id) {
+  OO.addStaticMember("parseAttributes", function(hash, classes, id){
     var out = [];
     classes = classes || [];
     if (hash['class']) classes.push(hash['class']);
@@ -426,6 +427,7 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
 
 $m.JSML = $m.ROOT.JSML;
 $m.JSMLElement = $m.ROOT.JSMLElement;
+
 
 var IDENT  = "[\\$\\w]+";
 var TOKENS = [
@@ -474,7 +476,7 @@ var REGEXES = [];
 var MAIN_REGEX = null;
 var RTYPES  = {};
 
-for(var i=0,_c1=TOKENS,_l1=_c1.length,t;(t=_c1[i])||(i<_l1);i++){
+for (var i=0,t=null,_list_0=TOKENS,_len_0=_list_0.length;(t=_list_0[i])||i<_len_0;i++){
   TYPES[t[0]] = i;
   RTYPES[i]   = t[0];
   REGEXES.push("(" + t[1] + ")");
@@ -487,26 +489,26 @@ var EXTRA_REGEX_STRINGS = {
 
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
 
-JS2.Class.extend('Tokens', function(KLASS, OO){
-  OO.addMember("initialize",function (str) {
+$m.Class.extend("Tokens", function(KLASS, OO){
+  OO.addMember("initialize", function(str){
     this.orig     = str;
     this.str      = str;
     this.iterator = 0;
     this.consumed = 0;
   });
 
-  OO.addMember("peek",function () {
+  OO.addMember("peek", function(){
     if (this._peek) return this._peek;
 
     var m = this.str.match(MAIN_REGEX);
     if (!m) return null;
 
-    for(var i=0,_c1=TOKENS,_l1=_c1.length,ele;(ele=_c1[i])||(i<_l1);i++){
+    for (var i=0,ele=null,_list_0=TOKENS,_len_0=_list_0.length;(ele=_list_0[i])||i<_len_0;i++){
       if (m[i+1]) return this._peek = [ i, m[i+1], ele[2] ];
     }
   });
 
-  OO.addStaticMember("regex",function (str) {
+  OO.addStaticMember("regex", function(str){
     var regexStr = str.replace(/\*\*/g, "\\s*").replace(/\s+/g, "\\s+").replace(/\>\</g, ">\\s*<").replace(/\<(\w+)\>/g, function($1,$2,$3){
       return "(" + (EXTRA_REGEX_STRINGS[$2] || TOKENS[TYPES[$2]][1])  + ")";
     });
@@ -514,17 +516,17 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
     return new RegExp("^" + regexStr);
   });
 
-  OO.addMember("consume",function (n) {
+  OO.addMember("consume", function(n){
     this.str   = this.str.substr(n, this.str.length-n);
     this._peek = null;
     this.consumed += n;
   });
 
-  OO.addMember("length",function () {
+  OO.addMember("length", function(){
     return this.str.length;
   });
 
-  OO.addMember("lookback",function (n) {
+  OO.addMember("lookback", function(n){
     var starting = this.consumed - 1;
 
     //$m.outs(JSON.stringify(this.orig.substr(starting-10, 10)));
@@ -538,22 +540,23 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
     return this.orig.substr(starting-n+1, n);
   });
 
-  OO.addMember("lookahead",function (n) {
+  OO.addMember("lookahead", function(n){
     var starting = this.consumed;
     while (this.orig.charAt(starting).match(/\s/)) starting++;
     return this.orig.substr(starting, n);
   });
 
 
-  OO.addMember("any",function () {
+  OO.addMember("any", function(){
     return this.str.length > 0;
   });
 
-  OO.addMember("match",function (regex) {
+  OO.addMember("match", function(regex){
     return this.str.match(regex);
   });
 });
 var Tokens = $c.Tokens;
+
 
 $m.parse = function (str) {
   var parser = new $c.RootParser();
@@ -575,22 +578,22 @@ $m.pp = function (str) {
 
 
 
-JS2.Class.extend('RootParser', function(KLASS, OO){
-  OO.addMember("handlers",{});
+$m.Class.extend("RootParser", function(KLASS, OO){
+  OO.addMember("handlers", {});
 
-  OO.addMember("initialize",function () {
+  OO.addMember("initialize", function(){
     this.out = [];
     this.finished = false;
   });
 
-  OO.addMember("parse",function (tokens) {
+  OO.addMember("parse", function(tokens){
     var len = tokens.length();
     if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) === false) return false
     return len != tokens.length();
   });
 
   // TODO: messy clean this process up
-  OO.addMember("parseTokens",function (tokens) {
+  OO.addMember("parseTokens", function(tokens){
     var sanity  = 100;
     var origLen = tokens.length();
 
@@ -626,32 +629,32 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
     }
   });
 
-  OO.addMember("startParse",function () { });
-  OO.addMember("endParse",function () { });
+  OO.addMember("startParse", function(){ });
+  OO.addMember("endParse", function(){ });
 
-  OO.addMember("handleToken",function (token, tokens) {
+  OO.addMember("handleToken", function(token, tokens){
     this.out.push(token[1]);
     tokens.consume(token[1].length);
   });
 
-  OO.addMember("toString",function () {
+  OO.addMember("toString", function(){
     var ret = [];
-    for(var _i1=0,_c1=this.out,_l1=_c1.length,ele;(ele=_c1[_i1])||(_i1<_l1);_i1++){
+    for (var _i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       ret.push(ele === undefined ? '' : ele.toString());
     }
     return ret.join("");
   });
 
-  OO.addMember("toJSON",function () {
+  OO.addMember("toJSON", function(){
     return JSON.stringify(this.toStruct());
   });
 
-  OO.addMember("pp",function (space) {
+  OO.addMember("pp", function(space){
     space = space == null ? "  " : space + "  ";
 
     var ret = [ space + (this._TYPE || 'NODE') ];
     var generic = [];
-    for(var _i1=0,_c1=this.out,_l1=_c1.length,ele;(ele=_c1[_i1])||(_i1<_l1);_i1++){
+    for (var _i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       if (ele === undefined) {
         ret.push(space + "  UNDEFINED!");
         continue;
@@ -677,34 +680,33 @@ JS2.Class.extend('RootParser', function(KLASS, OO){
     return ret.join("\n");
   });
 
-  OO.addMember("toStruct",function () {
+  OO.addMember("toStruct", function(){
     var ret = [];
-    for(var _i1=0,_c1=this.out,_l1=_c1.length,ele;(ele=_c1[_i1])||(_i1<_l1);_i1++){
+    for (var _i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       ret.push(ele.toStruct ? ele.toStruct() : ele);
     }
     return ret;
   });
 
   // intercepts parser class for special cases
-  OO.addMember("getHandler",function (token) {
+  OO.addMember("getHandler", function(token){
     return null;
   });
 
-  OO.addMember("chop",function () {
+  OO.addMember("chop", function(){
     this.out.pop();
   });
 });
 
 var RootParser = $c.RootParser;
 
-RootParser.extend('ClassParser', function(KLASS, OO){
-  // private closure
-
+RootParser.extend("ClassParser", function(KLASS, OO){
+  
     var REGEX   = Tokens.regex("(?:<EXPORT>|<PUBLIC>|<CLASS>) <CLASSNAME><LCURLY>");
     var EXTENDS = Tokens.regex("(?:<EXPORT>|<PUBLIC>|<CLASS>) <CLASSNAME><EXTENDS><CLASSNAME><LCURLY>");
   
 
-  OO.addMember("parse",function (tokens) {
+  OO.addMember("parse", function(tokens){
     var m = tokens.match(REGEX) || tokens.match(EXTENDS);
     var name      = m[4];
     var extending = m[6] || "$m.Class";
@@ -721,13 +723,12 @@ RootParser.extend('ClassParser', function(KLASS, OO){
   });
 });
 
-RootParser.extend('ModuleParser', function(KLASS, OO){
-  // private closure
-
+RootParser.extend("ModuleParser", function(KLASS, OO){
+  
     var REGEX = Tokens.regex("<MODULE> <CLASSNAME><LCURLY>");
   
 
-  OO.addMember("parse",function (tokens) {
+  OO.addMember("parse", function(tokens){
     var m = tokens.match(REGEX);
     if (!m) return false;
     var name = m[2];
@@ -740,15 +741,15 @@ RootParser.extend('ModuleParser', function(KLASS, OO){
   });
 });
 
-RootParser.extend('CurlyParser', function(KLASS, OO){
-  OO.addMember("_TYPE",'CurlyParser');
+RootParser.extend("CurlyParser", function(KLASS, OO){
+  OO.addMember("_TYPE", 'CurlyParser');
 
-  OO.addMember("initialize",function (chop) {
+  OO.addMember("initialize", function(chop){
     this.chop = chop;
     this.$super();
   });
 
-  OO.addMember("handleToken",function (token, tokens) {
+  OO.addMember("handleToken", function(token, tokens){
     if (this.curly === undefined) this.curly = 0;
     if (this.foo) console.log(RTYPES[token[0]], token[1]);
     if (token[0] == TYPES.RCURLY) {
@@ -764,7 +765,7 @@ RootParser.extend('CurlyParser', function(KLASS, OO){
     }
   });
 
-  OO.addMember("endParse",function (tokens) {
+  OO.addMember("endParse", function(tokens){
     if (this.chop) {
       this.out.pop();
       this.out.shift();
@@ -774,8 +775,8 @@ RootParser.extend('CurlyParser', function(KLASS, OO){
 
 var CurlyParser = $c.CurlyParser;
 
-CurlyParser.extend('ClassContentParser', function(KLASS, OO){
-  OO.addMember("getHandler",function (token) {
+CurlyParser.extend("ClassContentParser", function(KLASS, OO){
+  OO.addMember("getHandler", function(token){
     switch(token[0]) {
       case TYPES.STATIC:   return "StaticParser";
       case TYPES.VAR:      return "MemberParser";
@@ -787,8 +788,8 @@ CurlyParser.extend('ClassContentParser', function(KLASS, OO){
 
 });
 
-RootParser.extend('LineParser', function(KLASS, OO){
-  OO.addMember("handleToken",function (token, tokens) {
+RootParser.extend("LineParser", function(KLASS, OO){
+  OO.addMember("handleToken", function(token, tokens){
     this.$super(token, tokens);
     if (token[0] == TYPES.SEMICOLON) {
       this.finished = true;
@@ -796,31 +797,29 @@ RootParser.extend('LineParser', function(KLASS, OO){
   });
 });
 
-CurlyParser.extend('PrivateParser', function(KLASS, OO){
-  // private closure
-
+CurlyParser.extend("PrivateParser", function(KLASS, OO){
+  
     var REGEX = Tokens.regex("<PRIVATE>\\s*");
   
 
-  OO.addMember("startParse",function (tokens) {
+  OO.addMember("startParse", function(tokens){
     var m = tokens.match(REGEX);
     tokens.consume(m[0].length);
   });
 
-  OO.addMember("endParse",function (tokens) {
+  OO.addMember("endParse", function(tokens){
     this.out.pop();
     this.out.shift();
   });
 });
 
 
-RootParser.extend('IStringParser', function(KLASS, OO){
-  // private closure
-
+RootParser.extend("IStringParser", function(KLASS, OO){
+  
     var BEGIN = Tokens.regex("<ISTRING_START>");
   
 
-  OO.addMember("parse",function (tokens) {
+  OO.addMember("parse", function(tokens){
     var m = tokens.match(BEGIN);
     tokens.consume(m[0].length);
     this.out.push('"');
@@ -847,21 +846,20 @@ RootParser.extend('IStringParser', function(KLASS, OO){
     }
   });
 
-  OO.addMember("parseMiddle",function (tokens) {
+  OO.addMember("parseMiddle", function(tokens){
     var parser = new $c.CurlyParser(true);
     parser.parse(tokens);
     this.out.push(parser);
   });
 });
 
-RootParser.extend('StaticParser', function(KLASS, OO){
-  // private closure
-
+RootParser.extend("StaticParser", function(KLASS, OO){
+  
     var VAR_REGEX = Tokens.regex("(<STATIC>(\\s+))<VAR>");
     var FUNCT_REGEX = Tokens.regex("(<STATIC>(\\s+))<FUNCTION>");
   
 
-  OO.addMember("parseTokens",function (tokens) {
+  OO.addMember("parseTokens", function(tokens){
     var varMatch = tokens.match(VAR_REGEX);
     if (varMatch) {
       tokens.consume(varMatch[1].length);
@@ -883,13 +881,12 @@ RootParser.extend('StaticParser', function(KLASS, OO){
   });
 });
 
-RootParser.extend('MemberParser', function(KLASS, OO){
-  // private closure
-
+RootParser.extend("MemberParser", function(KLASS, OO){
+  
     var REGEX = Tokens.regex("var <IDENT>\\s*=\\s*?");
   
 
-  OO.addMember("parse",function (tokens) {
+  OO.addMember("parse", function(tokens){
     var m = tokens.str.match(REGEX);
     this.name = m[1];
     tokens.consume(m[0].length);
@@ -907,26 +904,24 @@ var MemberParser = $m.MemberParser;
 
 
 
-RootParser.extend('IncludeParser', function(KLASS, OO){
-  // private closure
-
+RootParser.extend("IncludeParser", function(KLASS, OO){
+  
     var REGEX = Tokens.regex("<INCLUDE> <CLASSNAME><SEMICOLON>");
   
 
-  OO.addMember("parse",function (tokens) {
+  OO.addMember("parse", function(tokens){
     var m = tokens.match(REGEX);
     tokens.consume(m[0].length);
     this.out = [ 'OO.include(',  m[2], ');' ];
   });
 });
 
-RootParser.extend('HereDocParser', function(KLASS, OO){
-  // private closure
-
+RootParser.extend("HereDocParser", function(KLASS, OO){
+  
     var REGEX = Tokens.regex("<HEREDOC>");
   
 
-  OO.addMember("parse",function (tokens) {
+  OO.addMember("parse", function(tokens){
     var beginning = tokens.match(/^<<(\w+)(?::(\w+))?\s*([;\)])*\n/);
     tokens.consume(beginning[0].length);
 
@@ -951,13 +946,12 @@ RootParser.extend('HereDocParser', function(KLASS, OO){
   });
 });
 
-RootParser.extend('MethodParser', function(KLASS, OO){
-  // private closure
-
+RootParser.extend("MethodParser", function(KLASS, OO){
+  
     var REGEX = Tokens.regex("<FUNCTION> <IDENT><ARGS><SPACE>");
   
 
-  OO.addMember("parse",function (tokens) {
+  OO.addMember("parse", function(tokens){
     var m = tokens.str.match(REGEX);
     tokens.consume(m[0].length);
     var name = m[2];
@@ -973,13 +967,12 @@ RootParser.extend('MethodParser', function(KLASS, OO){
   });
 });
 
-RootParser.extend('ShorthandFunctionParser', function(KLASS, OO){
-  // private closure
-
+RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
+  
     var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
   
 
-  OO.addMember("parse",function (tokens) {
+  OO.addMember("parse", function(tokens){
     tokens.consume(1);
     var argsMatch = tokens.match(ARGS_REGEX);
     var args = null;
@@ -999,8 +992,8 @@ RootParser.extend('ShorthandFunctionParser', function(KLASS, OO){
   });
 });
 
-RootParser.extend('CommentParser', function(KLASS, OO){
-  OO.addMember("parse",function (tokens) {
+RootParser.extend("CommentParser", function(KLASS, OO){
+  OO.addMember("parse", function(tokens){
     var m = tokens.match(/^\/\/.*?\n/);
     if (m) {
       tokens.consume(m[0].length);
@@ -1019,14 +1012,13 @@ RootParser.extend('CommentParser', function(KLASS, OO){
   });
 });
 
-RootParser.extend('RegexParser', function(KLASS, OO){
-  // private closure
-
+RootParser.extend("RegexParser", function(KLASS, OO){
+  
     var REGEX  = /^\/(\\.|[^\/])+\/[imgy]{0,4}/;
     var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$])$/;
   
 
-  OO.addMember("parseTokens",function (tokens) {
+  OO.addMember("parseTokens", function(tokens){
     var back = tokens.lookback(2);
 
     if (back.match(DIVIDE)) {
@@ -1049,15 +1041,14 @@ RootParser.extend('RegexParser', function(KLASS, OO){
 
 });
 
-CurlyParser.extend('ForeachParser', function(KLASS, OO){
-  OO.addMember("_TYPE",'Foreach');
+CurlyParser.extend("ForeachParser", function(KLASS, OO){
+  OO.addMember("_TYPE", 'Foreach');
 
-  // private closure
-
+  
     var REGEX = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**{");
   
 
-  OO.addMember("startParse",function (tokens) {
+  OO.addMember("startParse", function(tokens){
     var m = tokens.match(REGEX);
     namespace = tokens.iterator++;
 
@@ -1074,15 +1065,15 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
     this.out = [ "for (var ", declare, ";", bool, ';', this.iterator + "++)" ];
   });
 
-  OO.addMember("endParse",function (tokens) {
+  OO.addMember("endParse", function(tokens){
     tokens.iterator--;
   });
 
 });
 
-JS2.Class.extend('CLI', function(KLASS, OO){
-  // private closure
 
+$m.Class.extend("CLI", function(KLASS, OO){
+  
     var COMMANDS = {
       help:    'help',
       render:  'render',
@@ -1091,21 +1082,21 @@ JS2.Class.extend('CLI', function(KLASS, OO){
     };
   
 
-  OO.addMember("run",function (args) {
+  OO.addMember("run", function(args){
     var opts = this.parseOpts(args);
     var options = opts[0];
     var command = opts[1];
     var files   = opts[2];
   });
 
-  OO.addMember("parseOpts",function (args) {
+  OO.addMember("parseOpts", function(args){
     var files   = [];
     var options = {};
     var command = null;
 
     var endedArgs = false;
 
-    for(var i=0,_c1=args,_l1=_c1.length,arg;(arg=_c1[i])||(i<_l1);i++){
+    for (var i=0,arg=null,_list_0=args,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
       if (endedArgs) {
         files.push(arg);
       }
@@ -1124,6 +1115,7 @@ JS2.Class.extend('CLI', function(KLASS, OO){
     return [ options, command, files ];
   });
 });
+
 
 })();
 

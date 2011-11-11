@@ -35,8 +35,8 @@ namespace :test do
 
     get_files.each do |f|
       puts "Testing: " + f
-      unless system("node ./tests/node-runner.js #{f.sub(%r|^./tests/|, '')}")
-        system("node ./tests/node-parser.js #{f.sub(%r|^./tests/|, '')}")
+      unless system("./bin/ms-run #{f}")
+        system("./bin/ms-parse #{f}")
       end
     end
   end
@@ -73,5 +73,5 @@ task :compile do
 end
 
 def parse(file)
-  `js2 render #{file}`
+  `./bin/ms-parse #{file}`
 end
