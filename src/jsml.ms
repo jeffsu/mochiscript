@@ -1,4 +1,3 @@
-
 class JSML {
   static function process(txt) {
     return new $m.JSML(txt);

@@ -502,7 +502,7 @@ class ForeachParser extends CurlyParser {
 
     var bool = "(" + this.item + "=" + "_list_" + namespace + "[" + this.iterator + "])||" + this.iterator + "<_len_" + namespace;
 
-    this.out = [ "for (", declare, ";", bool, ';', this.iterator + "++)" ];
+    this.out = [ "for (var ", declare, ";", bool, ';', this.iterator + "++)" ];
   }
 
   function endParse(tokens) {
@@ -510,5 +510,3 @@ class ForeachParser extends CurlyParser {
   }
 
 }
-
-

@@ -258,8 +258,6 @@ var JS2 = $m;
   return $m;
 })(undefined, $m);
 
-
-
 JS2.Class.extend('JSML', function(KLASS, OO){
   OO.addStaticMember("process",function (txt) {
     return new $m.JSML(txt);
@@ -463,7 +461,6 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
 $m.JSML = $m.ROOT.JSML;
 $m.JSMLElement = $m.ROOT.JSMLElement;
 
-
   var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
@@ -591,7 +588,6 @@ JS2.Class.extend('Tokens', function(KLASS, OO){
   });
 });
 var Tokens = $c.Tokens;
-
 
 $m.parse = function (str) {
   var parser = new $c.RootParser();
@@ -1109,7 +1105,7 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
 
     var bool = "(" + this.item + "=" + "_list_" + namespace + "[" + this.iterator + "])||" + this.iterator + "<_len_" + namespace;
 
-    this.out = [ "for (", declare, ";", bool, ';', this.iterator + "++)" ];
+    this.out = [ "for (var ", declare, ";", bool, ';', this.iterator + "++)" ];
   });
 
   OO.addMember("endParse",function (tokens) {
@@ -1117,9 +1113,6 @@ CurlyParser.extend('ForeachParser', function(KLASS, OO){
   });
 
 });
-
-
-
 
 JS2.Class.extend('CLI', function(KLASS, OO){
   // private closure
@@ -1165,7 +1158,6 @@ JS2.Class.extend('CLI', function(KLASS, OO){
     return [ options, command, files ];
   });
 });
-
 
 })();
 FINISH

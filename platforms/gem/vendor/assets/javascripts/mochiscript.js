@@ -221,8 +221,6 @@ window.$m = $m;
   return $m;
 })(undefined, $m);
 
-
-
 JS2.Class.extend('JSML', function(KLASS, OO){
   OO.addStaticMember("process",function (txt) {
     return new $m.JSML(txt);
@@ -425,6 +423,5 @@ JS2.Class.extend('JSMLElement', function(KLASS, OO){
 
 $m.JSML = $m.ROOT.JSML;
 $m.JSMLElement = $m.ROOT.JSMLElement;
-
 
 })(window);
