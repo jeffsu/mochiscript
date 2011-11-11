@@ -3,8 +3,8 @@ require 'json'
 require 'pp'
 
 SRC_DIR = %|./src|
-BOOT    = %W| class |
-PARSER  = %W| tokens parsers jsml cli |
+BOOT    = %W| class jsml |
+PARSER  = %W| tokens parsers cli |
 VERSION = File.read("./VERSION").strip;
 
 namespace :test do

@@ -362,7 +362,7 @@ class HereDocParser extends RootParser {
   }
 
   function parse(tokens) {
-    var beginning = tokens.match(/^<<(\w+)\s*([;\)])*\n/);
+    var beginning = tokens.match(/^<<(\w+)(?::(\w+))?\s*([;\)])*\n/);
     tokens.consume(beginning[0].length);
 
     var spacing = tokens.match(/^(\s*)/);
@@ -378,7 +378,11 @@ class HereDocParser extends RootParser {
     var string = $m.parse('%{' + toParse + '}');
     tokens.consume(strMatch[0] ? strMatch[0].length : 0);
 
-    this.out = [ string, beginning[2] || ';' ];
+    if (beginning[2]) {
+      this.out = [ '$m.JSML.process(', string, ')',  beginning[3] || ';' ];
+    } else {
+      this.out = [ string, beginning[3] || ';' ];
+    }
   }
 }
 
@@ -506,4 +510,5 @@ class ForeachParser extends CurlyParser {
   }
 
 }
+
 
