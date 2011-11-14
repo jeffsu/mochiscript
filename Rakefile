@@ -45,10 +45,15 @@ end
 desc "run all platforms' tests"
 task :test => [ 'test:ruby', 'test:node' ]
 
-desc "publich both gem and npm"
+desc "publish both gem and npm"
 task :push => :compile do
   sh "cd ./platforms/gem; rm *.gem; gem build mochiscript.gemspec; gem push *.gem; "
   sh "cd ./platforms/npm; npm publish;"
+end
+
+desc "install gem"
+task :install_gem => :compile do
+  sh "cd ./platforms/gem; rm *.gem; gem build mochiscript.gemspec; gem install *.gem; "
 end
 
 desc "compile src to target"
