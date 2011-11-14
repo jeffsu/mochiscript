@@ -21,6 +21,7 @@ namespace :test do
       ctx = Mochiscript::Context.new
       begin
         ctx.eval_ms(File.read(f))
+        puts ctx.parse(File.read(f))
       rescue Exception => e
         puts "Error: " + ctx.parse(File.read(f))
         puts "TREE:\n" + ctx.pp(File.read(f))

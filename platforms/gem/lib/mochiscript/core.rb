@@ -967,7 +967,7 @@ RootParser.extend("HereDocParser", function(KLASS, OO){
     var toParse  = strMatch[1] || '';
 
     toParse = toParse.replace(regexSub, '');
-    toParse = toParse.replace("\n", "\\n");
+    toParse = toParse.replace(/\n/g, "\\n");
 
     var string = $m.parse('%{' + toParse + '}');
     tokens.consume(strMatch[0] ? strMatch[0].length : 0);
