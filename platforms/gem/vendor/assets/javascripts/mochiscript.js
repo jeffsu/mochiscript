@@ -204,7 +204,7 @@ window.$m = $m;
   });
 
   $m.out = function () {
-    for (i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
+    for (var i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
       $m.ADAPTER.out(arg);
       if (i < arguments.length-1) {
         $m.ADAPTER.out(',');
@@ -213,7 +213,7 @@ window.$m = $m;
   };
 
   $m.outs = function () {
-    for (_i_0=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (var _i_0=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       $m.ADAPTER.outs(arg);
     }
   };
