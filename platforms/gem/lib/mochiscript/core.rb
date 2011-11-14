@@ -269,7 +269,8 @@ $m.Class.extend("JSML", function(KLASS, OO){
     this.root    = new $c.JSMLElement();
     this.stack   = [ this.root ];
 
-    for (_i_0=0,l=null,_list_0=lines,_len_0=_list_0.length;(l=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (var i=0; i<lines.length; i++) {
+      var l = lines[i];
       if (l.match(/^\s*$/)) continue;
       this.processLine(l);
     }
@@ -398,9 +399,11 @@ $m.Class.extend("JSMLElement", function(KLASS, OO){
   OO.addMember("flatten", function(){
     var out = [];
 
-    for (_i_0=0,c=null,_list_0=this.children,_len_0=_list_0.length;(c=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (var i=0; i<this.children.length; i++) {
+      var c = this.children[i];
       var arr = c.flatten();
-      for (_i_1=0,item=null,_list_1=arr,_len_1=_list_1.length;(item=_list_1[_i_1])||_i_1<_len_1;_i_1++){
+      for (var j=0; j<arr.length; j++) {
+        var item = arr[j];
         out.push(item);
       }
     }
@@ -611,7 +614,6 @@ $m.pp = function (str) {
 };
 
 
-
 $m.Class.extend("RootParser", function(KLASS, OO){
   OO.addMember("handlers", {});
 
@@ -673,7 +675,8 @@ $m.Class.extend("RootParser", function(KLASS, OO){
 
   OO.addMember("toString", function(){
     var ret = [];
-    for (_i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (var i=0; i<this.out.length; i++) {
+      var ele = this.out[i];
       ret.push(ele === undefined ? '' : ele.toString());
     }
     return ret.join("");
@@ -956,22 +959,25 @@ RootParser.extend("HereDocParser", function(KLASS, OO){
   
 
   OO.addMember("parse", function(tokens){
-    var beginning = tokens.match(/^<<(\w+)(?::(\w+))?\s*([;\)])*\n/);
+    var beginning  = tokens.match(/^<<(\w+)(?::(\w+))?\s*([;\)])*\n/);
+    var terminator = beginning[1];
+
     tokens.consume(beginning[0].length);
 
-    var spacing = tokens.match(/^(\s*)/);
+    var spacing  = tokens.match(/^(\s*)/);
     var regexSub = new RegExp("^" + (spacing[0] || ''), "mg");
 
-
-    var strMatch = tokens.match(new RegExp("^([\\s\\S]*?)\\n\\s*" + beginning[1] + "\\s*\\n"));
+    var strMatch = tokens.match(new RegExp("^([\\s\\S]*?)\\n\\s*" + terminator + "\\b"));
     var toParse  = strMatch[1] || '';
 
     toParse = toParse.replace(regexSub, '');
     toParse = toParse.replace(/\n/g, "\\n");
 
-    var string = $m.parse('%{' + toParse + '}');
+    // TODO handle options for interpolation
+    var string = '"' + toParse.replace(/"/g, '\\"') + '"';
     tokens.consume(strMatch[0] ? strMatch[0].length : 0);
 
+    // TODO put this in register
     if (beginning[2]) {
       this.out = [ '$m.JSML.process(', string, ')',  beginning[3] || ';' ];
     } else {

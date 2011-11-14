@@ -17,7 +17,6 @@ $m.pp = function (str) {
 };
 
 
-
 class RootParser {
   var handlers = {};
 
@@ -79,7 +78,8 @@ class RootParser {
 
   function toString() {
     var ret = [];
-    foreach (var ele in this.out) {
+    for (var i=0; i<this.out.length; i++) {
+      var ele = this.out[i];
       ret.push(ele === undefined ? '' : ele.toString());
     }
     return ret.join("");
@@ -362,22 +362,25 @@ class HereDocParser extends RootParser {
   }
 
   function parse(tokens) {
-    var beginning = tokens.match(/^<<(\w+)(?::(\w+))?\s*([;\)])*\n/);
+    var beginning  = tokens.match(/^<<(\w+)(?::(\w+))?\s*([;\)])*\n/);
+    var terminator = beginning[1];
+
     tokens.consume(beginning[0].length);
 
-    var spacing = tokens.match(/^(\s*)/);
+    var spacing  = tokens.match(/^(\s*)/);
     var regexSub = new RegExp("^" + (spacing[0] || ''), "mg");
 
-
-    var strMatch = tokens.match(new RegExp("^([\\s\\S]*?)\\n\\s*" + beginning[1] + "\\s*\\n"));
+    var strMatch = tokens.match(new RegExp("^([\\s\\S]*?)\\n\\s*" + terminator + "\\b"));
     var toParse  = strMatch[1] || '';
 
     toParse = toParse.replace(regexSub, '');
     toParse = toParse.replace(/\n/g, "\\n");
 
-    var string = $m.parse('%{' + toParse + '}');
+    // TODO handle options for interpolation
+    var string = '"' + toParse.replace(/"/g, '\\"') + '"';
     tokens.consume(strMatch[0] ? strMatch[0].length : 0);
 
+    // TODO put this in register
     if (beginning[2]) {
       this.out = [ '$m.JSML.process(', string, ')',  beginning[3] || ';' ];
     } else {

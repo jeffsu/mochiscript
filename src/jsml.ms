@@ -8,7 +8,8 @@ class JSML {
     this.root    = new $c.JSMLElement();
     this.stack   = [ this.root ];
 
-    foreach (var l in lines) {
+    for (var i=0; i<lines.length; i++) {
+      var l = lines[i];
       if (l.match(/^\s*$/)) continue;
       this.processLine(l);
     }
@@ -137,9 +138,11 @@ class JSMLElement {
   function flatten() {
     var out = [];
 
-    foreach (var c in this.children) {
+    for (var i=0; i<this.children.length; i++) {
+      var c = this.children[i];
       var arr = c.flatten();
-      foreach (var item in arr) {
+      for (var j=0; j<arr.length; j++) {
+        var item = arr[j];
         out.push(item);
       }
     }

@@ -3,6 +3,7 @@
 -----
   * adding jsml support
   * dog-fooding
+  * took out string interpolation for heredocs for now
 
 0.4.0
 -----

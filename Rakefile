@@ -25,7 +25,7 @@ namespace :test do
           puts ctx.parse(File.read(f))
         end
       rescue Exception => e
-        puts "ERROR: " + ctx.parse(File.read(f))
+        puts "ERROR:\n" + ctx.parse(File.read(f))
         puts "TREE:\n" + ctx.pp(File.read(f))
         puts e.to_s
       end

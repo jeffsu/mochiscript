@@ -232,7 +232,8 @@ $m.Class.extend("JSML", function(KLASS, OO){
     this.root    = new $c.JSMLElement();
     this.stack   = [ this.root ];
 
-    for (_i_0=0,l=null,_list_0=lines,_len_0=_list_0.length;(l=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (var i=0; i<lines.length; i++) {
+      var l = lines[i];
       if (l.match(/^\s*$/)) continue;
       this.processLine(l);
     }
@@ -361,9 +362,11 @@ $m.Class.extend("JSMLElement", function(KLASS, OO){
   OO.addMember("flatten", function(){
     var out = [];
 
-    for (_i_0=0,c=null,_list_0=this.children,_len_0=_list_0.length;(c=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (var i=0; i<this.children.length; i++) {
+      var c = this.children[i];
       var arr = c.flatten();
-      for (_i_1=0,item=null,_list_1=arr,_len_1=_list_1.length;(item=_list_1[_i_1])||_i_1<_len_1;_i_1++){
+      for (var j=0; j<arr.length; j++) {
+        var item = arr[j];
         out.push(item);
       }
     }
