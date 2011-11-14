@@ -21,9 +21,11 @@ namespace :test do
       ctx = Mochiscript::Context.new
       begin
         ctx.eval_ms(File.read(f))
-        puts ctx.parse(File.read(f))
+        if ENV['VERBOSE']
+          puts ctx.parse(File.read(f))
+        end
       rescue Exception => e
-        puts "Error: " + ctx.parse(File.read(f))
+        puts "ERROR: " + ctx.parse(File.read(f))
         puts "TREE:\n" + ctx.pp(File.read(f))
         puts e.to_s
       end
@@ -37,6 +39,7 @@ namespace :test do
     get_files.each do |f|
       puts "Testing: " + f
       unless system("./bin/ms-run #{f}")
+        system("ERROR!!")
         system("./bin/ms-parse #{f}")
       end
     end
@@ -79,5 +82,5 @@ task :compile do
 end
 
 def parse(file)
-  `./bin/ms-parse #{file}`
+  `./bootstrap/ms-parse #{file}`
 end

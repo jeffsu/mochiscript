@@ -241,7 +241,7 @@ var JS2 = $m;
   });
 
   $m.out = function () {
-    for (var i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
+    for (i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
       $m.ADAPTER.out(arg);
       if (i < arguments.length-1) {
         $m.ADAPTER.out(',');
@@ -250,7 +250,7 @@ var JS2 = $m;
   };
 
   $m.outs = function () {
-    for (var _i_0=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (_i_0=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       $m.ADAPTER.outs(arg);
     }
   };
@@ -269,7 +269,7 @@ $m.Class.extend("JSML", function(KLASS, OO){
     this.root    = new $c.JSMLElement();
     this.stack   = [ this.root ];
 
-    for (var _i_0=0,l=null,_list_0=lines,_len_0=_list_0.length;(l=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (_i_0=0,l=null,_list_0=lines,_len_0=_list_0.length;(l=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       if (l.match(/^\s*$/)) continue;
       this.processLine(l);
     }
@@ -398,9 +398,9 @@ $m.Class.extend("JSMLElement", function(KLASS, OO){
   OO.addMember("flatten", function(){
     var out = [];
 
-    for (var _i_0=0,c=null,_list_0=this.children,_len_0=_list_0.length;(c=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (_i_0=0,c=null,_list_0=this.children,_len_0=_list_0.length;(c=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       var arr = c.flatten();
-      for (var _i_1=0,item=null,_list_1=arr,_len_1=_list_1.length;(item=_list_1[_i_1])||_i_1<_len_1;_i_1++){
+      for (_i_1=0,item=null,_list_1=arr,_len_1=_list_1.length;(item=_list_1[_i_1])||_i_1<_len_1;_i_1++){
         out.push(item);
       }
     }
@@ -510,7 +510,7 @@ var REGEXES = [];
 var MAIN_REGEX = null;
 var RTYPES  = {};
 
-for (var i=0,t=null,_list_0=TOKENS,_len_0=_list_0.length;(t=_list_0[i])||i<_len_0;i++){
+for (i=0,t=null,_list_0=TOKENS,_len_0=_list_0.length;(t=_list_0[i])||i<_len_0;i++){
   TYPES[t[0]] = i;
   RTYPES[i]   = t[0];
   REGEXES.push("(" + t[1] + ")");
@@ -537,7 +537,7 @@ $m.Class.extend("Tokens", function(KLASS, OO){
     var m = this.str.match(MAIN_REGEX);
     if (!m) return null;
 
-    for (var i=0,ele=null,_list_0=TOKENS,_len_0=_list_0.length;(ele=_list_0[i])||i<_len_0;i++){
+    for (i=0,ele=null,_list_0=TOKENS,_len_0=_list_0.length;(ele=_list_0[i])||i<_len_0;i++){
       if (m[i+1]) return this._peek = [ i, m[i+1], ele[2] ];
     }
   });
@@ -673,7 +673,7 @@ $m.Class.extend("RootParser", function(KLASS, OO){
 
   OO.addMember("toString", function(){
     var ret = [];
-    for (var _i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (_i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       ret.push(ele === undefined ? '' : ele.toString());
     }
     return ret.join("");
@@ -688,7 +688,7 @@ $m.Class.extend("RootParser", function(KLASS, OO){
 
     var ret = [ space + (this._TYPE || 'NODE') ];
     var generic = [];
-    for (var _i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (_i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       if (ele === undefined) {
         ret.push(space + "  UNDEFINED!");
         continue;
@@ -716,7 +716,7 @@ $m.Class.extend("RootParser", function(KLASS, OO){
 
   OO.addMember("toStruct", function(){
     var ret = [];
-    for (var _i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (_i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       ret.push(ele.toStruct ? ele.toStruct() : ele);
     }
     return ret;
@@ -1130,7 +1130,7 @@ $m.Class.extend("CLI", function(KLASS, OO){
 
     var endedArgs = false;
 
-    for (var i=0,arg=null,_list_0=args,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
+    for (i=0,arg=null,_list_0=args,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
       if (endedArgs) {
         files.push(arg);
       }

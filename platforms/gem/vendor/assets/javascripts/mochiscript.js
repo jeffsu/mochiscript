@@ -204,7 +204,7 @@ window.$m = $m;
   });
 
   $m.out = function () {
-    for (var i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
+    for (i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
       $m.ADAPTER.out(arg);
       if (i < arguments.length-1) {
         $m.ADAPTER.out(',');
@@ -213,7 +213,7 @@ window.$m = $m;
   };
 
   $m.outs = function () {
-    for (var _i_0=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (_i_0=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       $m.ADAPTER.outs(arg);
     }
   };
@@ -232,7 +232,7 @@ $m.Class.extend("JSML", function(KLASS, OO){
     this.root    = new $c.JSMLElement();
     this.stack   = [ this.root ];
 
-    for (var _i_0=0,l=null,_list_0=lines,_len_0=_list_0.length;(l=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (_i_0=0,l=null,_list_0=lines,_len_0=_list_0.length;(l=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       if (l.match(/^\s*$/)) continue;
       this.processLine(l);
     }
@@ -361,9 +361,9 @@ $m.Class.extend("JSMLElement", function(KLASS, OO){
   OO.addMember("flatten", function(){
     var out = [];
 
-    for (var _i_0=0,c=null,_list_0=this.children,_len_0=_list_0.length;(c=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (_i_0=0,c=null,_list_0=this.children,_len_0=_list_0.length;(c=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       var arr = c.flatten();
-      for (var _i_1=0,item=null,_list_1=arr,_len_1=_list_1.length;(item=_list_1[_i_1])||_i_1<_len_1;_i_1++){
+      for (_i_1=0,item=null,_list_1=arr,_len_1=_list_1.length;(item=_list_1[_i_1])||_i_1<_len_1;_i_1++){
         out.push(item);
       }
     }
