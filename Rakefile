@@ -83,9 +83,7 @@ end
 
 desc "copy over bootstrap"
 task :bootstrap do
-  [ './platforms/npm/lib/mochiscript/mochiscript.js',
-    './platforms/npm/bin/ms-run',
-    './platforms/npm/bin/ms-parse' ].each do |f|
+  [ './platforms/npm/lib/mochiscript/mochiscript.js' ].each do |f|
     sh "cp #{f} ./bootstrap/"  
   end
 end
