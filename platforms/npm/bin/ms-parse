@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var $m = require('./mochiscript').mochi;
+var $m = require('../lib/mochiscript').mochi;
 var fs = require('fs');
 
 var file = process.argv[process.argv.length-1];

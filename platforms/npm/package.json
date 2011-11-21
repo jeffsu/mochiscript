@@ -3,7 +3,7 @@
   "description":  "Javascript Dessert",
   "keywords":     ["javascript", "language", "mochiscript", "compiler"],
   "author":       "Jeff Su",
-  "version":      "0.4.3-pre2",
+  "version":      "0.4.3-pre4",
   "licenses":     [{
     "type":       "MIT"
   }],

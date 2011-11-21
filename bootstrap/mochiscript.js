@@ -207,7 +207,7 @@ var JS2 = $m;
   });
 
   $m.out = function () {
-    for (i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
+    for (var i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
       $m.ADAPTER.out(arg);
       if (i < arguments.length-1) {
         $m.ADAPTER.out(',');
@@ -216,7 +216,7 @@ var JS2 = $m;
   };
 
   $m.outs = function () {
-    for (_i_0=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (var _i_0=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       $m.ADAPTER.outs(arg);
     }
   };
@@ -479,7 +479,7 @@ var REGEXES = [];
 var MAIN_REGEX = null;
 var RTYPES  = {};
 
-for (i=0,t=null,_list_0=TOKENS,_len_0=_list_0.length;(t=_list_0[i])||i<_len_0;i++){
+for (var i=0,t=null,_list_0=TOKENS,_len_0=_list_0.length;(t=_list_0[i])||i<_len_0;i++){
   TYPES[t[0]] = i;
   RTYPES[i]   = t[0];
   REGEXES.push("(" + t[1] + ")");
@@ -506,7 +506,7 @@ $m.Class.extend("Tokens", function(KLASS, OO){
     var m = this.str.match(MAIN_REGEX);
     if (!m) return null;
 
-    for (i=0,ele=null,_list_0=TOKENS,_len_0=_list_0.length;(ele=_list_0[i])||i<_len_0;i++){
+    for (var i=0,ele=null,_list_0=TOKENS,_len_0=_list_0.length;(ele=_list_0[i])||i<_len_0;i++){
       if (m[i+1]) return this._peek = [ i, m[i+1], ele[2] ];
     }
   });
@@ -657,7 +657,7 @@ $m.Class.extend("RootParser", function(KLASS, OO){
 
     var ret = [ space + (this._TYPE || 'NODE') ];
     var generic = [];
-    for (_i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (var _i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       if (ele === undefined) {
         ret.push(space + "  UNDEFINED!");
         continue;
@@ -685,7 +685,7 @@ $m.Class.extend("RootParser", function(KLASS, OO){
 
   OO.addMember("toStruct", function(){
     var ret = [];
-    for (_i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
+    for (var _i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       ret.push(ele.toStruct ? ele.toStruct() : ele);
     }
     return ret;
@@ -1102,7 +1102,7 @@ $m.Class.extend("CLI", function(KLASS, OO){
 
     var endedArgs = false;
 
-    for (i=0,arg=null,_list_0=args,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
+    for (var i=0,arg=null,_list_0=args,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
       if (endedArgs) {
         files.push(arg);
       }
