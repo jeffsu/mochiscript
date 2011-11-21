@@ -3,8 +3,8 @@ require 'json'
 require 'pp'
 
 SRC_DIR = %|./src|
-BOOT    = %W| class |
-PARSER  = %W| tokens parsers jsml cli |
+BOOT    = %W| class jsml |
+PARSER  = %W| tokens parsers cli |
 VERSION = File.read("./VERSION").strip;
 
 namespace :test do
@@ -21,8 +21,11 @@ namespace :test do
       ctx = Mochiscript::Context.new
       begin
         ctx.eval_ms(File.read(f))
+        if ENV['VERBOSE']
+          puts ctx.parse(File.read(f))
+        end
       rescue Exception => e
-        puts "Error: " + ctx.parse(File.read(f))
+        puts "ERROR:\n" + ctx.parse(File.read(f))
         puts "TREE:\n" + ctx.pp(File.read(f))
         puts e.to_s
       end
@@ -35,8 +38,9 @@ namespace :test do
 
     get_files.each do |f|
       puts "Testing: " + f
-      unless system("node ./tests/node-runner.js #{f.sub(%r|^./tests/|, '')}")
-        system("node ./tests/node-parser.js #{f.sub(%r|^./tests/|, '')}")
+      unless system("./bin/ms-run #{f}")
+        system("ERROR!!")
+        system("./bin/ms-parse #{f}")
       end
     end
   end
@@ -45,10 +49,15 @@ end
 desc "run all platforms' tests"
 task :test => [ 'test:ruby', 'test:node' ]
 
-desc "publich both gem and npm"
+desc "publish both gem and npm"
 task :push => :compile do
   sh "cd ./platforms/gem; rm *.gem; gem build mochiscript.gemspec; gem push *.gem; "
   sh "cd ./platforms/npm; npm publish;"
+end
+
+desc "install gem"
+task :install_gem => :compile do
+  sh "cd ./platforms/gem; rm *.gem; gem build mochiscript.gemspec; gem install *.gem; "
 end
 
 desc "compile src to target"
@@ -72,6 +81,13 @@ task :compile do
   end
 end
 
+desc "copy over bootstrap"
+task :bootstrap do
+  [ './platforms/npm/lib/mochiscript/mochiscript.js' ].each do |f|
+    sh "cp #{f} ./bootstrap/"  
+  end
+end
+
 def parse(file)
-  `js2 render #{file}`
+  `./bootstrap/ms-parse #{file}`
 end

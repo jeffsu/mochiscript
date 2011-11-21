@@ -1,24 +1,25 @@
 class JSML {
   static function process(txt) {
-    return new KLASS(txt);
+    return new $m.JSML(txt);
   }
 
   function initialize(txt) {
     var lines = txt.split(/\n/);
-    this.root    = new JS2.JSMLElement();
+    this.root    = new $c.JSMLElement();
     this.stack   = [ this.root ];
 
-    foreach (var l in lines) {
+    for (var i=0; i<lines.length; i++) {
+      var l = lines[i];
       if (l.match(/^\s*$/)) continue;
       this.processLine(l);
     }
 
-    var toEval = 'function process() { var out = [];\n' + this.flatten().join('') + '\n return out.join("");\n}';
+    var toEval = 'function stuff() { var out = [];\n' + this.flatten().join('') + '\n return out.join("");\n}';
     eval(toEval);
 
     this.result = function(bound) {
       bound = bound || {};
-      return process.call(bound);
+      return stuff.call(bound);
     };
   }
 
@@ -29,7 +30,7 @@ class JSML {
   function processLine(line) {
     if (line.match(/^\s*$/)) return;
 
-    var ele   = new JS2.JSMLElement(line);
+    var ele   = new $m.JSMLElement(line);
     var scope = this.getScope();
 
     if (ele.scope == scope) {
@@ -137,9 +138,11 @@ class JSMLElement {
   function flatten() {
     var out = [];
 
-    foreach (var c in this.children) {
+    for (var i=0; i<this.children.length; i++) {
+      var c = this.children[i];
       var arr = c.flatten();
-      foreach (var item in arr) {
+      for (var j=0; j<arr.length; j++) {
+        var item = arr[j];
         out.push(item);
       }
     }
@@ -147,7 +150,7 @@ class JSMLElement {
     if (this.nodeType) {
       this.handleJsEQ(out);
       this.handleContent(out);
-      out.unshift('out.push("<' + this.nodeType + '"+JS2.JSMLElement.parseAttributes(' + (this.attributes || "{}") + ', ' + JSON.stringify(this.classes || []) + ', ' + JSON.stringify(this.id || null) + ')+"' + this.selfClose + '>");\n');
+      out.unshift('out.push("<' + this.nodeType + '"+$m.ROOT.JSMLElement.parseAttributes(' + (this.attributes || "{}") + ', ' + JSON.stringify(this.classes || []) + ', ' + JSON.stringify(this.id || null) + ')+"' + this.selfClose + '>");\n');
       if (this.selfClose == '') {
         out.push('out.push(' + JSON.stringify(%{</#{this.nodeType}>}) + ');\n');
       }
@@ -197,3 +200,6 @@ class JSMLElement {
     return (out.length ? ' ' : '') + out.join(' ');
   }
 }
+
+$m.JSML = $m.ROOT.JSML;
+$m.JSMLElement = $m.ROOT.JSMLElement;

@@ -4,9 +4,14 @@ var test1 = <<END;
   world
 END
 
-// interpolated
+// interpolated TODO
 var test2 = <<END;
-  #{test1}
+  hello
+  world
+END
+
+var test3 = <<END;
+  hello{}=
 END
 
 $m.test(#{

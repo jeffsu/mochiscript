@@ -1,4 +1,4 @@
-var list = [ 'hello', 'world' ];
+var list = [ 'hello', 'world', 'foo', 'bar', null, {}, false, 'bar2' ];
 var container  = null;
 var container2 = null;
 
@@ -11,6 +11,6 @@ foreach (var item:i in list) {
 }
 
 $m.test(#(assert) {
-  assert.eq(container, "world");
-  assert.eq(container2, 1);
+  assert.eq(container, "bar2");
+  assert.eq(container2, 7);
 });

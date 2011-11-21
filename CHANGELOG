@@ -1,3 +1,17 @@
+
+0.4.3.pre5
+----------
+
+0.4.3.pre4
+----------
+  * fixing node bin files
+
+0.4.3.pre
+---------
+  * adding jsml support
+  * dog-fooding
+  * took out string interpolation for heredocs for now
+
 0.4.0
 -----
   * adding experimental export and public classes for common.js
