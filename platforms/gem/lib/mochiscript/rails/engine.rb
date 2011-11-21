@@ -1,5 +1,5 @@
 require 'tilt'
-require 'sprockets/engines'
+require 'sprockets'
 
 module Mochiscript::Rails
   class Engine < ::Rails::Engine
