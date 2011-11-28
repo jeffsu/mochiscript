@@ -64,5 +64,5 @@ In main.js:
 Authors
 -------
 
-  1. (Jeff Su)[https://github.com/jeffsu]
-  1. (Hong Hao)[https://github.com/agate]
+  1. [Jeff Su](https://github.com/jeffsu)
+  1. [Hong Hao](https://github.com/agate)
