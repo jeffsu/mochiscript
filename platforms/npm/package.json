@@ -14,7 +14,10 @@
     "lib" : "./lib/mochiscript"
   },
   "main" : "./lib/mochiscript/mochiscript",
-  "bin":          {},
+  "bin": { 
+    'ms-parse': './bin/ms-parse' 
+    'ms-run': './bin/ms-run' 
+  },
   "repository":   {
     "type": "git",
     "url": "git://github.com/jeffsu/mochiscript.git"
