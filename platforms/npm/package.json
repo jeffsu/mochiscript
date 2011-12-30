@@ -3,7 +3,7 @@
   "description":  "Javascript Dessert",
   "keywords":     ["javascript", "language", "mochiscript", "compiler"],
   "author":       "Jeff Su",
-  "version":      "0.4.3",
+  "version":      "0.4.4-pre1",
   "licenses":     [{
     "type":       "MIT"
   }],
@@ -14,10 +14,7 @@
     "lib" : "./lib/mochiscript"
   },
   "main" : "./lib/mochiscript/mochiscript",
-  "bin": { 
-    'ms-parse': './bin/ms-parse' 
-    'ms-run': './bin/ms-run' 
-  },
+  "bin":          {},
   "repository":   {
     "type": "git",
     "url": "git://github.com/jeffsu/mochiscript.git"
