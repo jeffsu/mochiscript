@@ -34,8 +34,6 @@ namespace :test do
 
   desc "run all tests on node platform"
   task :node => :compile  do
-    require "./platforms/gem/lib/mochiscript"
-
     get_files.each do |f|
       puts "Testing: " + f
       unless system("./bin/ms-run #{f}")
@@ -62,21 +60,12 @@ end
 
 desc "compile src to target"
 task :compile do
-  @boot   = BOOT.collect { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
+  @boot   = BOOT.collect   { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
   @parser = PARSER.collect { |f| parse("#{SRC_DIR}/#{f}.ms") }.join("\n")
 
-  {
-    # gem
-    'boot.js.erb'        => './platforms/gem/vendor/assets/javascripts/mochiscript.js',
-    'core.rb.erb'        => './platforms/gem/lib/mochiscript/core.rb',
-    'mochiscript.rb.erb' => './platforms/gem/lib/mochiscript.rb',
-
-    # npm
-    'node.js.erb'      => './platforms/npm/lib/mochiscript/mochiscript.js',
-    'package.json.erb' => './platforms/npm/package.json'
-  }.each_pair do |target, destination|
-    target = "./src/platforms/#{target}"
-    puts "Writing #{target} to #{destination}"
+  traverse_dir('./src/platforms') do |target|
+    destination = target.sub(/^\.\/src(.*)\.erb$/, '.\1')
+    puts "Compiling #{target}\n      --> #{destination}"
     File.open(destination, "w") { |t| t << ERB.new(File.read(target)).result(binding) }
   end
 end
@@ -84,10 +73,22 @@ end
 desc "copy over bootstrap"
 task :bootstrap do
   [ './platforms/npm/lib/mochiscript/mochiscript.js' ].each do |f|
-    sh "cp #{f} ./bootstrap/"  
+    sh "cp #{f} ./bootstrap/"
   end
 end
 
 def parse(file)
   `./bootstrap/ms-parse #{file}`
+end
+
+def traverse_dir(file_path)
+  if File.directory? file_path
+    Dir.foreach(file_path) do |file|
+      if file!="." and file!=".."
+        traverse_dir("#{file_path}/#{file}"){ |x| yield x }
+      end
+    end
+  else
+    yield file_path
+  end
 end
