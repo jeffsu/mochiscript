@@ -789,7 +789,6 @@ RootParser.extend("CurlyParser", function(KLASS, OO){
 
   OO.addMember("handleToken", function(token, tokens){
     if (this.curly === undefined) this.curly = 0;
-    if (this.foo) console.log(RTYPES[token[0]], token[1]);
     if (token[0] == TYPES.RCURLY) {
       this.curly--;
     } else if (token[0] == TYPES.LCURLY) {
@@ -823,7 +822,6 @@ CurlyParser.extend("ClassContentParser", function(KLASS, OO){
       case TYPES.INCLUDE:  return "IncludeParser";
     }
   });
-
 });
 
 RootParser.extend("LineParser", function(KLASS, OO){
@@ -1000,6 +998,7 @@ RootParser.extend("MethodParser", function(KLASS, OO){
 
     var body = new $c.CurlyParser();
     body.parse(tokens);
+    body.out[0] = "{var self=this;";
 
     var addMethod = this.isStatic ? 'addStaticMember' : 'addMember';
 
