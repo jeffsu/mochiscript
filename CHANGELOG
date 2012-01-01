@@ -3,6 +3,7 @@
   * fixed gem package build error
 	* fixed npm bin execute probelm
 	* added ms-parse and ms-run in gem's bin dir
+	* improved gem/npm publish command
 
 0.4.3.pre5
 ----------
