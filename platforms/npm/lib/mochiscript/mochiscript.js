@@ -567,18 +567,19 @@ $m.parse = function (str) {
   return parser.toString();
 };
 
-$m.toJSON = function (str) {
+$m.toJSON = function (str, options) {
   var parser = new $c.RootParser();
   parser.parse(new $c.Tokens(str));
   return parser.toJSON();
 };
 
-$m.pp = function (str) {
+$m.pp = function (str, options) {
   var parser = new $c.RootParser();
   parser.parse(new $c.Tokens(str));
   return parser.pp();
 };
 
+var OPTIONS = {};
 
 $m.Class.extend("RootParser", function(KLASS, OO){
   OO.addMember("handlers", {});
