@@ -1,9 +1,13 @@
-0.4.4
+0.4.5
+----------
+  * merged 0.4.4.pre1 changes
+
+0.4.4 (yanked)
 ----------
   * fixed gem package build error
-	* fixed npm bin execute probelm
-	* added ms-parse and ms-run in gem's bin dir
-	* improved gem/npm publish command
+  * fixed npm bin execute probelm
+  * added ms-parse and ms-run in gem's bin dir
+  * improved gem/npm publish command
 
 0.4.4.pre1
 ----------
@@ -29,12 +33,12 @@
 0.4.0.pre14
 -----------
   * lookback error when no spacing
- 
+
 0.4.0.pre13
 -----------
   * lookback off by 1
   * added pp for printing tree
- 
+
 0.4.0.pre12
 -----------
   * regex bug
@@ -43,7 +47,7 @@
 0.4.0.pre11
 -----------
   * adding boot strap for web browsers
- 
+
 0.4.0.pre10
 -----------
   * multi-line comment parsing fix
