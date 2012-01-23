@@ -484,6 +484,7 @@ var TOKENS = [
   [ "EXTENDS",  "extends\\b" ],
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ],
 
+  [ "SHORTHAND_MAPPER",   "#[\\w\\$]+\\s*(?:{|\\()", 'ShorthandMapperParser' ],
   [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ],
   [ "ISTRING_START", "%{", 'IStringParser' ],
   [ "HEREDOC", "<<[A-Z][0-9A-Z]*", 'HereDocParser' ],
@@ -1007,6 +1008,35 @@ RootParser.extend("MethodParser", function(KLASS, OO){
   });
 });
 
+RootParser.extend("ShorthandMapperParser", function(KLASS, OO){
+  
+    var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
+  
+
+  OO.addMember("parse", function(tokens){
+    tokens.consume(1);
+    var nameMatch = tokens.match(/^([\w\$]+)\s*/);
+    tokens.consume(nameMatch[0].length);
+
+    var method = nameMatch[1];
+
+    var argsMatch = tokens.match(ARGS_REGEX);
+    var args = null;
+
+    if (argsMatch) {
+      args = argsMatch[0];
+      tokens.consume(argsMatch[0].length);
+    } else {
+      args = "($1,$2,$3)";
+    }
+
+    var body = new $c.ReturnableCurlyParser();
+    body.parse(tokens);
+
+    this.out = [ '.', method, '(function', args, body, ')' ];
+  });
+});
+
 RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
   
     var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
@@ -1080,6 +1110,14 @@ RootParser.extend("RegexParser", function(KLASS, OO){
   });
 
 });
+
+CurlyParser.extend("ReturnableCurlyParser", function(KLASS, OO){
+  OO.addMember("toString", function(){
+    var ret = this.$super();
+    return ret.replace(/^{(\s*)(return)?/, '{$1return ');
+  });
+});
+
 
 CurlyParser.extend("ForeachParser", function(KLASS, OO){
   OO.addMember("_TYPE", 'Foreach');
