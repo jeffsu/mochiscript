@@ -1,8 +1,9 @@
 Summary
 =======
 
-Mochiscript is a superset of the JavaScript language that adds more Object-Oriented features such as: methods, inheritance, mixins, etc... Mochiscript currently supports Ruby on Rails 3.1 (via asset pipeline) and Node.js
+Mochiscript is a superset of the JavaScript language that adds more Object-Oriented features such as: methods, inheritance, mixins, etc... What this means is that Mochiscript IS Javascript.  Mochiscript currently supports Ruby on Rails 3.1 (via asset pipeline) and Node.js.
 
+More on Mochiscript features and syntax here: https://github.com/jeffsu/mochiscript/wiki/Mochiscript-Syntax
 
 Installation
 ============
@@ -64,5 +65,5 @@ In main.js:
 Authors
 -------
 
-  1. (Jeff Su)[https://github.com/jeffsu]
-  1. (Hong Hao)[https://github.com/agate]
+  1. [Jeff Su](https://github.com/jeffsu)
+  1. [Hong Hao](https://github.com/agate)
