@@ -450,6 +450,7 @@ var TOKENS = [
   [ "EXTENDS",  "extends\\b" ],
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ],
 
+  [ "SHORTHAND_MAPPER",   "#[\\w\\$]+\\s*(?:{|\\()", 'ShorthandMapperParser' ],
   [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ],
   [ "ISTRING_START", "%{", 'IStringParser' ],
   [ "HEREDOC", "<<[A-Z][0-9A-Z]*", 'HereDocParser' ],
@@ -970,6 +971,35 @@ RootParser.extend("MethodParser", function(KLASS, OO){
 
 
     this.out = [ 'OO.' + addMethod + '(', JSON.stringify(name), ', function', args, body, ');' ];
+  });
+});
+
+RootParser.extend("ShorthandMapperParser", function(KLASS, OO){
+  
+    var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
+  
+
+  OO.addMember("parse", function(tokens){
+    tokens.consume(1);
+    var nameMatch = tokens.match(/^([\w\$]+)\s*/);
+    tokens.consume(nameMatch[0].length);
+
+    var method = nameMatch[1];
+
+    var argsMatch = tokens.match(ARGS_REGEX);
+    var args = null;
+
+    if (argsMatch) {
+      args = argsMatch[0];
+      tokens.consume(argsMatch[0].length);
+    } else {
+      args = "($1,$2,$3)";
+    }
+
+    var body = new $c.CurlyParser();
+    body.parse(tokens);
+
+    this.out = [ '.', method, '(function', args, body, ')' ];
   });
 });
 

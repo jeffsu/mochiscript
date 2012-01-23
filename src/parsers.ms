@@ -410,6 +410,35 @@ class MethodParser extends RootParser {
   }
 }
 
+class ShorthandMapperParser extends RootParser {
+  private {
+    var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
+  }
+
+  function parse(tokens) {
+    tokens.consume(1);
+    var nameMatch = tokens.match(/^([\w\$]+)\s*/);
+    tokens.consume(nameMatch[0].length);
+
+    var method = nameMatch[1];
+
+    var argsMatch = tokens.match(ARGS_REGEX);
+    var args = null;
+
+    if (argsMatch) {
+      args = argsMatch[0];
+      tokens.consume(argsMatch[0].length);
+    } else {
+      args = "($1,$2,$3)";
+    }
+
+    var body = new $c.CurlyParser();
+    body.parse(tokens);
+
+    this.out = [ '.', method, '(function', args, body, ')' ];
+  }
+}
+
 class ShorthandFunctionParser extends RootParser {
   private {
     var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
