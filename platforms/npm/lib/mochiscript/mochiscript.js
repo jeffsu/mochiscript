@@ -996,7 +996,7 @@ RootParser.extend("ShorthandMapperParser", function(KLASS, OO){
       args = "($1,$2,$3)";
     }
 
-    var body = new $c.CurlyParser();
+    var body = new $c.ReturnableCurlyParser();
     body.parse(tokens);
 
     this.out = [ '.', method, '(function', args, body, ')' ];
@@ -1076,6 +1076,14 @@ RootParser.extend("RegexParser", function(KLASS, OO){
   });
 
 });
+
+CurlyParser.extend("ReturnableCurlyParser", function(KLASS, OO){
+  OO.addMember("toString", function(){
+    var ret = this.$super();
+    return ret.replace(/^{(\s*)(return)?/, '{$1return ');
+  });
+});
+
 
 CurlyParser.extend("ForeachParser", function(KLASS, OO){
   OO.addMember("_TYPE", 'Foreach');

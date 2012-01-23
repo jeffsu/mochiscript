@@ -432,7 +432,7 @@ class ShorthandMapperParser extends RootParser {
       args = "($1,$2,$3)";
     }
 
-    var body = new $c.CurlyParser();
+    var body = new $c.ReturnableCurlyParser();
     body.parse(tokens);
 
     this.out = [ '.', method, '(function', args, body, ')' ];
@@ -512,6 +512,14 @@ class RegexParser extends RootParser {
   }
 
 }
+
+class ReturnableCurlyParser extends CurlyParser {
+  function toString() {
+    var ret = this.$super();
+    return ret.replace(/^{(\s*)(return)?/, '{$1return ');
+  }
+}
+
 
 class ForeachParser extends CurlyParser {
   var _TYPE = 'Foreach';
