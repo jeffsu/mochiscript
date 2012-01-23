@@ -62,8 +62,10 @@ In main.js:
     var obj   = new Hello();
     obj.say();
 
-More on Syntax
---------------
+
+## More on Syntax
+
+Mochiscript syntax is a superset of JavaScript's.  This means that any JavaScript you write will run just fine in Mochiscript.  Mochiscript simply adds extra features that make development life a little easier.
 
 ## Object Oriented Features
 
@@ -134,6 +136,80 @@ This is a little unorthodox part of Mochiscript which allows you to add a "close
       }
     }
 
+### Accessing "self"
+
+A lot of times, you need access to the "this" object in a callback.  The problem is that "this" often points to something else in a different context.  The workaround is usually:
+
+    class Foo {
+      var hello = "hello";
+      function setup() {
+        var self = this;
+        $('.hello').click(#{ alert(self.hello) }); 
+      }
+    }
+
+In mochiscript, it is no longer necessary to create a "self" variable.  Its given to you in all methods:
+
+    class Foo {
+      var hello = "hello";
+      function setup() {
+        $('.hello').click(#{ alert(self.hello) });
+      }
+    }
+
+## Syntactic Sugar
+
+### Shorthand Functions
+
+There are two ways to use this feature:
+
+    var myFunct = #{ console.log($1) }; // prints out first argument (supports up to 3 args)
+    var myFunct = #(msg){ console.log(msg) };
+   
+### Foreach
+    
+    var array = [ 'hello', 'world' ];
+    foreach (var word in array) {
+      console.log(word);
+    }
+
+    // foreach with iterator
+    foreach (var word:i in array) {
+      console.log(i, word);
+    }
+
+### Heredocs
+
+    var message = <<END;
+      this is a lot of text
+      here.
+    END
+
+### Enumerable Functions (experimental)
+
+    var greetings = [ 'hi', 'hello' ];
+    var mapped    = greetings#map { $1 + " there!" };
+    var some      = greetings#some { $1 == 'hi' };
+
+## Node-specific module exporters
+
+Mochiscript has two helpers for exporting your files:
+
+    public class MyClass {
+
+    }
+    
+    // equivalent to 
+    // exports.MyClass = MyClass;
+
+Or make it the default export:
+   
+    export class MyClass {
+
+    }
+   
+    // equivalent to
+    // module.exports = MyClass;
 
 Authors
 -------
