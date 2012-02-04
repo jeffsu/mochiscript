@@ -4,7 +4,7 @@ require 'pp'
 
 SRC_DIR = %|./src|
 BOOT    = %W| class jsml |
-PARSER  = %W| tokens parsers cli |
+PARSER  = %W| tokens parsers cli decorators |
 VERSION = File.read("./VERSION").strip;
 
 namespace :test do

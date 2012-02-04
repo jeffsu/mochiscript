@@ -1123,6 +1123,31 @@ $m.Class.extend("CLI", function(KLASS, OO){
 });
 
 
+$m.Class.extend("Decorator", function(KLASS, OO){
+  OO.addMember("classToString", function(klass){
+    var extend = klass.extending || '$m.Class';
+    var name   = JSON.stringify(klass.name);
+    return extend + ".extend(" + name + "," + 
+           "function (KLASS, OO)" +  klass.content.toString()  + ");";
+  });
+});
+
+Decorator.extend("NodeDecorator", function(KLASS, OO){
+  OO.addMember("classToString", function(klass){
+    var body = this.$super(klass);
+    if (klass.isPublic) {
+      return body + "module.exports=" + klass.name + ";";
+    } else if (klass.isExports) {
+      return body + "module.exports." + klass.name + "=" + klass.name + ";";
+    }
+  });
+});
+
+Decorator.extend("BrowserDecorator", function(KLASS, OO){
+
+});
+
+
 })();
 
 exports.mochi = $m;
