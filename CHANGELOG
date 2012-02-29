@@ -1,3 +1,7 @@
+0.4.6.pre3
+----------
+  * fixing #590
+
 0.4.6.pre2
 ----------
   * adding auto return to shortcut mappers
