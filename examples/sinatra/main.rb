@@ -3,7 +3,7 @@ require 'bundler'
 Bundler.require(:default)
 
 get '/' do
-  redirect '/index.html'
+  haml :index
 end
 
 get '/ms/*' do

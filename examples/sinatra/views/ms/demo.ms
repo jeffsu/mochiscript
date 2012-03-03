@@ -1,5 +1,5 @@
 $(function () {
-  $('#btn').click(function () {
+  $('.btn').click(function () {
     new Demo().sayHello();
   });
 });
