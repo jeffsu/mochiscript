@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+BOOTSTRAP_JS = File.dirname(__FILE__) + '/../vendor/assets/javascripts/mochiscript.js'
+puts File.read(BOOTSTRAP_JS)
