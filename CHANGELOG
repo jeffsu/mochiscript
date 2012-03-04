@@ -1,3 +1,7 @@
+0.4.6.pre4
+----------
+  * sinatra support
+
 0.4.6.pre3
 ----------
   * fixing #590
