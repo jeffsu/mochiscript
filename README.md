@@ -165,7 +165,11 @@ There are two ways to use this feature:
 
     var myFunct = #{ console.log($1) }; // prints out first argument (supports up to 3 args)
     var myFunct = #(msg){ console.log(msg) };
-   
+
+### Shorthand returns
+
+    [ 1, 2, 3 ].map(#{ => $1 + 1 });
+
 ### Foreach
     
     var array = [ 'hello', 'world' ];
