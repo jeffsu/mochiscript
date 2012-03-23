@@ -1,3 +1,7 @@
+0.4.6.pre4
+----------
+  * adding shortcut for returning "=> foo"
+
 0.4.6.pre3
 ----------
   * fixing #590
