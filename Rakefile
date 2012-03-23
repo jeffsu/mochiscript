@@ -3,7 +3,7 @@ require 'json'
 require 'pp'
 
 SRC_DIR = %|./src|
-BOOT    = %W| class jsml |
+BOOT    = %W| class events |
 PARSER  = %W| tokens parsers cli |
 VERSION = File.read("./VERSION").strip;
 

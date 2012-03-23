@@ -1,3 +1,3 @@
 module Mochiscript
-  VERSION = "0.4.6.pre4"
+  VERSION = "0.5.0"
 end
