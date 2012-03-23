@@ -410,6 +410,13 @@ class MethodParser extends RootParser {
   }
 }
 
+class ReturnParser extends RootParser {
+  function parse(tokens) {
+    tokens.consume(2);
+    this.out = [ 'return ' ];
+  }
+}
+
 class ShorthandMapperParser extends RootParser {
   private {
     var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
@@ -519,6 +526,7 @@ class ReturnableCurlyParser extends CurlyParser {
     return ret.replace(/^{(\s*)(return)?/, '{$1return ');
   }
 }
+
 
 
 class ForeachParser extends CurlyParser {

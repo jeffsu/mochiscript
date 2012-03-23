@@ -469,6 +469,7 @@ $m.JSMLElement = $m.ROOT.JSMLElement;
   var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
+  [ "RETURN", "=>", 'ReturnParser' ],
 
   [ "STATIC",   "static\\b" ],
   [ "MODULE",   "module\\b", 'ModuleParser' ],
@@ -1008,6 +1009,13 @@ RootParser.extend("MethodParser", function(KLASS, OO){
   });
 });
 
+RootParser.extend("ReturnParser", function(KLASS, OO){
+  OO.addMember("parse", function(tokens){
+    tokens.consume(2);
+    this.out = [ 'return ' ];
+  });
+});
+
 RootParser.extend("ShorthandMapperParser", function(KLASS, OO){
   
     var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
@@ -1117,6 +1125,7 @@ CurlyParser.extend("ReturnableCurlyParser", function(KLASS, OO){
     return ret.replace(/^{(\s*)(return)?/, '{$1return ');
   });
 });
+
 
 
 CurlyParser.extend("ForeachParser", function(KLASS, OO){
