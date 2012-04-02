@@ -1,6 +1,6 @@
-class EventEmitter {
+module EventEmitter {
   private {
-    this._maxListeners = 10;
+    var MAX_LISTENERS = 10;
     var isArray = Array.isArray;
   }
 
@@ -91,8 +91,8 @@ class EventEmitter {
     // Check for listener leak
     if (isArray(this._events[type]) && !this._events[type].warned) {
       var m;
-      if (this._maxListeners !== undefined) {
-        m = this._maxListeners;
+      if (MAX_LISTENERS !== undefined) {
+        m = MAX_LISTENERS;
       } else {
         m = defaultMaxListeners;
       }
@@ -108,6 +108,10 @@ class EventEmitter {
     }
 
     return this;
+  }
+
+  function on (type, listener) {
+    this.addListener(type, listener);
   }
 
   function once (type, listener) {

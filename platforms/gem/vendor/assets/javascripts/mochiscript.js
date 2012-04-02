@@ -206,9 +206,9 @@ window.$m = $m;
 })(undefined, $m);
 
 
-$m.Class.extend("EventEmitter", function(KLASS, OO){
+$m.Module.extend("EventEmitter", function(KLASS, OO){
   
-    this._maxListeners = 10;
+    var MAX_LISTENERS = 10;
     var isArray = Array.isArray;
   
 
@@ -299,8 +299,8 @@ $m.Class.extend("EventEmitter", function(KLASS, OO){
     // Check for listener leak
     if (isArray(this._events[type]) && !this._events[type].warned) {
       var m;
-      if (this._maxListeners !== undefined) {
-        m = this._maxListeners;
+      if (MAX_LISTENERS !== undefined) {
+        m = MAX_LISTENERS;
       } else {
         m = defaultMaxListeners;
       }
@@ -316,6 +316,10 @@ $m.Class.extend("EventEmitter", function(KLASS, OO){
     }
 
     return this;
+  });
+
+  OO.addMember("on", function(type, listener){
+    this.addListener(type, listener);
   });
 
   OO.addMember("once", function(type, listener){

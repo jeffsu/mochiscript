@@ -494,7 +494,7 @@ class CommentParser extends RootParser {
 class RegexParser extends RootParser {
   private {
     var REGEX  = /^\/(\\.|[^\/])+\/[imgy]{0,4}/;
-    var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$])$/;
+    var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$]|\]|\})$/;
   }
 
   function parseTokens(tokens) {
