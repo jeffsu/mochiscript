@@ -1,92 +1,104 @@
-0.4.6.pre2
-----------
+### 0.5.2
+  
+  * fixed #3
+
+
+### 0.5.0
+
+  * adding shortcut for returning "=> foo"
+  * sinatra support
+  * removing jsml
+
+### 0.4.6.pre3
+
+  * fixing #590
+
+### 0.4.6.pre2
+
   * adding auto return to shortcut mappers
 
 
-0.4.6.pre1
-----------
+### 0.4.6.pre1
+
   * adding shortcut mappers
 
-0.4.5
-----------
+### 0.4.5
+
   * merged 0.4.4.pre1 changes
 
-0.4.4 (yanked)
-----------
+### 0.4.4 (yanked)
+
   * fixed gem package build error
   * fixed npm bin execute probelm
   * added ms-parse and ms-run in gem's bin dir
   * improved gem/npm publish command
 
-0.4.4.pre1
-----------
+### 0.4.4.pre1
+
   * added self to methods
 
-0.4.3.pre5
-----------
+### 0.4.3.pre4
 
-0.4.3.pre4
-----------
   * fixing node bin files
 
-0.4.3.pre
----------
+### 0.4.3.pre
+
   * adding jsml support
   * dog-fooding
   * took out string interpolation for heredocs for now
 
-0.4.0
------
+### 0.4.0
+
   * adding experimental export and public classes for common.js
 
-0.4.0.pre14
------------
+### 0.4.0.pre14
+
   * lookback error when no spacing
 
-0.4.0.pre13
------------
+### 0.4.0.pre13
+
   * lookback off by 1
   * added pp for printing tree
 
-0.4.0.pre12
------------
+### 0.4.0.pre12
+
   * regex bug
   * rails support
 
-0.4.0.pre11
------------
+### 0.4.0.pre11
+
   * adding boot strap for web browsers
 
-0.4.0.pre10
------------
+### 0.4.0.pre10
+
   * multi-line comment parsing fix
 
-0.4.0.pre8
-----------
+### 0.4.0.pre8
+
   * adding filename to module._compile for better debugging
 
-0.4.0.pre7
-----------
+### 0.4.0.pre7
+
   * added node adapter for system calls
 
-0.4.0.pre6
-----------
+### 0.4.0.pre6
+
   * fixed divide/regex bug with spacing
 
-0.4.0.pre5
-----------
+### 0.4.0.pre5
+
   * fixed bad merge
 
-0.4.0.pre4
-----------
+### 0.4.0.pre4
+
   * fixed foreach length bug
 
-0.4.0.pre3
-----------
+### 0.4.0.pre3
+
   * fixed "module" keyword conflict bug
 
-0.4.0.pre2
-----------
+### 0.4.0.pre2
+
   * adding static var/function
   * adding jsml
   * adding divide/regex parsing support

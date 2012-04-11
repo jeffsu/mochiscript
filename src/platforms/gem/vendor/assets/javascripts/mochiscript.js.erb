@@ -1,9 +1,11 @@
 (function (window) {
+var log = window.console ? window.console.log : function () { };
+
 var $m  = {
   ROOT: window,
   ADAPTER: {
-    out:  console.log,
-    outs: console.log,
+    out:  log,
+    outs: log
   },
   PLATFORM: 'browser'
 };

@@ -1,6 +1,7 @@
 var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
+  [ "RETURN", "=>", 'ReturnParser' ],
 
   [ "STATIC",   "static\\b" ],
   [ "MODULE",   "module\\b", 'ModuleParser' ],
