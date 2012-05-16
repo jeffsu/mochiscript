@@ -1,4 +1,5 @@
 require 'sprockets'
+require 'sprockets/engines'
 
 class Engine < ::Rails::Engine
 end
