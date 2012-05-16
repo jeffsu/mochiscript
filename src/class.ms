@@ -173,24 +173,6 @@
     events[type].push(listener);
   }
 
-  $m.EventEmitter = $m.Module.extend({
-    emit: function () {
-      // TODO optimize
-      var type     = arguments[0];
-      var events   = this.__$events || (this.__$events = {});
-      var handlers = events[type];
-
-      if (!handlers) return false;
-
-      var args = [];
-      for (var i=1,len=arguments.length; i<len; i++) args[i-1] = arguments[i];
-      for (var i=0,len=handlers.length; i<len; i++) handlers[i].apply(this, args);
-    },
-
-    addListener: addListener,
-    on: addListener
-  });
-
   $m.out = function () {
     foreach (var arg:i in arguments) {
       $m.ADAPTER.out(arg);

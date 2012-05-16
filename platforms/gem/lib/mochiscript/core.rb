@@ -222,24 +222,6 @@ var JS2 = $m;
     events[type].push(listener);
   }
 
-  $m.EventEmitter = $m.Module.extend({
-    emit: function () {
-      // TODO optimize
-      var type     = arguments[0];
-      var events   = this.__$events || (this.__$events = {});
-      var handlers = events[type];
-
-      if (!handlers) return false;
-
-      var args = [];
-      for (var i=1,len=arguments.length; i<len; i++) args[i-1] = arguments[i];
-      for (var i=0,len=handlers.length; i<len; i++) handlers[i].apply(this, args);
-    },
-
-    addListener: addListener,
-    on: addListener
-  });
-
   $m.out = function () {
     for (var i=0,arg=null,_list_0=arguments,_len_0=_list_0.length;(arg=_list_0[i])||i<_len_0;i++){
       $m.ADAPTER.out(arg);
@@ -259,216 +241,200 @@ var JS2 = $m;
 })(undefined, $m);
 
 
-$m.Class.extend("JSML", function(KLASS, OO){
-  OO.addStaticMember("process", function(txt){
-    return new $m.JSML(txt);
-  });
+$m.Module.extend("EventEmitter", function(KLASS, OO){
+  
+    var MAX_LISTENERS = 10;
+    var isArray = Array.isArray;
+  
 
-  OO.addMember("initialize", function(txt){
-    var lines = txt.split(/\n/);
-    this.root    = new $c.JSMLElement();
-    this.stack   = [ this.root ];
-
-    for (var i=0; i<lines.length; i++) {
-      var l = lines[i];
-      if (l.match(/^\s*$/)) continue;
-      this.processLine(l);
-    }
-
-    var toEval = 'function stuff() { var out = [];\n' + this.flatten().join('') + '\n return out.join("");\n}';
-    eval(toEval);
-
-    this.result = function(bound) {
-      bound = bound || {};
-      return stuff.call(bound);
-    };
-  });
-
-  OO.addMember("flatten", function(){
-    return this.root.flatten();
-  });
-
-  OO.addMember("processLine", function(line){
-    if (line.match(/^\s*$/)) return;
-
-    var ele   = new $m.JSMLElement(line);
-    var scope = this.getScope();
-
-    if (ele.scope == scope) {
-      this.stack.pop();
-      this.getLast().push(ele);
-      this.stack.push(ele);
-    } else if (ele.scope > scope) {
-      this.getLast().push(ele);
-      this.stack.push(ele);
-    } else if (ele.scope < scope) {
-      var diff = scope - ele.scope + 1;
-      while(diff-- > 0) {
-        this.stack.pop();
-      }
-      this.getLast().push(ele);
-      this.stack.push(ele);
-    }
-  });
-
-
-  OO.addMember("getScope", function(){
-    return this.stack.length - 1;
-  });
-
-  OO.addMember("getLast", function(){
-    return this.stack[this.stack.length-1];
-  });
-
-});
-
-$m.Class.extend("JSMLElement", function(KLASS, OO){
-  OO.addMember("SCOPE_REGEX", /^(\s*)(.*)$/);
-  OO.addMember("SPLIT_REGEX", /^((?:\.|\#|\%)[^=\s\{]*)?(\{.*\})?(=|-)?(?:\s*)(.*)$/);
-  OO.addMember("TOKEN_REGEX", /(\%|\#|\.)([\w][\w\-]*)/g);
-  OO.addMember("JS_REGEX", /^(-|=)(.*)$/g);
-  OO.addMember("SCOPE_OFFSET", 1);
-  OO.addMember("SELF_CLOSING", { area: null, basefont: null, br: null, hr: null, input: null, img: null, link: null, meta: null });
-
-  OO.addMember("initialize", function(line){
-    this.children = [];
-
-    if (line == null) {
-      this.scope = this.SCOPE_OFFSET;
-      return;
-    }
-
-    var spaceMatch = line.match(this.SCOPE_REGEX);
-    this.scope = spaceMatch[1].length / 2 + this.SCOPE_OFFSET;
-
-    this.classes  = [];
-    this.nodeID   = null;
-
-    this.parse(spaceMatch[2]);
-  });
-
-  OO.addMember("push", function(child){
-    this.children.push(child);
-  });
-
-  OO.addMember("parse", function(line){
-    this.attributes;
-    this.line = line;
-    var self = this;
-
-    var splitted = line.match(this.SPLIT_REGEX);
-    var tokens   = splitted[1];
-    var attrs    = splitted[2];
-    var jsType   = splitted[3];
-    var content  = splitted[4];
-
-    if (tokens) {
-      tokens.replace(this.TOKEN_REGEX, function(match, type, name) {
-        switch(type) {
-          case '%': self.nodeType = name; break;
-          case '.': self.classes.push(name); break;
-          case '#': self.nodeID = name; break;
+  OO.addMember("emit", function(){var self=this;
+    var type = arguments[0];
+    // If there is no 'error' event listener then throw.
+    if (type === 'error') {
+      if (!this._events || !this._events.error ||
+          (isArray(this._events.error) && !this._events.error.length))
+      {
+        if (arguments[1] instanceof Error) {
+          throw arguments[1]; // Unhandled 'error' event
+        } else {
+          throw new Error("Uncaught, unspecified 'error' event.");
         }
-        return '';
-      });
+        return false;
+      }
     }
 
-    if (jsType == '=') {
-      this.jsEQ = content;
-    } else if (jsType == '-') {
-      this.jsExec = content;
+    if (!this._events) return false;
+    var handler = this._events[type];
+    if (!handler) return false;
+
+    if (typeof handler == 'function') {
+      switch (arguments.length) {
+        // fast cases
+        case 1:
+          handler.call(this);
+          break;
+        case 2:
+          handler.call(this, arguments[1]);
+          break;
+        case 3:
+          handler.call(this, arguments[1], arguments[2]);
+          break;
+        // slower
+        default:
+          var l = arguments.length;
+          var args = new Array(l - 1);
+          for (var i = 1; i < l; i++) args[i - 1] = arguments[i];
+          handler.apply(this, args);
+      }
+      return true;
+
+    } else if (isArray(handler)) {
+      var l = arguments.length;
+      var args = new Array(l - 1);
+      for (var i = 1; i < l; i++) args[i - 1] = arguments[i];
+
+      var listeners = handler.slice();
+      for (var i = 0, l = listeners.length; i < l; i++) {
+        listeners[i].apply(this, args);
+      }
+      return true;
+
     } else {
-      this.content = content;
+      return false;
     }
 
-    if (attrs) {
-      this.attributes = attrs;
+  }); 
+
+  OO.addMember("addListener", function(type, listener){var self=this;
+    if ('function' !== typeof listener) {
+      throw new Error('addListener only takes instances of Function');
     }
 
-    if (!this.nodeType && (this.classes.length || this.nodeID)) {
-      this.nodeType = 'div';
-    }
+    if (!this._events) this._events = {};
 
-    if (this.SELF_CLOSING.hasOwnProperty(this.nodeType) && this.children.length == 0) {
-      this.selfClose = '/';
+    // To avoid recursion in the case that type == "newListeners"! Before
+    // adding it to the listeners, first emit "newListeners".
+    this.emit('newListener', type, typeof listener.listener === 'function' ?
+              listener.listener : listener);
+
+    if (!this._events[type]) {
+      // Optimize the case of one listener. Don't need the extra array object.
+      this._events[type] = listener;
+    } else if (isArray(this._events[type])) {
+
+      // If we've already got an array, just append.
+      this._events[type].push(listener);
+
     } else {
-      this.selfClose = '';
+      // Adding the second element, need to change to array.
+      this._events[type] = [this._events[type], listener];
+
     }
-  });
 
-  OO.addMember("flatten", function(){
-    var out = [];
+    // Check for listener leak
+    if (isArray(this._events[type]) && !this._events[type].warned) {
+      var m;
+      if (MAX_LISTENERS !== undefined) {
+        m = MAX_LISTENERS;
+      } else {
+        m = defaultMaxListeners;
+      }
 
-    for (var i=0; i<this.children.length; i++) {
-      var c = this.children[i];
-      var arr = c.flatten();
-      for (var j=0; j<arr.length; j++) {
-        var item = arr[j];
-        out.push(item);
+      if (m && m > 0 && this._events[type].length > m) {
+        this._events[type].warned = true;
+        console.error('(node) warning: possible EventEmitter memory ' +
+                      'leak detected. %d listeners added. ' +
+                      'Use emitter.setMaxListeners() to increase limit.',
+                      this._events[type].length);
+        console.trace();
       }
     }
 
-    if (this.nodeType) {
-      this.handleJsEQ(out);
-      this.handleContent(out);
-      out.unshift('out.push("<' + this.nodeType + '"+$m.ROOT.JSMLElement.parseAttributes(' + (this.attributes || "{}") + ', ' + JSON.stringify(this.classes || []) + ', ' + JSON.stringify(this.id || null) + ')+"' + this.selfClose + '>");\n');
-      if (this.selfClose == '') {
-        out.push('out.push(' + JSON.stringify("</"+(this.nodeType)+">") + ');\n');
+    return this;
+  });
+
+  OO.addMember("on", function(type, listener){var self=this;
+    this.addListener(type, listener);
+  });
+
+  OO.addMember("once", function(type, listener){var self=this;
+    if ('function' !== typeof listener) {
+      throw new Error('.once only takes instances of Function');
+    }
+
+    function g() {
+      self.removeListener(type, g);
+      listener.apply(this, arguments);
+    };
+
+    g.listener = listener;
+    this.on(type, g);
+
+    return this;
+  });
+
+  OO.addMember("removeListener", function(type, listener){var self=this;
+    if ('function' !== typeof listener) {
+      throw new Error('removeListener only takes instances of Function');
+    }
+
+    // does not use listeners(), so no side effect of creating _events[type]
+    if (!this._events || !this._events[type]) return this;
+
+    var list = this._events[type];
+
+    if (isArray(list)) {
+      var position = -1;
+      for (var i = 0, length = list.length; i < length; i++) {
+        if (list[i] === listener ||
+            (list[i].listener && list[i].listener === listener))
+        {
+          position = i;
+          break;
+        }
       }
-    } else {
-      this.handleJsExec(out);
-      this.handleJsEQ(out);
-      this.handleContent(out);
+
+      if (position < 0) return this;
+      list.splice(position, 1);
+      if (list.length == 0)
+        delete this._events[type];
+    } else if (list === listener ||
+               (list.listener && list.listener === listener))
+    {
+      delete this._events[type];
     }
 
-    return out;
+    return this;
   });
 
-  OO.addMember("handleJsEQ", function(out){
-    if (this.jsEQ) {
-      this.jsEQ = this.jsEQ.replace(/;\s*$/, '');
-      out.unshift('out.push(' + this.jsEQ + ');\n');
+  OO.addMember("removeAllListeners", function(type){var self=this;
+    if (arguments.length === 0) {
+      this._events = {};
+      return this;
     }
+
+    // does not use listeners(), so no side effect of creating _events[type]
+    if (type && this._events && this._events[type]) this._events[type] = null;
+    return this;
   });
 
-  OO.addMember("handleContent", function(out){
-    if (this.content != null && this.content.length > 0) {
-      out.unshift('out.push(' + JSON.stringify(this.content) + ');\n');
+  OO.addMember("listeners", function(type){var self=this;
+    if (!this._events) this._events = {};
+    if (!this._events[type]) this._events[type] = [];
+    if (!isArray(this._events[type])) {
+      this._events[type] = [this._events[type]];
     }
-  });
-
-
-  OO.addMember("handleJsExec", function(out){
-    if (this.jsExec) {
-      out.unshift(this.jsExec);
-      if (this.jsExec.match(/\{\s*$/)) {
-        out.push("}\n");
-      }
-    }
-  });
-
-  OO.addStaticMember("parseAttributes", function(hash, classes, id){
-    var out = [];
-    classes = classes || [];
-    if (hash['class']) classes.push(hash['class']);
-    if (classes.length) hash['class'] = classes.join(" ");
-
-    for (var k in hash) {
-      if (hash.hasOwnProperty(k)) {
-        out.push(k + '=' + JSON.stringify(hash[k]));
-      }
-    }
-    return (out.length ? ' ' : '') + out.join(' ');
+    return this._events[type];
   });
 });
 
-$m.JSML = $m.ROOT.JSML;
-$m.JSMLElement = $m.ROOT.JSMLElement;
+$m.EventEmitter = $m.ROOT.EventEmitter;
 
 
   var IDENT  = "[\\$\\w]+";
 var TOKENS = [
   [ "SPACE", "\\s+"  ],
+  [ "RETURN", "=>", 'ReturnParser' ],
 
   [ "STATIC",   "static\\b" ],
   [ "MODULE",   "module\\b", 'ModuleParser' ],
@@ -528,14 +494,14 @@ var EXTRA_REGEX_STRINGS = {
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
 
 $m.Class.extend("Tokens", function(KLASS, OO){
-  OO.addMember("initialize", function(str){
+  OO.addMember("initialize", function(str){var self=this;
     this.orig     = str;
     this.str      = str;
     this.iterator = 0;
     this.consumed = 0;
   });
 
-  OO.addMember("peek", function(){
+  OO.addMember("peek", function(){var self=this;
     if (this._peek) return this._peek;
 
     var m = this.str.match(MAIN_REGEX);
@@ -546,7 +512,7 @@ $m.Class.extend("Tokens", function(KLASS, OO){
     }
   });
 
-  OO.addStaticMember("regex", function(str){
+  OO.addStaticMember("regex", function(str){var self=this;
     var regexStr = str.replace(/\*\*/g, "\\s*").replace(/\s+/g, "\\s+").replace(/\>\</g, ">\\s*<").replace(/\<(\w+)\>/g, function($1,$2,$3){
       return "(" + (EXTRA_REGEX_STRINGS[$2] || TOKENS[TYPES[$2]][1])  + ")";
     });
@@ -554,17 +520,17 @@ $m.Class.extend("Tokens", function(KLASS, OO){
     return new RegExp("^" + regexStr);
   });
 
-  OO.addMember("consume", function(n){
+  OO.addMember("consume", function(n){var self=this;
     this.str   = this.str.substr(n, this.str.length-n);
     this._peek = null;
     this.consumed += n;
   });
 
-  OO.addMember("length", function(){
+  OO.addMember("length", function(){var self=this;
     return this.str.length;
   });
 
-  OO.addMember("lookback", function(n){
+  OO.addMember("lookback", function(n){var self=this;
     var starting = this.consumed - 1;
 
     //$m.outs(JSON.stringify(this.orig.substr(starting-10, 10)));
@@ -578,18 +544,18 @@ $m.Class.extend("Tokens", function(KLASS, OO){
     return this.orig.substr(starting-n+1, n);
   });
 
-  OO.addMember("lookahead", function(n){
+  OO.addMember("lookahead", function(n){var self=this;
     var starting = this.consumed;
     while (this.orig.charAt(starting).match(/\s/)) starting++;
     return this.orig.substr(starting, n);
   });
 
 
-  OO.addMember("any", function(){
+  OO.addMember("any", function(){var self=this;
     return this.str.length > 0;
   });
 
-  OO.addMember("match", function(regex){
+  OO.addMember("match", function(regex){var self=this;
     return this.str.match(regex);
   });
 });
@@ -619,19 +585,19 @@ var OPTIONS = {};
 $m.Class.extend("RootParser", function(KLASS, OO){
   OO.addMember("handlers", {});
 
-  OO.addMember("initialize", function(){
+  OO.addMember("initialize", function(){var self=this;
     this.out = [];
     this.finished = false;
   });
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var len = tokens.length();
     if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) === false) return false
     return len != tokens.length();
   });
 
   // TODO: messy clean this process up
-  OO.addMember("parseTokens", function(tokens){
+  OO.addMember("parseTokens", function(tokens){var self=this;
     var sanity  = 100;
     var origLen = tokens.length();
 
@@ -667,15 +633,15 @@ $m.Class.extend("RootParser", function(KLASS, OO){
     }
   });
 
-  OO.addMember("startParse", function(){ });
-  OO.addMember("endParse", function(){ });
+  OO.addMember("startParse", function(){var self=this; });
+  OO.addMember("endParse", function(){var self=this; });
 
-  OO.addMember("handleToken", function(token, tokens){
+  OO.addMember("handleToken", function(token, tokens){var self=this;
     this.out.push(token[1]);
     tokens.consume(token[1].length);
   });
 
-  OO.addMember("toString", function(){
+  OO.addMember("toString", function(){var self=this;
     var ret = [];
     for (var i=0; i<this.out.length; i++) {
       var ele = this.out[i];
@@ -684,11 +650,11 @@ $m.Class.extend("RootParser", function(KLASS, OO){
     return ret.join("");
   });
 
-  OO.addMember("toJSON", function(){
+  OO.addMember("toJSON", function(){var self=this;
     return JSON.stringify(this.toStruct());
   });
 
-  OO.addMember("pp", function(space){
+  OO.addMember("pp", function(space){var self=this;
     space = space == null ? "  " : space + "  ";
 
     var ret = [ space + (this._TYPE || 'NODE') ];
@@ -719,7 +685,7 @@ $m.Class.extend("RootParser", function(KLASS, OO){
     return ret.join("\n");
   });
 
-  OO.addMember("toStruct", function(){
+  OO.addMember("toStruct", function(){var self=this;
     var ret = [];
     for (var _i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       ret.push(ele.toStruct ? ele.toStruct() : ele);
@@ -728,11 +694,11 @@ $m.Class.extend("RootParser", function(KLASS, OO){
   });
 
   // intercepts parser class for special cases
-  OO.addMember("getHandler", function(token){
+  OO.addMember("getHandler", function(token){var self=this;
     return null;
   });
 
-  OO.addMember("chop", function(){
+  OO.addMember("chop", function(){var self=this;
     this.out.pop();
   });
 });
@@ -745,7 +711,7 @@ RootParser.extend("ClassParser", function(KLASS, OO){
     var EXTENDS = Tokens.regex("(?:<EXPORT>|<PUBLIC>|<CLASS>) <CLASSNAME><EXTENDS><CLASSNAME><LCURLY>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.match(REGEX) || tokens.match(EXTENDS);
     var name      = m[4];
     var extending = m[6] || "$m.Class";
@@ -767,7 +733,7 @@ RootParser.extend("ModuleParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<MODULE> <CLASSNAME><LCURLY>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.match(REGEX);
     if (!m) return false;
     var name = m[2];
@@ -783,12 +749,12 @@ RootParser.extend("ModuleParser", function(KLASS, OO){
 RootParser.extend("CurlyParser", function(KLASS, OO){
   OO.addMember("_TYPE", 'CurlyParser');
 
-  OO.addMember("initialize", function(chop){
+  OO.addMember("initialize", function(chop){var self=this;
     this.chop = chop;
     this.$super();
   });
 
-  OO.addMember("handleToken", function(token, tokens){
+  OO.addMember("handleToken", function(token, tokens){var self=this;
     if (this.curly === undefined) this.curly = 0;
     if (token[0] == TYPES.RCURLY) {
       this.curly--;
@@ -803,7 +769,7 @@ RootParser.extend("CurlyParser", function(KLASS, OO){
     }
   });
 
-  OO.addMember("endParse", function(tokens){
+  OO.addMember("endParse", function(tokens){var self=this;
     if (this.chop) {
       this.out.pop();
       this.out.shift();
@@ -814,7 +780,7 @@ RootParser.extend("CurlyParser", function(KLASS, OO){
 var CurlyParser = $c.CurlyParser;
 
 CurlyParser.extend("ClassContentParser", function(KLASS, OO){
-  OO.addMember("getHandler", function(token){
+  OO.addMember("getHandler", function(token){var self=this;
     switch(token[0]) {
       case TYPES.STATIC:   return "StaticParser";
       case TYPES.VAR:      return "MemberParser";
@@ -826,7 +792,7 @@ CurlyParser.extend("ClassContentParser", function(KLASS, OO){
 });
 
 RootParser.extend("LineParser", function(KLASS, OO){
-  OO.addMember("handleToken", function(token, tokens){
+  OO.addMember("handleToken", function(token, tokens){var self=this;
     this.$super(token, tokens);
     if (token[0] == TYPES.SEMICOLON) {
       this.finished = true;
@@ -839,12 +805,12 @@ CurlyParser.extend("PrivateParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<PRIVATE>\\s*");
   
 
-  OO.addMember("startParse", function(tokens){
+  OO.addMember("startParse", function(tokens){var self=this;
     var m = tokens.match(REGEX);
     tokens.consume(m[0].length);
   });
 
-  OO.addMember("endParse", function(tokens){
+  OO.addMember("endParse", function(tokens){var self=this;
     this.out.pop();
     this.out.shift();
   });
@@ -856,7 +822,7 @@ RootParser.extend("IStringParser", function(KLASS, OO){
     var BEGIN = Tokens.regex("<ISTRING_START>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.match(BEGIN);
     tokens.consume(m[0].length);
     this.out.push('"');
@@ -883,7 +849,7 @@ RootParser.extend("IStringParser", function(KLASS, OO){
     }
   });
 
-  OO.addMember("parseMiddle", function(tokens){
+  OO.addMember("parseMiddle", function(tokens){var self=this;
     var parser = new $c.CurlyParser(true);
     parser.parse(tokens);
     this.out.push(parser);
@@ -896,7 +862,7 @@ RootParser.extend("StaticParser", function(KLASS, OO){
     var FUNCT_REGEX = Tokens.regex("(<STATIC>(\\s+))<FUNCTION>");
   
 
-  OO.addMember("parseTokens", function(tokens){
+  OO.addMember("parseTokens", function(tokens){var self=this;
     var varMatch = tokens.match(VAR_REGEX);
     if (varMatch) {
       tokens.consume(varMatch[1].length);
@@ -923,7 +889,7 @@ RootParser.extend("MemberParser", function(KLASS, OO){
     var REGEX = Tokens.regex("var <IDENT>\\s*=\\s*?");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.str.match(REGEX);
     this.name = m[1];
     tokens.consume(m[0].length);
@@ -946,7 +912,7 @@ RootParser.extend("IncludeParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<INCLUDE> <CLASSNAME><SEMICOLON>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.match(REGEX);
     tokens.consume(m[0].length);
     this.out = [ 'OO.include(',  m[2], ');' ];
@@ -958,7 +924,7 @@ RootParser.extend("HereDocParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<HEREDOC>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var beginning  = tokens.match(/^<<(\w+)(?::(\w+))?\s*([;\)])*\n/);
     var terminator = beginning[1];
 
@@ -991,7 +957,7 @@ RootParser.extend("MethodParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<FUNCTION> <IDENT><ARGS><SPACE>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.str.match(REGEX);
     tokens.consume(m[0].length);
     var name = m[2];
@@ -1008,12 +974,19 @@ RootParser.extend("MethodParser", function(KLASS, OO){
   });
 });
 
+RootParser.extend("ReturnParser", function(KLASS, OO){
+  OO.addMember("parse", function(tokens){var self=this;
+    tokens.consume(2);
+    this.out = [ 'return ' ];
+  });
+});
+
 RootParser.extend("ShorthandMapperParser", function(KLASS, OO){
   
     var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     tokens.consume(1);
     var nameMatch = tokens.match(/^([\w\$]+)\s*/);
     tokens.consume(nameMatch[0].length);
@@ -1042,7 +1015,7 @@ RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
     var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     tokens.consume(1);
     var argsMatch = tokens.match(ARGS_REGEX);
     var args = null;
@@ -1063,7 +1036,7 @@ RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
 });
 
 RootParser.extend("CommentParser", function(KLASS, OO){
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.match(/^\/\/.*?\n/);
     if (m) {
       tokens.consume(m[0].length);
@@ -1085,10 +1058,10 @@ RootParser.extend("CommentParser", function(KLASS, OO){
 RootParser.extend("RegexParser", function(KLASS, OO){
   
     var REGEX  = /^\/(\\.|[^\/])+\/[imgy]{0,4}/;
-    var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$])$/;
+    var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$]|\]|\})$/;
   
 
-  OO.addMember("parseTokens", function(tokens){
+  OO.addMember("parseTokens", function(tokens){var self=this;
     var back = tokens.lookback(2);
 
     if (back.match(DIVIDE)) {
@@ -1112,11 +1085,12 @@ RootParser.extend("RegexParser", function(KLASS, OO){
 });
 
 CurlyParser.extend("ReturnableCurlyParser", function(KLASS, OO){
-  OO.addMember("toString", function(){
+  OO.addMember("toString", function(){var self=this;
     var ret = this.$super();
     return ret.replace(/^{(\s*)(return)?/, '{$1return ');
   });
 });
+
 
 
 CurlyParser.extend("ForeachParser", function(KLASS, OO){
@@ -1126,7 +1100,7 @@ CurlyParser.extend("ForeachParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**{");
   
 
-  OO.addMember("startParse", function(tokens){
+  OO.addMember("startParse", function(tokens){var self=this;
     var m = tokens.match(REGEX);
     namespace = tokens.iterator++;
 
@@ -1143,7 +1117,7 @@ CurlyParser.extend("ForeachParser", function(KLASS, OO){
     this.out = [ "for (var ", declare, ";", bool, ';', this.iterator + "++)" ];
   });
 
-  OO.addMember("endParse", function(tokens){
+  OO.addMember("endParse", function(tokens){var self=this;
     tokens.iterator--;
   });
 
@@ -1160,14 +1134,14 @@ $m.Class.extend("CLI", function(KLASS, OO){
     };
   
 
-  OO.addMember("run", function(args){
+  OO.addMember("run", function(args){var self=this;
     var opts = this.parseOpts(args);
     var options = opts[0];
     var command = opts[1];
     var files   = opts[2];
   });
 
-  OO.addMember("parseOpts", function(args){
+  OO.addMember("parseOpts", function(args){var self=this;
     var files   = [];
     var options = {};
     var command = null;
