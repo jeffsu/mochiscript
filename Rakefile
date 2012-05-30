@@ -30,6 +30,7 @@ namespace :test do
         puts e.to_s
       end
     end
+
   end
 
   desc "run all tests on node platform"
@@ -68,6 +69,7 @@ task :compile do
     puts "Compiling #{target}\n      --> #{destination}"
     File.open(destination, "w") { |t| t << ERB.new(File.read(target)).result(binding) }
   end
+  system("cp ./platforms/www/mochiscript.js .")
 end
 
 desc "copy over bootstrap"
