@@ -1138,6 +1138,9 @@ $m.Class.extend("CLI", function(KLASS, OO){
 })();
 
 exports.mochi = $m;
+exports.compile = function(text, opts) {
+  return $m.parse(text);
+};
 
 var fs = require('fs');
 var requireScript = "var $m = require('mochiscript').mochi; $m.PUSH_ROOT(root);";
