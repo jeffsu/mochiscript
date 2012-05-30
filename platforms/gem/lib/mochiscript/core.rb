@@ -247,7 +247,7 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
     var isArray = Array.isArray;
   
 
-  OO.addMember("emit", function(){
+  OO.addMember("emit", function(){var self=this;
     var type = arguments[0];
     // If there is no 'error' event listener then throw.
     if (type === 'error') {
@@ -305,7 +305,7 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
 
   }); 
 
-  OO.addMember("addListener", function(type, listener){
+  OO.addMember("addListener", function(type, listener){var self=this;
     if ('function' !== typeof listener) {
       throw new Error('addListener only takes instances of Function');
     }
@@ -353,11 +353,11 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
     return this;
   });
 
-  OO.addMember("on", function(type, listener){
+  OO.addMember("on", function(type, listener){var self=this;
     this.addListener(type, listener);
   });
 
-  OO.addMember("once", function(type, listener){
+  OO.addMember("once", function(type, listener){var self=this;
     if ('function' !== typeof listener) {
       throw new Error('.once only takes instances of Function');
     }
@@ -373,7 +373,7 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
     return this;
   });
 
-  OO.addMember("removeListener", function(type, listener){
+  OO.addMember("removeListener", function(type, listener){var self=this;
     if ('function' !== typeof listener) {
       throw new Error('removeListener only takes instances of Function');
     }
@@ -407,7 +407,7 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
     return this;
   });
 
-  OO.addMember("removeAllListeners", function(type){
+  OO.addMember("removeAllListeners", function(type){var self=this;
     if (arguments.length === 0) {
       this._events = {};
       return this;
@@ -418,7 +418,7 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
     return this;
   });
 
-  OO.addMember("listeners", function(type){
+  OO.addMember("listeners", function(type){var self=this;
     if (!this._events) this._events = {};
     if (!this._events[type]) this._events[type] = [];
     if (!isArray(this._events[type])) {
@@ -494,14 +494,14 @@ var EXTRA_REGEX_STRINGS = {
 var MAIN_REGEX = new RegExp("^" + REGEXES.join('|'));
 
 $m.Class.extend("Tokens", function(KLASS, OO){
-  OO.addMember("initialize", function(str){
+  OO.addMember("initialize", function(str){var self=this;
     this.orig     = str;
     this.str      = str;
     this.iterator = 0;
     this.consumed = 0;
   });
 
-  OO.addMember("peek", function(){
+  OO.addMember("peek", function(){var self=this;
     if (this._peek) return this._peek;
 
     var m = this.str.match(MAIN_REGEX);
@@ -512,7 +512,7 @@ $m.Class.extend("Tokens", function(KLASS, OO){
     }
   });
 
-  OO.addStaticMember("regex", function(str){
+  OO.addStaticMember("regex", function(str){var self=this;
     var regexStr = str.replace(/\*\*/g, "\\s*").replace(/\s+/g, "\\s+").replace(/\>\</g, ">\\s*<").replace(/\<(\w+)\>/g, function($1,$2,$3){
       return "(" + (EXTRA_REGEX_STRINGS[$2] || TOKENS[TYPES[$2]][1])  + ")";
     });
@@ -520,17 +520,17 @@ $m.Class.extend("Tokens", function(KLASS, OO){
     return new RegExp("^" + regexStr);
   });
 
-  OO.addMember("consume", function(n){
+  OO.addMember("consume", function(n){var self=this;
     this.str   = this.str.substr(n, this.str.length-n);
     this._peek = null;
     this.consumed += n;
   });
 
-  OO.addMember("length", function(){
+  OO.addMember("length", function(){var self=this;
     return this.str.length;
   });
 
-  OO.addMember("lookback", function(n){
+  OO.addMember("lookback", function(n){var self=this;
     var starting = this.consumed - 1;
 
     //$m.outs(JSON.stringify(this.orig.substr(starting-10, 10)));
@@ -544,18 +544,18 @@ $m.Class.extend("Tokens", function(KLASS, OO){
     return this.orig.substr(starting-n+1, n);
   });
 
-  OO.addMember("lookahead", function(n){
+  OO.addMember("lookahead", function(n){var self=this;
     var starting = this.consumed;
     while (this.orig.charAt(starting).match(/\s/)) starting++;
     return this.orig.substr(starting, n);
   });
 
 
-  OO.addMember("any", function(){
+  OO.addMember("any", function(){var self=this;
     return this.str.length > 0;
   });
 
-  OO.addMember("match", function(regex){
+  OO.addMember("match", function(regex){var self=this;
     return this.str.match(regex);
   });
 });
@@ -585,19 +585,19 @@ var OPTIONS = {};
 $m.Class.extend("RootParser", function(KLASS, OO){
   OO.addMember("handlers", {});
 
-  OO.addMember("initialize", function(){
+  OO.addMember("initialize", function(){var self=this;
     this.out = [];
     this.finished = false;
   });
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var len = tokens.length();
     if (this.startParse(tokens) === false || this.parseTokens(tokens) === false || this.endParse(tokens) === false) return false
     return len != tokens.length();
   });
 
   // TODO: messy clean this process up
-  OO.addMember("parseTokens", function(tokens){
+  OO.addMember("parseTokens", function(tokens){var self=this;
     var sanity  = 100;
     var origLen = tokens.length();
 
@@ -633,15 +633,15 @@ $m.Class.extend("RootParser", function(KLASS, OO){
     }
   });
 
-  OO.addMember("startParse", function(){ });
-  OO.addMember("endParse", function(){ });
+  OO.addMember("startParse", function(){var self=this; });
+  OO.addMember("endParse", function(){var self=this; });
 
-  OO.addMember("handleToken", function(token, tokens){
+  OO.addMember("handleToken", function(token, tokens){var self=this;
     this.out.push(token[1]);
     tokens.consume(token[1].length);
   });
 
-  OO.addMember("toString", function(){
+  OO.addMember("toString", function(){var self=this;
     var ret = [];
     for (var i=0; i<this.out.length; i++) {
       var ele = this.out[i];
@@ -650,11 +650,11 @@ $m.Class.extend("RootParser", function(KLASS, OO){
     return ret.join("");
   });
 
-  OO.addMember("toJSON", function(){
+  OO.addMember("toJSON", function(){var self=this;
     return JSON.stringify(this.toStruct());
   });
 
-  OO.addMember("pp", function(space){
+  OO.addMember("pp", function(space){var self=this;
     space = space == null ? "  " : space + "  ";
 
     var ret = [ space + (this._TYPE || 'NODE') ];
@@ -685,7 +685,7 @@ $m.Class.extend("RootParser", function(KLASS, OO){
     return ret.join("\n");
   });
 
-  OO.addMember("toStruct", function(){
+  OO.addMember("toStruct", function(){var self=this;
     var ret = [];
     for (var _i_0=0,ele=null,_list_0=this.out,_len_0=_list_0.length;(ele=_list_0[_i_0])||_i_0<_len_0;_i_0++){
       ret.push(ele.toStruct ? ele.toStruct() : ele);
@@ -694,11 +694,11 @@ $m.Class.extend("RootParser", function(KLASS, OO){
   });
 
   // intercepts parser class for special cases
-  OO.addMember("getHandler", function(token){
+  OO.addMember("getHandler", function(token){var self=this;
     return null;
   });
 
-  OO.addMember("chop", function(){
+  OO.addMember("chop", function(){var self=this;
     this.out.pop();
   });
 });
@@ -711,7 +711,7 @@ RootParser.extend("ClassParser", function(KLASS, OO){
     var EXTENDS = Tokens.regex("(?:<EXPORT>|<PUBLIC>|<CLASS>) <CLASSNAME><EXTENDS><CLASSNAME><LCURLY>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.match(REGEX) || tokens.match(EXTENDS);
     var name      = m[4];
     var extending = m[6] || "$m.Class";
@@ -733,7 +733,7 @@ RootParser.extend("ModuleParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<MODULE> <CLASSNAME><LCURLY>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.match(REGEX);
     if (!m) return false;
     var name = m[2];
@@ -749,12 +749,12 @@ RootParser.extend("ModuleParser", function(KLASS, OO){
 RootParser.extend("CurlyParser", function(KLASS, OO){
   OO.addMember("_TYPE", 'CurlyParser');
 
-  OO.addMember("initialize", function(chop){
+  OO.addMember("initialize", function(chop){var self=this;
     this.chop = chop;
     this.$super();
   });
 
-  OO.addMember("handleToken", function(token, tokens){
+  OO.addMember("handleToken", function(token, tokens){var self=this;
     if (this.curly === undefined) this.curly = 0;
     if (token[0] == TYPES.RCURLY) {
       this.curly--;
@@ -769,7 +769,7 @@ RootParser.extend("CurlyParser", function(KLASS, OO){
     }
   });
 
-  OO.addMember("endParse", function(tokens){
+  OO.addMember("endParse", function(tokens){var self=this;
     if (this.chop) {
       this.out.pop();
       this.out.shift();
@@ -780,7 +780,7 @@ RootParser.extend("CurlyParser", function(KLASS, OO){
 var CurlyParser = $c.CurlyParser;
 
 CurlyParser.extend("ClassContentParser", function(KLASS, OO){
-  OO.addMember("getHandler", function(token){
+  OO.addMember("getHandler", function(token){var self=this;
     switch(token[0]) {
       case TYPES.STATIC:   return "StaticParser";
       case TYPES.VAR:      return "MemberParser";
@@ -792,7 +792,7 @@ CurlyParser.extend("ClassContentParser", function(KLASS, OO){
 });
 
 RootParser.extend("LineParser", function(KLASS, OO){
-  OO.addMember("handleToken", function(token, tokens){
+  OO.addMember("handleToken", function(token, tokens){var self=this;
     this.$super(token, tokens);
     if (token[0] == TYPES.SEMICOLON) {
       this.finished = true;
@@ -805,12 +805,12 @@ CurlyParser.extend("PrivateParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<PRIVATE>\\s*");
   
 
-  OO.addMember("startParse", function(tokens){
+  OO.addMember("startParse", function(tokens){var self=this;
     var m = tokens.match(REGEX);
     tokens.consume(m[0].length);
   });
 
-  OO.addMember("endParse", function(tokens){
+  OO.addMember("endParse", function(tokens){var self=this;
     this.out.pop();
     this.out.shift();
   });
@@ -822,7 +822,7 @@ RootParser.extend("IStringParser", function(KLASS, OO){
     var BEGIN = Tokens.regex("<ISTRING_START>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.match(BEGIN);
     tokens.consume(m[0].length);
     this.out.push('"');
@@ -849,7 +849,7 @@ RootParser.extend("IStringParser", function(KLASS, OO){
     }
   });
 
-  OO.addMember("parseMiddle", function(tokens){
+  OO.addMember("parseMiddle", function(tokens){var self=this;
     var parser = new $c.CurlyParser(true);
     parser.parse(tokens);
     this.out.push(parser);
@@ -862,7 +862,7 @@ RootParser.extend("StaticParser", function(KLASS, OO){
     var FUNCT_REGEX = Tokens.regex("(<STATIC>(\\s+))<FUNCTION>");
   
 
-  OO.addMember("parseTokens", function(tokens){
+  OO.addMember("parseTokens", function(tokens){var self=this;
     var varMatch = tokens.match(VAR_REGEX);
     if (varMatch) {
       tokens.consume(varMatch[1].length);
@@ -889,7 +889,7 @@ RootParser.extend("MemberParser", function(KLASS, OO){
     var REGEX = Tokens.regex("var <IDENT>\\s*=\\s*?");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.str.match(REGEX);
     this.name = m[1];
     tokens.consume(m[0].length);
@@ -912,7 +912,7 @@ RootParser.extend("IncludeParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<INCLUDE> <CLASSNAME><SEMICOLON>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.match(REGEX);
     tokens.consume(m[0].length);
     this.out = [ 'OO.include(',  m[2], ');' ];
@@ -924,7 +924,7 @@ RootParser.extend("HereDocParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<HEREDOC>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var beginning  = tokens.match(/^<<(\w+)(?::(\w+))?\s*([;\)])*\n/);
     var terminator = beginning[1];
 
@@ -957,7 +957,7 @@ RootParser.extend("MethodParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<FUNCTION> <IDENT><ARGS><SPACE>");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.str.match(REGEX);
     tokens.consume(m[0].length);
     var name = m[2];
@@ -975,7 +975,7 @@ RootParser.extend("MethodParser", function(KLASS, OO){
 });
 
 RootParser.extend("ReturnParser", function(KLASS, OO){
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     tokens.consume(2);
     this.out = [ 'return ' ];
   });
@@ -986,7 +986,7 @@ RootParser.extend("ShorthandMapperParser", function(KLASS, OO){
     var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     tokens.consume(1);
     var nameMatch = tokens.match(/^([\w\$]+)\s*/);
     tokens.consume(nameMatch[0].length);
@@ -1015,7 +1015,7 @@ RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
     var ARGS_REGEX = Tokens.regex("<ARGS>\\s*");
   
 
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     tokens.consume(1);
     var argsMatch = tokens.match(ARGS_REGEX);
     var args = null;
@@ -1036,7 +1036,7 @@ RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
 });
 
 RootParser.extend("CommentParser", function(KLASS, OO){
-  OO.addMember("parse", function(tokens){
+  OO.addMember("parse", function(tokens){var self=this;
     var m = tokens.match(/^\/\/.*?\n/);
     if (m) {
       tokens.consume(m[0].length);
@@ -1061,7 +1061,7 @@ RootParser.extend("RegexParser", function(KLASS, OO){
     var DIVIDE = /(\}|\)|\+\+|\-\-|[\w\$]|\]|\})$/;
   
 
-  OO.addMember("parseTokens", function(tokens){
+  OO.addMember("parseTokens", function(tokens){var self=this;
     var back = tokens.lookback(2);
 
     if (back.match(DIVIDE)) {
@@ -1085,7 +1085,7 @@ RootParser.extend("RegexParser", function(KLASS, OO){
 });
 
 CurlyParser.extend("ReturnableCurlyParser", function(KLASS, OO){
-  OO.addMember("toString", function(){
+  OO.addMember("toString", function(){var self=this;
     var ret = this.$super();
     return ret.replace(/^{(\s*)(return)?/, '{$1return ');
   });
@@ -1100,7 +1100,7 @@ CurlyParser.extend("ForeachParser", function(KLASS, OO){
     var REGEX = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**{");
   
 
-  OO.addMember("startParse", function(tokens){
+  OO.addMember("startParse", function(tokens){var self=this;
     var m = tokens.match(REGEX);
     namespace = tokens.iterator++;
 
@@ -1117,7 +1117,7 @@ CurlyParser.extend("ForeachParser", function(KLASS, OO){
     this.out = [ "for (var ", declare, ";", bool, ';', this.iterator + "++)" ];
   });
 
-  OO.addMember("endParse", function(tokens){
+  OO.addMember("endParse", function(tokens){var self=this;
     tokens.iterator--;
   });
 
@@ -1134,14 +1134,14 @@ $m.Class.extend("CLI", function(KLASS, OO){
     };
   
 
-  OO.addMember("run", function(args){
+  OO.addMember("run", function(args){var self=this;
     var opts = this.parseOpts(args);
     var options = opts[0];
     var command = opts[1];
     var files   = opts[2];
   });
 
-  OO.addMember("parseOpts", function(args){
+  OO.addMember("parseOpts", function(args){var self=this;
     var files   = [];
     var options = {};
     var command = null;

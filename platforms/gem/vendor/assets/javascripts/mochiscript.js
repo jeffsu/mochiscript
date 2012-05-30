@@ -212,7 +212,7 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
     var isArray = Array.isArray;
   
 
-  OO.addMember("emit", function(){
+  OO.addMember("emit", function(){var self=this;
     var type = arguments[0];
     // If there is no 'error' event listener then throw.
     if (type === 'error') {
@@ -270,7 +270,7 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
 
   }); 
 
-  OO.addMember("addListener", function(type, listener){
+  OO.addMember("addListener", function(type, listener){var self=this;
     if ('function' !== typeof listener) {
       throw new Error('addListener only takes instances of Function');
     }
@@ -318,11 +318,11 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
     return this;
   });
 
-  OO.addMember("on", function(type, listener){
+  OO.addMember("on", function(type, listener){var self=this;
     this.addListener(type, listener);
   });
 
-  OO.addMember("once", function(type, listener){
+  OO.addMember("once", function(type, listener){var self=this;
     if ('function' !== typeof listener) {
       throw new Error('.once only takes instances of Function');
     }
@@ -338,7 +338,7 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
     return this;
   });
 
-  OO.addMember("removeListener", function(type, listener){
+  OO.addMember("removeListener", function(type, listener){var self=this;
     if ('function' !== typeof listener) {
       throw new Error('removeListener only takes instances of Function');
     }
@@ -372,7 +372,7 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
     return this;
   });
 
-  OO.addMember("removeAllListeners", function(type){
+  OO.addMember("removeAllListeners", function(type){var self=this;
     if (arguments.length === 0) {
       this._events = {};
       return this;
@@ -383,7 +383,7 @@ $m.Module.extend("EventEmitter", function(KLASS, OO){
     return this;
   });
 
-  OO.addMember("listeners", function(type){
+  OO.addMember("listeners", function(type){var self=this;
     if (!this._events) this._events = {};
     if (!this._events[type]) this._events[type] = [];
     if (!isArray(this._events[type])) {
