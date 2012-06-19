@@ -1,11 +1,15 @@
+### 0.5.7
+
+  * added middleware for express/connect
+
 ### 0.5.6
 
   * merged 0.5.4
-  
+
 ### 0.5.5
 
-  * compile support for connect 
- 
+  * compile support for connect
+
 ### 0.5.4
 
   * added haml filter support
@@ -15,7 +19,7 @@
   * fixed self problem in bootstrap
 
 ### 0.5.2
-  
+
   * fixed #3
 
 ### 0.5.0

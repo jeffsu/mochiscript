@@ -1,4 +1,5 @@
-var $m  = {
+var fs = require('fs');
+var $m = {
   ROOT: root,
   ADAPTER: {
     out: function () { print.call(null, arguments); },
@@ -1141,8 +1142,39 @@ exports.mochi = $m;
 exports.compile = function(text, opts) {
   return $m.parse(text);
 };
+exports.middleware = function (options) {
+  options = options || {};
 
-var fs = require('fs');
+  var src    = options.src;
+  var dest   = options.dest;
+  var prefix = options.prefix || '';
+
+  if (!src) { throw new Error('mochiscript.middleware() requires "src" directory'); }
+
+  return function (req, res, next) {
+    if (req.method == 'GET' && req.url.match(/\.js$/)) {
+      var prefixRegExp = new RegExp('^/' + prefix + '/?');
+      var filePath     = req.url.replace(prefixRegExp, '/');
+      var msPath       = src + filePath.replace(/js$/, 'ms');
+      var jsPath       = dest + filePath;
+
+      fs.readFile(msPath, "utf8", function(err, data) {
+        if (err) {
+          next();
+        } else {
+          data = $m.parse(data);
+          if (dest) { fs.writeFileSync(jsPath, data); }
+
+          res.header("Content-type", "text/javascript");
+          res.send(data);
+        }
+      });
+    } else {
+      next();
+    }
+  }
+};
+
 var requireScript = "var $m = require('mochiscript').mochi; $m.PUSH_ROOT(root);";
 var endScript = "$m.POP_ROOT();";
 if (require.extensions) {
