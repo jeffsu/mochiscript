@@ -381,9 +381,10 @@ class HereDocParser extends RootParser {
 
     // TODO put this in register
     if (beginning[2]) {
-      this.out = [ '$m.JSML.process(', string, ')',  beginning[3] || ';' ];
+      console.log('DEPRECATED JSML: Use Jade!');
+      this.out = [ '$m.JSML.process(', string, ')',  beginning[3] ];
     } else {
-      this.out = [ string, beginning[3] || ';' ];
+      this.out = [ string, beginning[3] ];
     }
   }
 }

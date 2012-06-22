@@ -1,3 +1,7 @@
+### 0.6.0
+  
+  * removed auto semicolon for heredoc
+
 ### 0.5.7
 
   * added middleware for express/connect
