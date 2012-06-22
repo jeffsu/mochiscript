@@ -925,7 +925,7 @@ RootParser.extend("HereDocParser", function(KLASS, OO){
   
 
   OO.addMember("parse", function(tokens){var self=this;
-    var beginning  = tokens.match(/^<<(\w+)(?::(\w+))?\s*([;\)])*\n/);
+    var beginning  = tokens.match(/^<<(\w+)(?::(\w+))?(.*?)\n/);
     var terminator = beginning[1];
 
     tokens.consume(beginning[0].length);

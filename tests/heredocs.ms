@@ -14,7 +14,12 @@ var test3 = <<END;
   hello{}=
 END
 
+var test4 = <<END + " world";
+  hello
+END
+
 $m.test(#{
   $1.eq("hello\nworld", test1);
   $1.eq("hello\nworld", test2);
+  $1.eq("hello world", test4);
 });
