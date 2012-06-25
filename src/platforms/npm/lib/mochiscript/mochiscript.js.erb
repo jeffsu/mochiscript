@@ -13,6 +13,24 @@ var $m = {
 };
 var JS2 = $m;
 
+// connect compiler options
+(function () {
+  $m.connectCompilerOptions = {
+    match: /\.js$/,
+    ext:  '.ms',
+    compile: function (str, fn) {
+      try {
+        fn(null, $m.compile(str));
+      } catch(err) {
+        fn(err);
+      }
+    }
+  };
+  $m.registerCompiler = function (compiler) {
+    compiler.compilers['mochiscript'] = $m.connectCompilerOptions;
+  };
+})();
+
 (function () {
 <%= @boot   %>
 <%= @parser %>
