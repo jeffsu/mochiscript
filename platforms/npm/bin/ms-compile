@@ -10,7 +10,7 @@ var argv = process.argv;
 var offset = 2;
 var from   = argv[offset];
 var to     = argv[offset+1];
-var header = argv[offset+2] ? fs.readFileSync(argv[offset+2]) : null;
+var header = argv[offset+2] ? fs.readFileSync(argv[offset+2]).toString() : null;
 
 console.log("FROM: " + from);
 console.log("TO: " + to);

@@ -1,4 +1,8 @@
-### 0.6.4
+### 0.6.5
+
+  * fixed string buffer template problem
+
+### 0.6.5
 
   * adding compile to bin
 
