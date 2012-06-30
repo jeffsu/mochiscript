@@ -3,14 +3,16 @@
   "description": "Javascript Dessert",
   "keywords": [ "javascript", "language", "mochiscript", "compiler" ],
   "author": "Jeff Su",
-  "version": "0.6.3",
+  "version": "0.6.5",
   "licenses": [ { "type": "MIT" }],
   "engines": { "node": ">=0.4.0" },
   "directories": { "lib": "./lib/mochiscript" },
+  "dependencies": { "watch": "0.5.1" },
   "main" : "./lib/mochiscript/mochiscript",
   "bin": {
     "ms-parse": "./bin/ms-parse",
-    "ms-run":   "./bin/ms-run"
+    "ms-run":   "./bin/ms-run",
+    "ms-compile": "./bin/ms-compile"
   },
   "repository": {
     "type": "git",

@@ -1,3 +1,11 @@
+### 0.6.4
+
+  * adding compile to bin
+
+### 0.6.4
+
+  * experimenting with "watch compiling" -- ms-compile <from dir> <to dir> <template file?>
+  
 ### 0.6.3
 
   * patch compiler bug

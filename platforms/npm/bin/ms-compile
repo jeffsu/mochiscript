@@ -1,0 +1,42 @@
+#!/usr/bin/env node
+
+var $m = require('../lib/mochiscript/mochiscript').mochi;
+var watch = require('watch');
+var fs    = require('fs');
+
+
+var argv = process.argv;
+
+var offset = 2;
+var from   = argv[offset];
+var to     = argv[offset+1];
+var header = argv[offset+2] ? fs.readFileSync(argv[offset+2]) : null;
+
+console.log("FROM: " + from);
+console.log("TO: " + to);
+if (header) console.log("TEMPLATE: " + argv[offset+2]);
+
+watch.watchTree(from, function (files, curr, prev)  {
+  for (var f in files) {
+    if (f.match(/\.ms$/)) compile(f);
+  }
+});
+
+function compile(f) {
+  var t = f.replace(from, to).replace(/\.ms$/, '.js');
+
+  fs.readFile(f, function (err, data) {
+    if (err) return console.warn("ERROR READING (" + f + "):" + err);
+    try {
+      var out = $m.parse(data.toString());
+      if (header) out = header.replace('__MOCHI__', out);
+      fs.writeFile(t, out, function(err) {
+        if (err) console.log(err);
+        else console.log("WRITE: " + t);
+      });
+    } catch(e) {
+      console.warn('Error parsing mochiscript: ' + f);
+      console.warn(e);
+    }
+  });
+}
