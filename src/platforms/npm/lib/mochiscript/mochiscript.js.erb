@@ -20,7 +20,7 @@ var JS2 = $m;
     ext:  '.ms',
     compile: function (str, fn) {
       try {
-        fn(null, $m.compile(str));
+        fn(null, $m.parse(str));
       } catch(err) {
         fn(err);
       }
