@@ -19,6 +19,7 @@ var JS2 = $m;
     match: /\.js$/,
     ext:  '.ms',
     compile: function (str, fn) {
+      console.warn("Deprecated use of compiler (this is no longer supported by connect).");
       try {
         fn(null, $m.parse(str));
       } catch(err) {
@@ -27,6 +28,7 @@ var JS2 = $m;
     }
   };
   $m.registerCompiler = function (compiler) {
+    console.warn("Deprecated use of $m.registerCompiler.");
     compiler.compilers['mochiscript'] = $m.connectCompilerOptions;
   };
 })();
@@ -40,18 +42,19 @@ exports.mochi = $m;
 exports.compile = function(text, opts) {
   return $m.parse(text);
 };
+
 exports.middleware = function (options) {
   options = options || {};
 
   var src    = options.src;
   var dest   = options.dest;
   var prefix = options.prefix || '';
+  var prefixRegExp = new RegExp('^/' + prefix + '/?');
 
   if (!src) { throw new Error('mochiscript.middleware() requires "src" directory'); }
 
   return function (req, res, next) {
     if (req.method == 'GET' && req.url.match(/\.js$/)) {
-      var prefixRegExp = new RegExp('^/' + prefix + '/?');
       var filePath     = req.url.replace(prefixRegExp, '/');
       var msPath       = src + filePath.replace(/js$/, 'ms');
       var jsPath       = dest + filePath;

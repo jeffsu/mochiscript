@@ -62,6 +62,41 @@ In main.js:
     var obj   = new Hello();
     obj.say();
 
+### CLI
+
+Parsing a file:
+
+    ms-parse <filename>
+
+Running an ms file:
+ 
+    ms-run <filename>
+
+Compiling files in a directory:
+
+    ms-watch <src> <dest> <template>
+
+  1. src: source directory with .ms files
+  1. dest: destination directory to write .js files
+  1. template file (optional).  This will allow you to templatize mochiscript.  Just make sure the file has "__MOCHI__" in it.
+
+
+Mochiscript in the browser
+--------------------------
+
+### Bootstrap File
+
+Please include this file before requiring any mochiscript compiled file: [mochiscript.js](https://cloud.github.com/downloads/jeffsu/mochiscript/mochiscript.js)
+  
+### Middleware
+
+Using connect/express:
+
+    var options = {
+      src: "views",
+
+    };
+    app.use(require('mochiscript').middleware(options));
 
 ## More on Syntax
 
