@@ -1,4 +1,4 @@
-### 0.6.7
+### 0.6.8
   
   * fixing space in arguments tokenizing error 
   * fixing shorthand methods at the end of hash declarations
