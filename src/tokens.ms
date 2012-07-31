@@ -54,7 +54,7 @@ foreach (var t:i in TOKENS) {
 }
 
 var EXTRA_REGEX_STRINGS = {
-  ARGS: "\\(\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\s*\\)",
+  ARGS: "\\(\\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\\s*\\)",
   CLASSNAME: "[\\$\\w\\.]+"
 };
 
@@ -100,14 +100,10 @@ class Tokens {
   function lookback(n) {
     var starting = this.consumed - 1;
 
-    //$m.outs(JSON.stringify(this.orig.substr(starting-10, 10)));
-    //$m.outs(JSON.stringify(this.orig.charAt(starting)));
     while (this.orig.charAt(starting).match(/\s/)) {
-      //$m.outs("back");
       starting--;
     }
 
-    //$m.outs(n + "= " + JSON.stringify(this.orig.substr(starting-n, n)));
     return this.orig.substr(starting-n+1, n);
   }
 

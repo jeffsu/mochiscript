@@ -466,7 +466,7 @@ class ShorthandFunctionParser extends RootParser {
 
     var body = new $c.CurlyParser();
     body.parse(tokens);
-    var semi = tokens.match(/^\s*[,;\)]/) ? '' : ';';
+    var semi = tokens.match(/^\s*[,;\)\}\]]/) ? '' : ';';
 
     this.out = [ 'function', args, body, semi ];
   }

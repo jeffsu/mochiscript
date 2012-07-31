@@ -1,9 +1,11 @@
+### 0.6.6
+  
+  * fixing space in arguments tokenizing error 
+  * fixing shorthand methods at the end of hash declarations
+
 ### 0.6.5
 
   * fixed string buffer template problem
-
-### 0.6.5
-
   * adding compile to bin
 
 ### 0.6.4

@@ -19,6 +19,7 @@ var JS2 = $m;
     match: /\.js$/,
     ext:  '.ms',
     compile: function (str, fn) {
+      console.warn("Deprecated use of compiler (this is no longer supported by connect).");
       try {
         fn(null, $m.parse(str));
       } catch(err) {
@@ -27,6 +28,7 @@ var JS2 = $m;
     }
   };
   $m.registerCompiler = function (compiler) {
+    console.warn("Deprecated use of $m.registerCompiler.");
     compiler.compilers['mochiscript'] = $m.connectCompilerOptions;
   };
 })();
@@ -472,7 +474,7 @@ for (var i=0,t=null,_list_0=TOKENS,_len_0=_list_0.length;(t=_list_0[i])||i<_len_
 }
 
 var EXTRA_REGEX_STRINGS = {
-  ARGS: "\\(\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\s*\\)",
+  ARGS: "\\(\\s*(?:" + IDENT + ")?(?:\\s*,\\s*" + IDENT + ")*\\s*\\)",
   CLASSNAME: "[\\$\\w\\.]+"
 };
 
@@ -518,14 +520,10 @@ $m.Class.extend("Tokens", function(KLASS, OO){
   OO.addMember("lookback", function(n){var self=this;
     var starting = this.consumed - 1;
 
-    //$m.outs(JSON.stringify(this.orig.substr(starting-10, 10)));
-    //$m.outs(JSON.stringify(this.orig.charAt(starting)));
     while (this.orig.charAt(starting).match(/\s/)) {
-      //$m.outs("back");
       starting--;
     }
 
-    //$m.outs(n + "= " + JSON.stringify(this.orig.substr(starting-n, n)));
     return this.orig.substr(starting-n+1, n);
   });
 
@@ -1015,7 +1013,7 @@ RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
 
     var body = new $c.CurlyParser();
     body.parse(tokens);
-    var semi = tokens.match(/^\s*[,;\)]/) ? '' : ';';
+    var semi = tokens.match(/^\s*[,;\)\}\]]/) ? '' : ';';
 
     this.out = [ 'function', args, body, semi ];
   });
@@ -1161,18 +1159,19 @@ exports.mochi = $m;
 exports.compile = function(text, opts) {
   return $m.parse(text);
 };
+
 exports.middleware = function (options) {
   options = options || {};
 
   var src    = options.src;
   var dest   = options.dest;
   var prefix = options.prefix || '';
+  var prefixRegExp = new RegExp('^/' + prefix + '/?');
 
   if (!src) { throw new Error('mochiscript.middleware() requires "src" directory'); }
 
   return function (req, res, next) {
     if (req.method == 'GET' && req.url.match(/\.js$/)) {
-      var prefixRegExp = new RegExp('^/' + prefix + '/?');
       var filePath     = req.url.replace(prefixRegExp, '/');
       var msPath       = src + filePath.replace(/js$/, 'ms');
       var jsPath       = dest + filePath;
