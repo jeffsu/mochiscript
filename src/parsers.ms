@@ -453,7 +453,13 @@ class ShorthandFunctionParser extends RootParser {
   }
 
   function parse(tokens) {
-    tokens.consume(1);
+    var m = tokens.match(/^##?/);
+    if (!m) return false;
+
+    var nhashes = m[0].length;
+    var exec    = nhashes == 2;
+    
+    tokens.consume(nhashes);
     var argsMatch = tokens.match(ARGS_REGEX);
     var args = null;
 
@@ -467,8 +473,16 @@ class ShorthandFunctionParser extends RootParser {
     var body = new $c.CurlyParser();
     body.parse(tokens);
     var semi = tokens.match(/^\s*[,;\)\}\]]/) ? '' : ';';
+    var out  = [ 'function', args, body ];
 
-    this.out = [ 'function', args, body, semi ];
+    if (exec) {
+      out.unshift('(');
+      out.push(')()');
+    }
+
+    out.push(semi);
+
+    this.out = out; 
   }
 }
 

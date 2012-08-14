@@ -18,7 +18,7 @@ var TOKENS = [
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ],
 
   [ "SHORTHAND_MAPPER",   "#[\\w\\$]+\\s*(?:{|\\()", 'ShorthandMapperParser' ],
-  [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ],
+  [ "SHORTHAND_FUNCTION", "##?(?:{|\\()", 'ShorthandFunctionParser' ],
   [ "ISTRING_START", "%{", 'IStringParser' ],
   [ "HEREDOC", "<<[A-Z][0-9A-Z]*", 'HereDocParser' ],
 

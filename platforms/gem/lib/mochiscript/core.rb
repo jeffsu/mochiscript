@@ -451,7 +451,7 @@ var TOKENS = [
   [ "FOREACH",  "foreach\\b", 'ForeachParser' ],
 
   [ "SHORTHAND_MAPPER",   "#[\\w\\$]+\\s*(?:{|\\()", 'ShorthandMapperParser' ],
-  [ "SHORTHAND_FUNCTION", "#(?:{|\\()", 'ShorthandFunctionParser' ],
+  [ "SHORTHAND_FUNCTION", "##?(?:{|\\()", 'ShorthandFunctionParser' ],
   [ "ISTRING_START", "%{", 'IStringParser' ],
   [ "HEREDOC", "<<[A-Z][0-9A-Z]*", 'HereDocParser' ],
 
@@ -1013,7 +1013,13 @@ RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
   
 
   OO.addMember("parse", function(tokens){var self=this;
-    tokens.consume(1);
+    var m = tokens.match(/^##?/);
+    if (!m) return false;
+
+    var nhashes = m[0].length;
+    var exec    = nhashes == 2;
+    
+    tokens.consume(nhashes);
     var argsMatch = tokens.match(ARGS_REGEX);
     var args = null;
 
@@ -1027,8 +1033,16 @@ RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
     var body = new $c.CurlyParser();
     body.parse(tokens);
     var semi = tokens.match(/^\s*[,;\)\}\]]/) ? '' : ';';
+    var out  = [ 'function', args, body ];
 
-    this.out = [ 'function', args, body, semi ];
+    if (exec) {
+      out.unshift('(');
+      out.push(')()');
+    }
+
+    out.push(semi);
+
+    this.out = out; 
   });
 });
 

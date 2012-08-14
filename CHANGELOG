@@ -1,3 +1,7 @@
+### 0.6.9
+  
+  * adding "##" syntax for shorthand functions to execute in place
+
 ### 0.6.8
   
   * fixing space in arguments tokenizing error 
