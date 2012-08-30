@@ -94,7 +94,6 @@ Using connect/express:
 
     var options = {
       src: "views",
-
     };
     app.use(require('mochiscript').middleware(options));
 
