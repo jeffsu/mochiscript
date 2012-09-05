@@ -908,7 +908,7 @@ RootParser.extend("HereDocParser", function(KLASS, OO){
   
 
   OO.addMember("parse", function(tokens){var self=this;
-    var beginning  = tokens.match(/^<<(\w+)(?::(\w+))?(.*?)\n/);
+    var beginning  = tokens.match(/^<<(\w+)(?::(\w+))?(.*?)?\n/);
     var terminator = beginning[1];
 
     tokens.consume(beginning[0].length);
@@ -1095,7 +1095,7 @@ CurlyParser.extend("ForeachParser", function(KLASS, OO){
   OO.addMember("_TYPE", 'Foreach');
 
   
-    var REGEX = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**{");
+    var REGEX  = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**");
   
 
   OO.addMember("startParse", function(tokens){var self=this;

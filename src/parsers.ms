@@ -361,7 +361,7 @@ class HereDocParser extends RootParser {
   }
 
   function parse(tokens) {
-    var beginning  = tokens.match(/^<<(\w+)(?::(\w+))?(.*?)\n/);
+    var beginning  = tokens.match(/^<<(\w+)(?::(\w+))?(.*?)?\n/);
     var terminator = beginning[1];
 
     tokens.consume(beginning[0].length);
@@ -548,7 +548,7 @@ class ForeachParser extends CurlyParser {
   var _TYPE = 'Foreach';
 
   private {
-    var REGEX = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**{");
+    var REGEX  = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**");
   }
 
   function startParse(tokens) {
