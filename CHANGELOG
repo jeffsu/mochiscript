@@ -1,6 +1,13 @@
 ### 0.6.11
 
-  *
+  * allowing trailing foreach statements
+  * adding tests for inline heredocs
+  
+     ```
+       var str = foo.map(#{ => <<END; }).join("\n");
+         hello
+       END
+     ```
 
 ### 0.6.9
   

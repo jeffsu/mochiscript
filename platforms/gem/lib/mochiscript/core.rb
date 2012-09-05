@@ -1020,6 +1020,7 @@ RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
     var exec    = nhashes == 2;
     
     tokens.consume(nhashes);
+
     var argsMatch = tokens.match(ARGS_REGEX);
     var args = null;
 
@@ -1033,7 +1034,7 @@ RootParser.extend("ShorthandFunctionParser", function(KLASS, OO){
     var body = new $c.CurlyParser();
     body.parse(tokens);
     var semi = tokens.match(/^\s*[,;\)\}\]]/) ? '' : ';';
-    var out  = [ 'function', args, body ];
+    var out  = [ 'function', args, body, semi ];
 
     if (exec) {
       out.unshift('(');
