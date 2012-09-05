@@ -70,6 +70,7 @@ task :compile do
     File.open(destination, "w") { |t| t << ERB.new(File.read(target)).result(binding) }
   end
   system("cp ./platforms/www/mochiscript.js .")
+  system("cp ./platforms/www/mochiscript-full.js .")
 end
 
 desc "copy over bootstrap"
