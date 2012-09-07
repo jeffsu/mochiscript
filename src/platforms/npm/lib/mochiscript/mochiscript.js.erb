@@ -27,6 +27,18 @@ var JS2 = $m;
       }
     }
   };
+
+  $m.setupJade = function(jade) {
+    jade.filters.mochi = function (block) {
+      var code = $m.parse(block);
+      var str =
+        '<script language="JavaScript">//<![CDATA[\\n' +
+        code.replace(/\n/g, '\\n') +
+        '\\n//]]></script>';
+      return str;
+    };
+  };
+
   $m.registerCompiler = function (compiler) {
     console.warn("Deprecated use of $m.registerCompiler.");
     compiler.compilers['mochiscript'] = $m.connectCompilerOptions;

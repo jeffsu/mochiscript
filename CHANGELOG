@@ -1,3 +1,7 @@
+### 0.6.12
+  
+  * fixing bad merge
+
 ### 0.6.11
 
   * allowing trailing foreach statements
@@ -8,6 +12,9 @@
          hello
        END
      ```
+### 0.6.10
+  
+  * adding mochi filter for jade ($m.setupJade(jade))
 
 ### 0.6.9
   
