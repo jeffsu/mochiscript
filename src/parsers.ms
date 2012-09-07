@@ -164,6 +164,7 @@ class ClassParser extends RootParser {
   }
 }
 
+
 class ModuleParser extends RootParser {
   private {
     var REGEX = Tokens.regex("<MODULE> <CLASSNAME><LCURLY>");
@@ -214,6 +215,39 @@ class CurlyParser extends RootParser {
 }
 
 var CurlyParser = $c.CurlyParser;
+
+class BraceParser extends RootParser {
+  var _TYPE = 'BraceParser';
+
+  function initialize(chop) {
+    this.chop = chop;
+    this.$super();
+  }
+
+  function handleToken(token, tokens) {
+    if (this.brace === undefined) this.brace = 0;
+    if (token[0] == TYPES.LBRACE) {
+      this.brace--;
+    } else if (token[0] == TYPES.RBRACE) {
+      this.brace++;
+    }
+
+    this.$super(token, tokens);
+
+    if (this.brace == 0) {
+      this.finished = true;
+    }
+  }
+
+  function endParse(tokens) {
+    if (this.chop) {
+      this.out.pop();
+      this.out.shift();
+    }
+  }
+}
+
+var BraceParser = $c.BraceParser;
 
 class ClassContentParser extends CurlyParser {
   function getHandler(token) {
@@ -549,19 +583,28 @@ class ForeachParser extends CurlyParser {
   var _TYPE = 'Foreach';
 
   private {
-    var REGEX  = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**");
+    var REGEX  = Tokens.regex("(<FOREACH>\\s*)<LBRACE>");
+    var REGEX_INNER = Tokens.regex("<LBRACE><VAR> <IDENT>(?:**:**<IDENT>)?\\s+in\\s+(.*)<RBRACE>");
   }
 
   function startParse(tokens) {
     var m = tokens.match(REGEX);
-    namespace = tokens.iterator++;
-
-    this.item     = m[4];
-    this.iterator = m[5] || "_i_" + namespace;
-    this.list     = m[6];
-
-    // TODO ugly, revisit this later
+    if (!m) return false;
     tokens.consume(m[0].length-1);
+
+
+    var content = new $c.BraceParser();
+    content.parse(tokens);
+
+    var mInner    = content.toString().match(REGEX_INNER);
+    if (!mInner) return false;
+
+    var namespace = tokens.iterator++;
+
+    this.item     = mInner[3];
+    this.iterator = mInner[4] || "_i_" + namespace;
+    this.list     = mInner[5];
+
     var declare = [ this.iterator + "=0", this.item + "=null", "_list_" + namespace + "=" + this.list, "_len_" + namespace + "=_list_" + namespace + ".length" ].join(',');
 
     var bool = "(" + this.item + "=" + "_list_" + namespace + "[" + this.iterator + "])||" + this.iterator + "<_len_" + namespace;

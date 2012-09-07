@@ -723,6 +723,7 @@ RootParser.extend("ClassParser", function(KLASS, OO){
   });
 });
 
+
 RootParser.extend("ModuleParser", function(KLASS, OO){
   
     var REGEX = Tokens.regex("<MODULE> <CLASSNAME><LCURLY>");
@@ -773,6 +774,39 @@ RootParser.extend("CurlyParser", function(KLASS, OO){
 });
 
 var CurlyParser = $c.CurlyParser;
+
+RootParser.extend("BraceParser", function(KLASS, OO){
+  OO.addMember("_TYPE", 'BraceParser');
+
+  OO.addMember("initialize", function(chop){var self=this;
+    this.chop = chop;
+    this.$super();
+  });
+
+  OO.addMember("handleToken", function(token, tokens){var self=this;
+    if (this.brace === undefined) this.brace = 0;
+    if (token[0] == TYPES.LBRACE) {
+      this.brace--;
+    } else if (token[0] == TYPES.RBRACE) {
+      this.brace++;
+    }
+
+    this.$super(token, tokens);
+
+    if (this.brace == 0) {
+      this.finished = true;
+    }
+  });
+
+  OO.addMember("endParse", function(tokens){var self=this;
+    if (this.chop) {
+      this.out.pop();
+      this.out.shift();
+    }
+  });
+});
+
+var BraceParser = $c.BraceParser;
 
 CurlyParser.extend("ClassContentParser", function(KLASS, OO){
   OO.addMember("getHandler", function(token){var self=this;
@@ -1108,19 +1142,28 @@ CurlyParser.extend("ForeachParser", function(KLASS, OO){
   OO.addMember("_TYPE", 'Foreach');
 
   
-    var REGEX  = Tokens.regex("<FOREACH><LBRACE><VAR> <IDENT>(?:**:**<IDENT>)? in (.*?)**<RBRACE>**");
+    var REGEX  = Tokens.regex("(<FOREACH>\\s*)<LBRACE>");
+    var REGEX_INNER = Tokens.regex("<LBRACE><VAR> <IDENT>(?:**:**<IDENT>)?\\s+in\\s+(.*)<RBRACE>");
   
 
   OO.addMember("startParse", function(tokens){var self=this;
     var m = tokens.match(REGEX);
-    namespace = tokens.iterator++;
-
-    this.item     = m[4];
-    this.iterator = m[5] || "_i_" + namespace;
-    this.list     = m[6];
-
-    // TODO ugly, revisit this later
+    if (!m) return false;
     tokens.consume(m[0].length-1);
+
+
+    var content = new $c.BraceParser();
+    content.parse(tokens);
+
+    var mInner    = content.toString().match(REGEX_INNER);
+    if (!mInner) return false;
+
+    var namespace = tokens.iterator++;
+
+    this.item     = mInner[3];
+    this.iterator = mInner[4] || "_i_" + namespace;
+    this.list     = mInner[5];
+
     var declare = [ this.iterator + "=0", this.item + "=null", "_list_" + namespace + "=" + this.list, "_len_" + namespace + "=_list_" + namespace + ".length" ].join(',');
 
     var bool = "(" + this.item + "=" + "_list_" + namespace + "[" + this.iterator + "])||" + this.iterator + "<_len_" + namespace;
@@ -1224,10 +1267,23 @@ var requireScript = "var $m = require('mochiscript').mochi; $m.PUSH_ROOT(root);"
 var endScript = "$m.POP_ROOT();";
 if (require.extensions) {
   require.extensions['.ms'] = function(module, filename) {
-    return module._compile($m.parse(requireScript + fs.readFileSync(filename, 'utf8') + endScript), filename);
+    var content = fs.readFileSync(filename, 'utf8');
+    try {
+      var parsed = $m.parse(content);
+    } catch(e) {
+      console.log("Error parsing " + filename + "!");
+      throw e;
+    }
+
+    return module._compile(requireScript + parsed + endScript, filename);
   };
 } else if (require.registerExtension) {
-  require.registerExtension('.ms', function(content) {
-    return $m.parse(requireScript + content);
+  require.registerExtension('.ms', function(content, filename) {
+    try {
+      return $m.parse(requireScript + content + endScript);
+    } catch(e) {
+      console.warn("Error parsing mochiscript.");
+      throw e;
+    }
   });
 }
