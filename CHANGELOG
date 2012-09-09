@@ -1,3 +1,20 @@
+### 0.6.14
+ 
+  * added extended callback as class static method
+   
+```
+class Foo {
+  static function extended(klass) {
+    // do stuff to child class
+  }
+}
+
+// extended called
+class Bar extends Foo {
+
+}
+```
+
 ### 0.6.13
 
   * fixing bad merge

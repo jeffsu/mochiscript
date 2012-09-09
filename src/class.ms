@@ -53,6 +53,7 @@
       if (typeof staticMembers['included'] == 'function') {
         staticMembers['included'](this.klass);
       }
+
     },
 
     createNamespace: function(name) {
@@ -149,6 +150,8 @@
         oo.addMember(name, klassDef[name]);
       }
     }
+
+    if (this.extended) this.extended(klass);
 
     return klass;
   };

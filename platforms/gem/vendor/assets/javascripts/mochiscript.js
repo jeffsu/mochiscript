@@ -67,6 +67,7 @@ window.$m = $m;
       if (typeof staticMembers['included'] == 'function') {
         staticMembers['included'](this.klass);
       }
+
     },
 
     createNamespace: function(name) {
@@ -163,6 +164,8 @@ window.$m = $m;
         oo.addMember(name, klassDef[name]);
       }
     }
+
+    if (this.extended) this.extended(klass);
 
     return klass;
   };
