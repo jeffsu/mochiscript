@@ -13,7 +13,7 @@ var express = require('express')
 var app = express();
 
 app.configure(function(){
-  app.set('port', process.env.PORT || 3000);
+  app.set('port', process.env.PORT || 3001);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.favicon());
@@ -26,7 +26,10 @@ app.configure(function(){
 
 app.configure('development', function(){
   app.use(express.errorHandler());
-  app.use(mochiscript.middleware({ src: "views" }));
+  app.use(mochiscript.middleware({ 
+    src: path.join(__dirname, "public", "javascripts"), 
+    prefix: "javascripts"
+  }));
 });
 
 app.configure('production', function() {

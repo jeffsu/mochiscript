@@ -6,7 +6,7 @@
     "start": "node app"
   },
   "dependencies": {
-    "mochiscript": "0.6.12",
+    "mochiscript": "0.6.14",
     "express": "3.0.0rc2",
     "jade": "*"
   }
