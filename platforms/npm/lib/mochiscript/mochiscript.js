@@ -1158,7 +1158,7 @@ CurlyParser.extend("ForeachParser", function(KLASS, OO){
     var content = new $c.BraceParser();
     content.parse(tokens);
 
-    var mInner    = content.toString().match(REGEX_INNER);
+    var mInner  = content.toString().match(REGEX_INNER);
     if (!mInner) return false;
 
     var namespace = tokens.iterator++;
@@ -1172,10 +1172,6 @@ CurlyParser.extend("ForeachParser", function(KLASS, OO){
     var bool = "(" + this.item + "=" + "_list_" + namespace + "[" + this.iterator + "])||" + this.iterator + "<_len_" + namespace;
 
     this.out = [ "for (var ", declare, ";", bool, ';', this.iterator + "++)" ];
-  });
-
-  OO.addMember("endParse", function(tokens){var self=this;
-    tokens.iterator--;
   });
 
 });

@@ -596,7 +596,7 @@ class ForeachParser extends CurlyParser {
     var content = new $c.BraceParser();
     content.parse(tokens);
 
-    var mInner    = content.toString().match(REGEX_INNER);
+    var mInner  = content.toString().match(REGEX_INNER);
     if (!mInner) return false;
 
     var namespace = tokens.iterator++;
@@ -610,10 +610,6 @@ class ForeachParser extends CurlyParser {
     var bool = "(" + this.item + "=" + "_list_" + namespace + "[" + this.iterator + "])||" + this.iterator + "<_len_" + namespace;
 
     this.out = [ "for (var ", declare, ";", bool, ';', this.iterator + "++)" ];
-  }
-
-  function endParse(tokens) {
-    tokens.iterator--;
   }
 
 }
