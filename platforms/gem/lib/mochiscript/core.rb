@@ -10,19 +10,19 @@ module Mochiscript
     end
 
     def parse(str)
-      @ctx.eval_js("$m.parse(#{str.to_json})")
+      @ctx.eval("$m.parse(#{str.to_json})")
     end
 
     def to_json(str)
-      @ctx.eval_js("$m.toJSON(#{str.to_json})")
+      @ctx.eval("$m.toJSON(#{str.to_json})")
     end
 
     def pp(str)
-      return @ctx.eval_js("$m.pp(#{str.to_json})")
+      return @ctx.eval("$m.pp(#{str.to_json})")
     end
 
     def eval_ms(str)
-      @ctx.eval_js(parse(str))
+      @ctx.eval(parse(str))
     end
 
     protected
